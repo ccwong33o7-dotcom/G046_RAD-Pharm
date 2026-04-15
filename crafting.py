@@ -8,3 +8,4 @@ RECIPES = {
     "Pain Killer":{"Bio_Fuel":1, "Glowing Aloe": 1, "Rusty Thorn": 1}
 }
 
+inventory = {"Filtered water": 999999, "Bio-Fuel": 999999, "Scrap Fiber": 999999, "Glowing Aloe": 0, "Rusty Thorn":0 }
