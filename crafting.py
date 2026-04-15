@@ -12,7 +12,7 @@ inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber"
 
 def try_to_craft(item_name):
     recipe = RECIPES[item_name]
-    infinate_resources = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
+    infinite_resources = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
 
     for ingredient, amount_needed in recipe.items():
         if ingredient not in infinite_resources:
@@ -20,6 +20,13 @@ def try_to_craft(item_name):
                 print(f"Not enough {ingredient} to craft {item_name}!")
                 return
             
-    
+    for ingredient, amount_needed in recipe.items():
+        if ingredient not in infinite_resources:
+            inventory[ingredient] -= amount_needed
+            print(f"Ha! You crafted {item_name}!")
+
+            inventory[item_name] += 1
+
+            
 
 
