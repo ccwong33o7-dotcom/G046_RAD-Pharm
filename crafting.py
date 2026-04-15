@@ -8,4 +8,18 @@ RECIPES = {
     "Pain Killer":{"Bio_Fuel":1, "Glowing Aloe": 1, "Rusty Thorn": 1}
 }
 
-inventory = {"Filtered water": 999999, "Bio-Fuel": 999999, "Scrap Fiber": 999999, "Glowing Aloe": 0, "Rusty Thorn":0 }
+inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber": "Infinite", "Glowing Aloe": 0, "Rusty Thorn":0 }
+
+def try_to_craft(item_name):
+    recipe = RECIPES[item_name]
+    infinate_resources = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
+
+    for ingredient, amount_needed in recipe.items():
+        if ingredient not in infinite_resources:
+            if inventory[ingredient] < amount_needed:
+                print(f"Not enough {ingredient} to craft {item_name}!")
+                return
+            
+    
+
+
