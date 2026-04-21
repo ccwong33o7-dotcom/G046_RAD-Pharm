@@ -38,28 +38,41 @@ font = pygame.font.SysFont("Arial", 22)
 
 running=True
 while running:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
     screen.fill((30, 30, 30))
     
-for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-        running = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
 
-    if event.type == pygame.KEYDOWN:
-        if event .key == pygame.K_1:
-            try_to_craft("Rad-Ointment")
-        if event.key == pygame.K_2:
-            try_to_craft("Speed Serum")
-        if event.key == pygame.K_3:
-            try_to_craft("Lung-Clear")
-        if event.key == pygame.K_4:
-            try_to_craft("Blood-Stop")
-        if event.key == pygame.K_5:
-            try_to_craft("Pain Killer")
-    
-            
+        if event.type == pygame.KEYDOWN:
+            if event .key == pygame.K_1:
+                try_to_craft("Rad-Ointment")
+            if event.key == pygame.K_2:
+                try_to_craft("Speed Serum")
+            if event.key == pygame.K_3:
+                try_to_craft("Lung-Clear")
+            if event.key == pygame.K_4:
+                try_to_craft("Blood-Stop")
+            if event.key == pygame.K_5:
+                try_to_craft("Pain Killer")
+
+    y_pos = 50
+    for item,count in inventory.items():
+        color = (0, 255, 0) if count != "Infinite" else (225, 255, 225)
+        text = font.render(f"{item}: {count}", True, color)
+        screen.blit(text, (50, y_pos))
+        y_pos += 30
+
+    instruction_text = font.render("Press 1-5 to craft items", True, (200, 200, 200))
+    screen.blit(instruction_text,(400,50))
+
+    pygame.display.flip()
+
+pygame.quit()
 
 
