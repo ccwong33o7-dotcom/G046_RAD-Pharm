@@ -18,4 +18,14 @@ class Plant:
     def clean(self):
         self.dust -=30
         
-        if self.dust < 0: self.dust = 0
+        if self.dust < 0: 
+            self.dust = 0
+
+pygame.init()
+screen = pygame.display.set_mode((600, 400))
+pygame.display.set_caption("Hazard Greenhouse - Survival Alpha")
+clock = pygame.time.Clock() 
+
+
+my_plant = Plant(270, 250)
+
