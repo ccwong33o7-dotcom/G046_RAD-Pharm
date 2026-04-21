@@ -40,7 +40,7 @@ class Plant:
     
     def draw(self, surface):
         current_height = (self.growth / 100) * 150
-        plant_rect = pygame.Rect(self.rect.x, self.rect.buttom - current_height, self.rect.width, current_height)
+        plant_rect = pygame.Rect(self.rect.x, self.rect.bottom - current_height, self.rect.width, current_height)
 
         color = (100, 100, 100) if self.is_dead else COLOR_PLANT
         pygame.draw.rect(surface, color, plant_rect)
@@ -64,6 +64,21 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if my_plant.rect.collidepoint(event.pos):
                 my_plant.clean_dust()
+    
+
+    my_plant.update()
+
+    my_plant.draw(screen)
+
+    font = pygame.font.SysFont(None, 36)
+    status_text = font.render(f"Growth: {int(my_plant.growth)}%  Dust: {int(my_plant.dust)}%", True, COLOR_TEXT)
+    screen.blit(status_text, (20,20))
+    if my_plant.is_dead:
+       death_text = font.render("PLANT DIED! (Too much radiation)", True, (255, 0, 0))
+       screen.blit(death_text, (250, 250))
+    
+    pygame.display.flip()
+    clock.tick(60) 
 
 
 
