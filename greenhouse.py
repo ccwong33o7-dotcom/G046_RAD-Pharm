@@ -78,7 +78,7 @@ while True:
        screen.blit(death_text, (250, 250))
     
     pygame.display.flip()
-    clock.tick(60) 
+    clock.tick(60)
 
 
 
