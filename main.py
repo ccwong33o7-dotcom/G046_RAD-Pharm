@@ -23,21 +23,21 @@ while True:
          if current_state == "MENU":
             s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
             if s_btn.collidepoint(mouse_pos):
-               current_state = "GAME"
+               current_state = "GAME"  #Player's Actions
             elif set_btn.collidepoint(mouse_pos):
                current_state = "SETTING"
             elif e_btn.collidepoint(mouse_pos):
                pygame.quit()
                sys.exit()
+         
+         elif current_state == "SETTING":
+            pass
 
-    if current_state == "MENU":
-       draw_menu(screen, font, mouse_pos)
-    elif current_state =="GAME":
-       screen.fill((0, 100, 0))
-    elif current_state == "SETTING":
-       screen.fill((50, 50, 50))
+         elif current_state == "GAME":
+            pass
 
-    pygame.display.update()
+         elif current_state in ["Pharmacy", "SHOP", "JUNKYARD", "GREENHOUSE"]:
+            pass
 
     
          
