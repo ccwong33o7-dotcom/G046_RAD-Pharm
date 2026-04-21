@@ -51,7 +51,19 @@ class Plant:
             dust_overlay.fill(COLOR_DUST)
             surface.blit(dust_overlay, (self.rect.x, self.rect.bottom - current_height))
 
+my_plant = Plant()
 
+while True: 
+    screen.fill(COLOR_BG)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+        
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if my_plant.rect.collidepoint(event.pos):
+                my_plant.clean_dust()
 
 
 
