@@ -41,8 +41,6 @@ class Plant:
 
 def draw_greenhouse(screen, font, my_plant):
     screen.fill(COLOR_BG)
-    
-
     my_plant.update()
     my_plant.draw(screen)
 
@@ -51,14 +49,21 @@ def draw_greenhouse(screen, font, my_plant):
 
     if my_plant.is_dead:
        death_text = font.render("PLANT DIED! (Too much radiation)", True, (255, 0, 0))
-       screen.blit(death_text, (Width//2 - 200, Height//2))
-    
-    back_btn_rect = pygame.Rect(1100, 650, 150, 50)
-    pygame.draw.rect(screen, (100, 100, 100), back_btn_rect)
-    btn_text = font.render("Back", True, (255, 255, 255))
-    screen.blit(btn_text, (1135, 655))
+       screen.blit(death_text, (1280 // 2 - 150, 720 // 2))
 
-    return back_btn_rect
+    small_font = pygame.font.SysFont("Arial", 20)
+
+    setting_btn_rect = pygame.Rect(1150, 30, 100, 40)
+    pygame.draw.rect(screen, (150, 50, 50), setting_btn_rect)
+    set_text = small_font.render("Setting", True, (255, 255, 255))
+    screen. blit(set_text, (setting_btn_rect.x +15, setting_btn_rect.y + 10))
+    
+    back_btn_rect = pygame.Rect(1150, 80, 100, 40)
+    pygame.draw.rect(screen, (100, 100, 250), back_btn_rect)
+    btn_text = small_font.render("Back", True, (255, 255, 255))
+    screen.blit(btn_text, (back_btn_rect.x + 25, back_btn_rect.y + 10))
+
+    return setting_btn_rect, back_btn_rect
 
 
 

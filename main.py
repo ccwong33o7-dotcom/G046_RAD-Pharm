@@ -4,6 +4,7 @@ from menu import draw_menu
 from setting import run_setting
 from pharmacy import draw_pharmacy
 from shop import draw_shop
+from greenhouse import draw_greenhouse, Plant
 
 pygame.init()
 
@@ -16,6 +17,7 @@ font = pygame.font.SysFont("Arial",40)
 
 current_state="MENU"
 last_state = "MENU"
+my_plant = Plant()
 
 while True:
     mouse_pos = pygame.mouse.get_pos()
@@ -24,10 +26,13 @@ while True:
        s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
 
     elif current_state == "PHARMACY":
-       pharmacy_set_btn, pharmacy_to_shop_btn = draw_pharmacy(screen,font)
+       pharmacy_set_btn, pharmacy_to_shop_btn, greenhouse_btn = draw_pharmacy(screen,font)
 
     elif current_state == "SHOP":
        shop_set_btn = draw_shop(screen,font)
+
+    elif current_state == "GREENHOUSE":
+       gh_set_btn, greenhouse_set_btn = draw_greenhouse(screen, font, my_plant)
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
@@ -54,10 +59,17 @@ while True:
                current_state = "SETTING"
             elif pharmacy_to_shop_btn.collidepoint(mouse_pos):
                current_state = "SHOP"
+            elif greenhouse_btn.collidepoint(mouse_pos):
+               current_state = "GREENHOUSE"
 
          elif current_state == "SHOP":
             if shop_set_btn.collidepoint(mouse_pos):
                last_state = "SHOP"
+               current_state = "SETTING"
+
+         elif current_state == "GREENHOUSE":
+            if shop_set_btn.collidepoint(mouse_pos):
+               last_state = "GREENHOUSE"
                current_state = "SETTING"
 
          elif current_state == "SETTING":
