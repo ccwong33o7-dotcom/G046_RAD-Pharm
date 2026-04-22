@@ -23,14 +23,14 @@ while True:
     elif current_state == "PHARMACY":
        pharmacy_set_btn = draw_pharmacy(screen,font)
     elif current_state == "SETTING":
-       back_btn = run_setting(screen)
+       current_state = run_setting(screen)
        
        
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
         pygame.quit()
         sys.exit()
-      if event.type == pygame.MOUSEBUTTONDOWN:
+      if event.type == pygame.MOUSEBUTTONDOWN:         
          if current_state == "MENU":
             if s_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"  
@@ -42,7 +42,7 @@ while True:
          
          elif current_state == "PHARMACY":
             if pharmacy_set_btn.collidepoint(mouse_pos):
-               run_setting(screen)
+               current_state = "SETTING"
 
          elif current_state == "SETTING":
             pass

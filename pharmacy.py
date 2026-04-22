@@ -10,7 +10,7 @@ def draw_pharmacy(screen, font):
     pygame.draw.rect(screen,(150,50,50),settings_btn_rect)
 
     small_font = pygame.font.SysFont("Arial",20)
-    btn_text = small_font.render("Set",True, (255,255,255))
+    btn_text = small_font.render("Setting",True, (255,255,255))
     screen.blit(btn_text,(settings_btn_rect.x + 15, settings_btn_rect.y +10))
 
     return settings_btn_rect
