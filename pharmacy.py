@@ -1,24 +1,16 @@
 import pygame
 
-def run_pharmacy(screen):
-    font = pygame.font.SysFont("Arial",30)
-    settings_btn_rect = pygame.Rect(700,20,80,40)
+def draw_pharmacy(screen, font):
+    screen.fill((255,250,200))
 
-    running = True
-    while running:
-        screen.fill((255,250,200))
-        text = font.render("Settings", True, (0,0,0))
-        screen.blit(text,(320,250))
+    text = font.render("Pharmacy Room", True,(0,0,0))
+    screen.blit(text,(1280//2-100,720//2))
 
-        pygame.draw.rect(screen, (150,50,50), back_btn_rect)
-        btn_text = font.render("Back", True, (255,255,255))
-        screen.blit(btn_text,(back_btn_rect.x + 10, back_btn_rect.y +5))
+    settings_btn_rect = pygame.Rect(1180,20,80,40)
+    pygame.draw.rect(screen,(150,50,50),settings_btn_rect)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return "QUIT"
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if back_btn_rect.collidepoint(event.pos):
-                    return "BACK_TO_PHARMACY" 
-                
-        pygame.display.flip()
+    small_font = pygame.font.SysFont("Arial",20)
+    btn_text = small_font.render("Set",True, (255,255,255))
+    screen.blit(btn_text,(settings_btn_rect.x + 15, settings_btn_rect.y +10))
+
+    return settings_btn_rect
