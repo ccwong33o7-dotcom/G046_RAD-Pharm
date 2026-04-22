@@ -1,7 +1,7 @@
 import pygame
 import json
 
-def run_setting(screen): 
+def run_setting(screen, back_to): 
   title_font = pygame.font.SysFont("Arial",50,bold=True)
   UI_font = pygame.font.SysFont("Arial",30)
   clock = pygame.time.Clock()
@@ -45,4 +45,4 @@ def run_setting(screen):
 
     pygame.display.flip()
 
-  return "MENU"
+  return back_to
