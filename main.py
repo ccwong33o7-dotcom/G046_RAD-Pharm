@@ -18,7 +18,10 @@ font = pygame.font.SysFont("Arial",40)
 
 current_state="MENU"
 last_state = "MENU"
-my_plant = Plant()
+
+plant_a = Plant(400, "Glowing Aloe", 0.05)
+plant_b = Plant(700, "Rusty Thorn", 0.4)
+plants = [plant_a, plant_b]
 
 while True:
     mouse_pos = pygame.mouse.get_pos()
@@ -33,7 +36,17 @@ while True:
        shop_set_btn, shop_back_btn = draw_shop(screen,font)
 
     elif current_state == "GREENHOUSE":
-       gh_set_btn, gh_back_btn = draw_greenhouse(screen, font, my_plant)
+       gh_set_btn, gh_back_btn = draw_greenhouse(screen, font, plants)
+
+       ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
+       any_dead = any(p.is_dead for p in plants)
+
+       if ready_to_craft:
+            msg = font.render("MEDICINE READY!", True, (0, 255, 0))
+            screen.blit(msg, (Width//2 - 150, 50))
+       elif any_dead:
+            msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
+            screen.blit(msg, (Width//2 - 200, 50))
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
@@ -76,6 +89,10 @@ while True:
                current_state = "SETTING"
             elif gh_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
+            else:
+             for p in plants:
+                if p.rect.collidepoint(mouse_pos):
+                    p.clean()
 
          elif current_state == "SETTING":
             pass
