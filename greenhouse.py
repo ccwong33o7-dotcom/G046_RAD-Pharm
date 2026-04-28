@@ -1,18 +1,31 @@
 import pygame
 
 COLOR_BG = (30, 30, 30)
-COLOR_PLANT= (50, 200, 50)
-COLOR_DEAD = (100, 100, 100)
 COLOR_TEXT = (200, 200, 200)
 
 class Plant:
     def __init__(self, x_pos, name, dust_speed):
-        self.rect = pygame.Rect(x_pos, 500, 100, 100)
+        self.rect = pygame.Rect(x_pos, 400, 150, 200)
         self.name = name
         self.growth = 0
         self.dust = 0
         self.dust_speed = dust_speed 
         self.is_dead = False
+        self.death_timer = 0
+
+        try:
+            self.img_seedling = pygame.image.load("image/seedling.png").convert_alpha()
+            self.img_bud = pygame.image.load("image/bud.png").convert_alpha()
+            self.img_flower = pygame.image.load("image/flower.png").convert_alpha()
+
+            self.img_wilt_1 = pygame.image.load("image/wilt_1.png").convert_alpha()
+            self.img_wilt_2 = pygame.image.load("image/wilt_2.png").convert_alpha()
+        
+        except pygame.erroe as e:
+            print(f"Error loading images: {e}")
+            pygame.quit()
+            import sys
+            sys.exit()
     
     def update(self):
         if self.is_dead: return
