@@ -1,4 +1,5 @@
 import pygame
+import os
 
 COLOR_BG = (30, 30, 30)
 COLOR_TEXT = (200, 200, 200)
@@ -13,46 +14,67 @@ class Plant:
         self.is_dead = False
         self.death_timer = 0
 
-        try:
-            self.img_seedling = pygame.image.load("image/seedling.png").convert_alpha()
-            self.img_bud = pygame.image.load("image/bud.png").convert_alpha()
-            self.img_flower = pygame.image.load("image/flower.png").convert_alpha()
+        self.img_growth = []
+        self.img_dead = []
 
-            self.img_wilt_1 = pygame.image.load("image/wilt_1.png").convert_alpha()
-            self.img_wilt_2 = pygame.image.load("image/wilt_2.png").convert_alpha()
+
+        try:
+            self.img_seedling = pygame.image.load("image/seedling.jpeg").convert_alpha()
+            self.img_bud = pygame.image.load("image/bud.jpeg").convert_alpha()
+            self.img_flower = pygame.image.load("image/flower.jpeg").convert_alpha()
+
+            self.img_wilt_1 = pygame.image.load("image/wilt_1.jpeg").convert_alpha()
+            self.img_wilt_2 = pygame.image.load("image/wilt_2.jpeg").convert_alpha()
+            self.img_wilt_3 = pygame.image.load("image/wilt_3.jpeg").convert_alpha()
         
-        except pygame.erroe as e:
+        except pygame.error as e:
             print(f"Error loading images: {e}")
             pygame.quit()
             import sys
             sys.exit()
     
     def update(self):
-        if self.is_dead: return
-
         self.dust += self.dust_speed
         if self.dust > 100: 
             self.dust = 100
+            if not self.is_dead:
+                self.is_dead = True
+                self.death_timer = 0
 
-        if self.dust < 70:
-            self.growth += 0.05
+        if not self.is_dead and self.dust < 70:
+            self.growth += 0.03
             if self.growth > 100:
                 self.growth = 100
 
-        if self.dust >= 100:
-            self.is_dead = True
+        if self.is_dead:
+            self.death_timer += 1
 
-        def clean(self):
+    def clean(self):
+     if not self.is_dead:
          self.dust -= 20
-        if self.dust < 0:
-            self.dust = 0
+     if self.dust < 0:
+        self.dust = 0
 
     
     def draw(self, surface):
-        current_height = (self.growth / 100) * 150
-        plant_rect = pygame.Rect(self.rect.x, self.rect.bottom - current_height, self.rect.width, current_height)
-        color = COLOR_DEAD if self.is_dead else COLOR_PLANT
-        pygame.draw.rect(surface, color, plant_rect)
+        current_image = None
+        if not self.is_dead:
+            if self.growth < 33:
+                current_image = self.img_seedling
+            elif self.growth < 66:
+                current_image = self.img_bud
+            else:
+                current_image = self.img_flower
+        else:
+            if self.death_timer < 300:
+                current_image = self.img_wilt_1
+            elif self.death_timer < 600:
+                current_image = self.img_wilt_2
+            else:
+                current_image = self.img_wilt_3
+        
+        scaled_image = pygame.transform.scale(current_image, (self.rect.width, self.rect.height))
+        surface.blit(scaled_image, (self.rect.x, self.rect.y))
 
         font_small = pygame.font.SysFont("Arial", 18)
         name_txt = font_small.render(f"{self.name}", True, COLOR_TEXT)

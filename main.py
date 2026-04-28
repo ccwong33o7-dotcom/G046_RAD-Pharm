@@ -4,7 +4,7 @@ from menu import draw_menu
 from setting import run_setting
 from pharmacy import draw_pharmacy
 from shop import draw_shop
-from Greenhouse.greenhouse import draw_greenhouse, Plant
+from greenhouse import draw_greenhouse, Plant
 
 
 pygame.init()
