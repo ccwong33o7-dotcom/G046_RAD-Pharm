@@ -19,13 +19,13 @@ class Plant:
 
 
         try:
-            self.img_seedling = pygame.image.load("image/seedling.jpeg").convert_alpha()
-            self.img_bud = pygame.image.load("image/bud.jpeg").convert_alpha()
-            self.img_flower = pygame.image.load("image/flower.jpeg").convert_alpha()
+            self.img_seedling = pygame.image.load("image/seedling.png").convert_alpha()
+            self.img_bud = pygame.image.load("image/bud.png").convert_alpha()
+            self.img_flower = pygame.image.load("image/flower.png").convert_alpha()
 
-            self.img_wilt_1 = pygame.image.load("image/wilt_1.jpeg").convert_alpha()
-            self.img_wilt_2 = pygame.image.load("image/wilt_2.jpeg").convert_alpha()
-            self.img_wilt_3 = pygame.image.load("image/wilt_3.jpeg").convert_alpha()
+            self.img_wilt_1 = pygame.image.load("image/wilt_1.png").convert_alpha()
+            self.img_wilt_2 = pygame.image.load("image/wilt_2.png").convert_alpha()
+            self.img_wilt_3 = pygame.image.load("image/wilt_3.png").convert_alpha()
         
         except pygame.error as e:
             print(f"Error loading images: {e}")
@@ -37,7 +37,7 @@ class Plant:
         self.dust += self.dust_speed
         if self.dust > 100: 
             self.dust = 100
-            if not self.is_dead:
+            if not self.is_dead and self.growth < 100:
                 self.is_dead = True
                 self.death_timer = 0
 
@@ -58,20 +58,23 @@ class Plant:
     
     def draw(self, surface):
         current_image = None
-        if not self.is_dead:
-            if self.growth < 33:
-                current_image = self.img_seedling
-            elif self.growth < 66:
-                current_image = self.img_bud
-            else:
-                current_image = self.img_flower
-        else:
-            if self.death_timer < 300:
+
+        if self.growth >= 100:
+            current_image = self.img_flower
+        
+        elif self.is_dead:
+            if self.death_timer < 400:
                 current_image = self.img_wilt_1
-            elif self.death_timer < 600:
+            elif self.death_timer < 800:
                 current_image = self.img_wilt_2
             else:
                 current_image = self.img_wilt_3
+        
+        else:
+            if self.growth < 33:
+                current_image = self.img_seedling
+            else:
+                current_image = self.img_bud
         
         scaled_image = pygame.transform.scale(current_image, (self.rect.width, self.rect.height))
         surface.blit(scaled_image, (self.rect.x, self.rect.y))
