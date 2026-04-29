@@ -50,7 +50,7 @@ running = True
 while running:
     screen.fill((30, 30, 30))
 
-    # 1. Event Handling (Must be inside the loop)
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -81,7 +81,7 @@ while running:
                     print("FAILED!")
                 game_state = "MENU"
 
-    # 2. Drawing Logic (Must be inside the loop)
+    
     if game_state == "MENU":
         y_offset = 50
         for item, count in inventory.items():
@@ -104,7 +104,7 @@ while running:
         msg = font.render(f"Crafting {pending_item}: Press SPACE in Green!", True, (255, 255, 255))
         screen.blit(msg, (bar_x, 300)) 
 
-    # 3. Refresh (Must be inside the loop)
+    
     pygame.display.flip()
     clock.tick(60)
 
