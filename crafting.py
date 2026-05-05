@@ -17,6 +17,10 @@ def get_title_font():
         pygame.font.init()
     return pygame.font.SysFont("Arial", 32, bold=True)
 
+crafting_btn_set_btn = pygame.Rect(1080, 50, 150, 50)
+crafting_back_btn = pygame.Rect(1080, 150, 150, 50)
+
+
 RECIPES = {
     "Rad-Ointment": {"Filtered water": 1, "Glowing Aloe": 1 , "Scrap Fiber": 1},
     "Speed Serum": {"Bio-Fuel": 1, "Rusty Thorn": 1, "Filtered water": 1},
@@ -61,6 +65,15 @@ def craft_success(item_name):
 def update_crafting(event):
     global game_state, pending_item, marker_pos, marker_speed
 
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        mouse_pos = event.pos
+
+        if crafting_btn_set_btn.collidepoint(mouse_pos):
+            return "SETTING"
+        
+        if crafting_back_btn.collidepoint(mouse_pos):
+            return "PHARMACY"
+        
     if game_state == "MENU":
         if event.type == pygame.KEYDOWN:
             selection = None
@@ -86,6 +99,8 @@ def update_crafting(event):
             else:
                 print("FAILED!")
             game_state = "MENU"
+
+    return game_state
 
 def animate_crafting():
     global marker_pos, marker_speed
@@ -122,9 +137,6 @@ def draw_crafting(screen, font):
                          (bar_x + marker_pos, 340, 10, 70))
 
     # Buttons
-    crafting_btn_set_btn = pygame.Rect(1080, 50, 150, 50)
-    crafting_back_btn = pygame.Rect(1080, 150, 150, 50)
-
     pygame.draw.rect(screen, (100, 100, 100), crafting_btn_set_btn)
     pygame.draw.rect(screen, (100, 100, 100), crafting_back_btn)
 

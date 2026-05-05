@@ -63,8 +63,10 @@ while True:
         pygame.quit()
         sys.exit()
         
-        current_statestate = "MENU"
-      if event.type == pygame.MOUSEBUTTONDOWN:         
+      if current_state == "CRAFTING":
+         update_crafting(event) 
+
+      if event.type == pygame.MOUSEBUTTONDOWN: 
          if current_state == "MENU":
             if s_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"  
@@ -104,15 +106,12 @@ while True:
                 if p.rect.collidepoint(mouse_pos):
                     p.clean()
 
-      elif current_state == "CRAFTING":
-         update_crafting(event)
-
-         if event.type == pygame.MOUSEBUTTONDOWN:
+         elif current_state == "CRAFTING":
             if crafting_btn_set_btn.collidepoint(mouse_pos):
-                  last_state = "CRAFTING"
-                  current_state = "SETTING"
+               last_state = "CRAFTING"
+               current_state = "SETTING"
             elif crafting_back_btn.collidepoint(mouse_pos):
-                  current_state = "PHARMACY"
+               current_state = "PHARMACY"
 
          elif current_state == "SETTING":
             pass
