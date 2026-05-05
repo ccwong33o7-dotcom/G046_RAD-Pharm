@@ -9,6 +9,11 @@ from crafting import draw_crafting, update_crafting, animate_crafting
 
 pygame.init()
 
+pygame.mixer.init()
+pygame.mixer.music.load("music/background_music.ogg")
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1)
+
 Width = 1280
 Height= 720
 

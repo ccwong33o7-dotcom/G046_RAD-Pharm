@@ -17,6 +17,8 @@ def run_setting(screen, back_to):
                 sfx_volume = data.get("sfx_volume", 0.5)
         except: pass
 
+  pygame.mixer.music.set_volume(music_volume)
+
   music_rect = pygame.Rect(540, 280, 200, 20)
   sfx_rect = pygame.Rect(540, 360, 200, 20)
   save_btn_rect = pygame.Rect(540, 450, 200, 50)
@@ -40,6 +42,7 @@ def run_setting(screen, back_to):
         if music_rect.collidepoint(mouse_pos):
            music_volume = (mouse_pos[0] - music_rect.x) / music_rect.width
            music_volume = max(0.0, min(1.0, music_volume))
+           pygame.mixer.music.set_volume(music_volume)
             
         elif sfx_rect.collidepoint(mouse_pos):
            sfx_volume = (mouse_pos[0] - sfx_rect.x) / sfx_rect.width
