@@ -71,12 +71,13 @@ while True:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
 
-    elif current_state == "SETTING":
-       current_state = run_setting(screen, last_state)
-
     elif current_state == "CRAFTING":
       crafting_btn_set_btn, crafting_back_btn = draw_crafting(screen, font)
       animate_crafting()
+
+    elif current_state == "SETTING":
+       current_state = run_setting(screen, last_state)
+       pygame.event.clear()
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -141,5 +142,3 @@ while True:
 
     pygame.display.flip()
     
-         
-
