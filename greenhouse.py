@@ -6,7 +6,7 @@ COLOR_TEXT = (200, 200, 200)
 
 class Plant:
     def __init__(self, x_pos, name, dust_speed):
-        self.rect = pygame.Rect(x_pos, 400, 150, 200)
+        self.rect = pygame.Rect(x_pos, 420, 120, 160)
         self.name = name
         self.growth = 0
         self.dust = 0
@@ -85,9 +85,12 @@ class Plant:
         surface.blit(name_txt, (self.rect.x, self.rect.y - 40))
         surface.blit(stats_txt, (self.rect.x, self.rect.y - 20))
 
-def draw_greenhouse(screen, font, plant_list):
-    screen.fill(COLOR_BG)
-
+def draw_greenhouse(screen, font, plant_list, bg_image=None):
+    if bg_image:
+        screen.blit(bg_image, (0,0))
+    else:
+        screen.fill(COLOR_BG)
+    
     for p in plant_list:
         p.update()
         p.draw(screen)

@@ -18,14 +18,20 @@ Width = 1280
 Height= 720
 
 screen = pygame.display.set_mode((Width, Height))
+try:
+   gh_bg_img = pygame.image.load("image/Greenhouse.jpeg").convert()
+   gh_bg_img = pygame.transform.scale(gh_bg_img, (Width, Height))
+except:
+   gh_bg_img = None
+   print("Warning: Greenhouse background image not fount")
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
 
 current_state="MENU"
 last_state = "MENU"
 
-plant_a = Plant(400, "Glowing Aloe", 0.05)
-plant_b = Plant(700, "Rusty Thorn", 0.4)
+plant_a = Plant(160, "Glowing Aloe", 0.05)
+plant_b = Plant(430, "Rusty Thorn", 0.4)
 plants = [plant_a, plant_b]
 
 pygame.event.pump()
@@ -44,7 +50,7 @@ while True:
        shop_set_btn, shop_back_btn = draw_shop(screen,font)
 
     elif current_state == "GREENHOUSE":
-       gh_set_btn, gh_back_btn = draw_greenhouse(screen, font, plants)
+       gh_set_btn, gh_back_btn = draw_greenhouse(screen, font, plants,gh_bg_img)
 
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
