@@ -24,6 +24,13 @@ try:
 except:
    gh_bg_img = None
    print("Warning: Greenhouse background image not fount")
+try:
+   menu_bg_img = pygame.image.load("image/MainMenu.jpeg").convert()
+   menu_bg_img = pygame.transform.scale(menu_bg_img, (Width, Height))
+except:
+   menu_bg_img = None
+   print("Warning: MainMenu image not found")
+
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
 
@@ -41,6 +48,8 @@ while True:
     mouse_pos = pygame.mouse.get_pos()
 
     if current_state == "MENU":
+       if menu_bg_img:
+          screen.blit(menu_bg_img, (0,0))
        s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
 
     elif current_state == "PHARMACY":

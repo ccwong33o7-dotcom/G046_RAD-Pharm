@@ -1,7 +1,6 @@
 import pygame
 
 def draw_menu(screen, font, mouse_pos):
-    screen.fill((40,40,40))
 
     start_rect = pygame.Rect(549,250,200,60)
     setting_rect = pygame.Rect(540,350,200,60)
