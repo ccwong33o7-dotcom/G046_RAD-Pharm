@@ -19,7 +19,7 @@ Height= 720
 
 screen = pygame.display.set_mode((Width, Height))
 try:
-   gh_bg_img = pygame.image.load("image/Greenhouse.jpeg").convert()
+   gh_bg_img = pygame.image.load("image/greenhouse scene.png").convert()
    gh_bg_img = pygame.transform.scale(gh_bg_img, (Width, Height))
 except:
    gh_bg_img = None
