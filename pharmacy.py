@@ -1,10 +1,11 @@
 import pygame
 
-def draw_pharmacy(screen, font):
-    screen.fill((255,250,200))
+def draw_pharmacy(screen, font, bg_img):
+    if bg_img:
+        screen.blit(bg_img, (0,0))
+    else:
+        screen.fill((255,250,200))
 
-    text = font.render("Pharmacy Room", True,(0,0,0))
-    screen.blit(text,(1280//2-100,720//2))
 
     settings_btn_rect = pygame.Rect(1180,20,80,40)
     pygame.draw.rect(screen,(150,50,50),settings_btn_rect)
