@@ -1,37 +1,59 @@
 import pygame
+import os
+
+SETTING_ICON = None
+
+def load_assets():
+    global SETTING_ICON
+    if SETTING_ICON is not None: 
+        return SETTING_ICON
+
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    img_path = os.path.join(base_path, "image", "setting_button.png")
+    
+    if os.path.exists(img_path):
+        try:
+            img = pygame.image.load(img_path).convert_alpha()
+            SETTING_ICON = pygame.transform.scale(img, (42, 42))
+            print("Icon Success")
+        except Exception as e:
+            print(f"Icon Failed: {e}")
+    return SETTING_ICON
 
 def draw_pharmacy(screen, font, bg_img):
+    icon = load_assets()
+
     if bg_img:
         screen.blit(bg_img, (0,0))
     else:
         screen.fill((255,250,200))
 
 
-    settings_btn_rect = pygame.Rect(1180,20,80,40)
-    pygame.draw.rect(screen,(150,50,50),settings_btn_rect)
+    settings_btn_rect = pygame.Rect(35,22,50,50)
+
+    if SETTING_ICON:
+        screen.blit(icon, (settings_btn_rect.x, settings_btn_rect.y))
+    else:
+        pygame.draw.rect(screen, (150, 50, 50), settings_btn_rect)
+        temp_text = pygame.font.SysFont("Arial", 15).render("Set", True, (255,255,255))
+        screen.blit(temp_text, (settings_btn_rect.x + 10, settings_btn_rect.y + 15))
 
     small_font = pygame.font.SysFont("Arial",20)
-    btn_text = small_font.render("Setting",True, (255,255,255))
-    screen.blit(btn_text,(settings_btn_rect.x + 15, settings_btn_rect.y +10))
 
-    shop_btn_rect = pygame.Rect(1180,70,80,40)
+    shop_btn_rect = pygame.Rect(1180,80,80,40)
     pygame.draw.rect(screen,(50,150,50),shop_btn_rect)
+    btn_text = small_font.render("Shop", True, (255, 255, 255))
+    screen.blit(btn_text, (shop_btn_rect.x + 15, shop_btn_rect.y + 10))
 
-    small_font = pygame.font.SysFont("Arial",20)
-    btn_text = small_font.render("Shop",True, (255,255,255))
-    screen.blit(btn_text,(settings_btn_rect.x + 15, settings_btn_rect.y +55))
-
-    greenhouse_btn_rect = pygame.Rect(1180,120,80,40)
+    greenhouse_btn_rect = pygame.Rect(1180,130,80,40)
     pygame.draw.rect(screen,(50,50,150),greenhouse_btn_rect)
+    gh_font = pygame.font.SysFont("Arial",14)
+    btn_text = gh_font.render("Greenhouse",True, (255,255,255))
+    screen.blit(btn_text,(greenhouse_btn_rect.x + 2, greenhouse_btn_rect.y +12))
 
-    small_font = pygame.font.SysFont("Arial",20)
-    btn_text = small_font.render("Greenhouse",True, (255,255,255))
-    screen.blit(btn_text,(settings_btn_rect.x + 15, settings_btn_rect.y +100))
-
-    crafting_btn_rect = pygame.Rect(1180,170,80,40)
+    crafting_btn_rect = pygame.Rect(1180,180,80,40)
     pygame.draw.rect(screen,(150,150,50),crafting_btn_rect)
-    small_font = pygame.font.SysFont("Arial",20)
     btn_text = small_font.render("Crafting",True, (255,255,255))
-    screen.blit(btn_text,(settings_btn_rect.x + 15, settings_btn_rect.y +150))
+    screen.blit(btn_text,(crafting_btn_rect.x + 5, crafting_btn_rect.y +10))
 
     return settings_btn_rect, shop_btn_rect, greenhouse_btn_rect, crafting_btn_rect
