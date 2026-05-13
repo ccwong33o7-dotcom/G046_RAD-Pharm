@@ -25,7 +25,7 @@ except:
    gh_bg_img = None
    print("Warning: Greenhouse background image not fount")
 try:
-   menu_bg_img = pygame.image.load("image/MainMenu.jpeg").convert()
+   menu_bg_img = pygame.image.load("image/mainmenu.png").convert()
    menu_bg_img = pygame.transform.scale(menu_bg_img, (Width, Height))
 except:
    menu_bg_img = None
