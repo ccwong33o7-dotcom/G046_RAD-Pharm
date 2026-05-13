@@ -30,6 +30,12 @@ try:
 except:
    menu_bg_img = None
    print("Warning: MainMenu image not found")
+try:
+   pharmacy_bg_img = pygame.image.load("image/pharmacy scene.png").convert()
+   pharmacy_bg_img = pygame.transform.scale(pharmacy_bg_img, (Width, Height))
+except:
+   pharmacy_bg_img = None
+   print("Warning: Pharmacy scene image not found")
 
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
@@ -53,7 +59,7 @@ while True:
        s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
 
     elif current_state == "PHARMACY":
-       pharmacy_set_btn, pharmacy_to_shop_btn, greenhouse_btn, crafting_btn = draw_pharmacy(screen,font)
+       pharmacy_set_btn, pharmacy_to_shop_btn, greenhouse_btn, crafting_btn = draw_pharmacy(screen, font, pharmacy_bg_img)
 
     elif current_state == "SHOP":
        shop_set_btn, shop_back_btn = draw_shop(screen,font)
