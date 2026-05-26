@@ -51,13 +51,13 @@ def draw_pharmacy(screen, font, bg_img):
 
     small_font = pygame.font.SysFont("Arial",20)
 
-    shop_btn_rect = pygame.Rect(1180,80,80,40)
+    shop_btn_rect = pygame.Rect(95,22,50,50)
     if SHOP_ICON:
-        screen.blit(icon_shop, (shop_btn_rect.x + 18, shop_btn_rect.y - 2))
+        screen.blit(icon_shop, (shop_btn_rect.x + 2, shop_btn_rect.y + 2))
     else:
         pygame.draw.rect(screen,(50,150,50),shop_btn_rect)
         btn_text = small_font.render("Shop", True, (255, 255, 255))
-        screen.blit(btn_text, (shop_btn_rect.x + 15, shop_btn_rect.y + 10))
+        screen.blit(btn_text, (shop_btn_rect.x + 4, shop_btn_rect.y + 12))
 
     greenhouse_btn_rect = pygame.Rect(1180,130,80,40)
     pygame.draw.rect(screen,(50,50,150),greenhouse_btn_rect)
