@@ -1,11 +1,14 @@
 import pygame
 import sys
+import os
+import json
 from menu import draw_menu
 from setting import run_setting
 from pharmacy import draw_pharmacy
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant
 from crafting import draw_crafting, update_crafting, animate_crafting
+from intro import show_intro
 
 pygame.init()
 
@@ -40,6 +43,28 @@ except:
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
 
+SAVE_FILE = "save_data.json"
+
+def load_game():
+    """Reads saved progression data or establishes defaults."""
+    if os.path.exists(SAVE_FILE):
+        try:
+            with open(SAVE_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except:
+            pass
+    return {"current_day": 1, "has_seen_intro": False}
+
+def save_game(day_num, seen_intro):
+    """Writes active day progression and intro milestones to disk."""
+    data = {"current_day": day_num, "has_seen_intro": seen_intro}
+    with open(SAVE_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)
+
+progress = load_game()
+current_day = progress["current_day"]
+has_seen_intro = progress["has_seen_intro"]
+
 current_state="MENU"
 last_state = "MENU"
 
@@ -49,6 +74,9 @@ plants = [plant_a, plant_b]
 
 pygame.event.pump()
 pygame.event.clear()
+
+clock= pygame.time.Clock()
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
@@ -57,11 +85,19 @@ while True:
        if menu_bg_img:
           screen.blit(menu_bg_img, (0,0))
        s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
+    elif current_state == "INTRO":
+        show_intro(screen, clock)
+        has_seen_intro = True
+        save_game(current_day, has_seen_intro)  
+        current_state = "PHARMACY" 
 
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
        pharmacy_set_btn, pharmacy_to_shop_btn, greenhouse_btn, crafting_btn = draw_pharmacy(screen, font, pharmacy_bg_img)
 
+       day_tag = font.render(f"DAY {current_day} / 10", True, (200, 50, 50))
+       screen.blit(day_tag, (20, 20))
+       
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
        shop_set_btn, shop_back_btn = draw_shop(screen,font)
@@ -91,6 +127,7 @@ while True:
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
+        save_game(current_day, has_seen_intro)
         pygame.quit()
         sys.exit()
         
@@ -99,14 +136,18 @@ while True:
 
       if event.type == pygame.MOUSEBUTTONDOWN: 
          if current_state == "MENU":
-            if s_btn.collidepoint(mouse_pos):
-               current_state = "PHARMACY"  
-            elif set_btn.collidepoint(mouse_pos):
-               last_state = "MENU"
-               current_state = "SETTING"
-            elif e_btn.collidepoint(mouse_pos):
-               pygame.quit()
-               sys.exit()
+             if s_btn.collidepoint(mouse_pos):
+                  if not has_seen_intro:
+                        current_state = "INTRO"
+                  else:
+                        current_state = "PHARMACY"  
+             elif set_btn.collidepoint(mouse_pos):
+                  last_state = "MENU"
+                  current_state = "SETTING"
+             elif e_btn.collidepoint(mouse_pos):
+                   save_game(current_day, has_seen_intro)
+                   pygame.quit()
+                   sys.exit()
          
          elif current_state == "PHARMACY":
             if pharmacy_set_btn.collidepoint(mouse_pos):
@@ -151,4 +192,5 @@ while True:
             pass
 
     pygame.display.flip()
+    clock.tick(60)
     
