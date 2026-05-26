@@ -50,21 +50,24 @@ plants = [plant_a, plant_b]
 pygame.event.pump()
 pygame.event.clear()
 while True:
-    screen.fill((0, 0, 0))
     mouse_pos = pygame.mouse.get_pos()
 
     if current_state == "MENU":
+       screen.fill((0, 0, 0))
        if menu_bg_img:
           screen.blit(menu_bg_img, (0,0))
        s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
 
     elif current_state == "PHARMACY":
+       screen.fill((0, 0, 0))
        pharmacy_set_btn, pharmacy_to_shop_btn, greenhouse_btn, crafting_btn = draw_pharmacy(screen, font, pharmacy_bg_img)
 
     elif current_state == "SHOP":
+       screen.fill((0, 0, 0))
        shop_set_btn, shop_back_btn = draw_shop(screen,font)
 
     elif current_state == "GREENHOUSE":
+       screen.fill((0, 0, 0))
        gh_set_btn, gh_back_btn = draw_greenhouse(screen, font, plants,gh_bg_img)
 
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
@@ -78,6 +81,7 @@ while True:
             screen.blit(msg, (Width//2 - 200, 50))
 
     elif current_state == "CRAFTING":
+      screen.fill((0, 0, 0))
       crafting_btn_set_btn, crafting_back_btn = draw_crafting(screen, font)
       animate_crafting()
 
