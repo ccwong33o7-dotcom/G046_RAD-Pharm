@@ -2,6 +2,7 @@ import pygame
 import sys
 
 def show_intro(screen, clock):
+    screen_width = screen.get_width()
     title_font = pygame.font.SysFont("Arial", 44, bold=True)
     text_font = pygame.font.SysFont("Arial", 24)
     tip_font = pygame.font.SysFont("Arial", 18, italic=True)
@@ -42,10 +43,11 @@ def show_intro(screen, clock):
     while running:
         screen.fill((20, 18, 18)) 
 
-        title_surf = title_font.render("THE LAST PHARMACIST", True, (140, 20, 20)) # Crimson Red
-        screen.blit(title_surf, (50, 45))
+        title_surf = title_font.render("Welcome to RAD-PHARM", True, (140, 20, 20)) # Crimson Red
+        title_x = (screen_width - title_surf.get_width()) // 2  # 👈 居中计算
+        screen.blit(title_surf, (title_x, 45))
 
-        pygame.draw.line(screen, (70, 65, 65), (50, 110), (750, 110), 2)
+        pygame.draw.line(screen, (70, 65, 65), (140, 110), (screen_width - 140, 110), 2)
 
         lines = story_scenes[current_scene]
         total_text_len = sum(len(line) for line in lines)
@@ -59,7 +61,7 @@ def show_intro(screen, clock):
                 scene_complete = True
 
         chars_to_show = char_index
-        current_y = 160
+        current_y = 180
         
         for line in lines:
             if chars_to_show <= 0:
@@ -78,8 +80,9 @@ def show_intro(screen, clock):
                 text_color = (210, 210, 210) 
             
             text_surf = text_font.render(display_line, True, text_color)
-            screen.blit(text_surf, (60, current_y))
-            current_y += 40 
+            text_x = (screen_width - text_surf.get_width()) // 2  
+            screen.blit(text_surf, (text_x, current_y))
+            current_y += 45 
 
         if scene_complete:
             if current_scene < len(story_scenes) - 1:
@@ -90,7 +93,8 @@ def show_intro(screen, clock):
             tip_text = "[ Printing... Press SPACE to reveal all text ]"
 
         tip_surf = tip_font.render(tip_text, True, (110, 105, 105))
-        screen.blit(tip_surf, (60, 520))
+        tip_x = (screen_width - tip_surf.get_width()) // 2  
+        screen.blit(tip_surf, (tip_x, 580))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

@@ -65,6 +65,8 @@ progress = load_game()
 current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
 
+has_seen_intro = False
+
 current_state="MENU"
 last_state = "MENU"
 
