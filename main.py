@@ -7,7 +7,7 @@ from setting import run_setting
 from pharmacy import draw_pharmacy
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant
-from crafting import draw_crafting, update_crafting, animate_crafting
+from crafting import draw_crafting, update_crafting, animate_crafting 
 from intro import show_intro
 from taskbar import TaskBar
 
@@ -46,6 +46,12 @@ try:
 except:
    shop_bg_img = None
    print("Warning: Shop scene image not found")
+try:
+    crafting_bg_img = pygame.image.load("image/Lab_background.png").convert()
+    crafting_bg_img = pygame.transform.scale(crafting_bg_img, (Width, Height))
+except:
+    crafting_bg_img = None
+    print("Warning: Crafting background image not found")
 
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
@@ -134,7 +140,7 @@ while True:
 
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
-      _, crafting_back_btn = draw_crafting(screen, font)
+      _, crafting_back_btn = draw_crafting(screen, crafting_bg_img, font)
       animate_crafting()
 
       task_bar.draw(screen,current_day)

@@ -107,8 +107,11 @@ def animate_crafting():
         if marker_pos >= bar_width or marker_pos <= 0:
             marker_speed *= -1
 
-def draw_crafting(screen, font):
-    screen.fill(COLOUR_BG)
+def draw_crafting(screen, bg_image, font):
+    if bg_image:
+        screen.blit(bg_image, (0, 0))
+    else:
+        screen.fill(COLOUR_BG)
 
 
     msg = get_title_font().render("Press 1-5 to Craft", True, COLOR_TEXT)
