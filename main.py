@@ -23,7 +23,7 @@ Height= 720
 
 screen = pygame.display.set_mode((Width, Height))
 try:
-   gh_bg_img = pygame.image.load("image/greenhouse scene.png").convert()
+   gh_bg_img = pygame.image.load("image/greenhouse_3.png").convert()
    gh_bg_img = pygame.transform.scale(gh_bg_img, (Width, Height))
 except:
    gh_bg_img = None
@@ -60,25 +60,27 @@ def load_game():
                 return json.load(f)
         except:
             pass
-    return {"current_day": 1, "has_seen_intro": False}
+    return {"current_day": 1, "has_seen_intro": False, "pure_soil": 0}
 
-def save_game(day_num, seen_intro):
+def save_game(day_num, seen_intro, pure_soil_count):
     """Writes active day progression and intro milestones to disk."""
-    data = {"current_day": day_num, "has_seen_intro": seen_intro}
+    data = {"current_day": day_num, "has_seen_intro": seen_intro, "pure_soil": pure_soil_count}
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
 progress = load_game()
 current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
+pure_soil_count = progress.get("pure_soil", 0)
+pure_soil_count = 1
 
 has_seen_intro = False
 
 current_state="MENU"
 last_state = "MENU"
 
-plant_a = Plant(160, "Glowing Aloe", 0.05)
-plant_b = Plant(430, "Rusty Thorn", 0.4)
+plant_a = Plant(950, 400, "Glowing Aloe", 0.05)
+plant_b = Plant(710, 400, "Rusty Thorn", 0.4)
 plants = [plant_a, plant_b]
 
 pygame.event.pump()
@@ -100,7 +102,7 @@ while True:
     elif current_state == "INTRO":
         show_intro(screen, clock)
         has_seen_intro = True
-        save_game(current_day, has_seen_intro)  
+        save_game(current_day, has_seen_intro, pure_soil_count)  
         current_state = "PHARMACY" 
 
     elif current_state == "PHARMACY":
@@ -111,12 +113,12 @@ while True:
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       shop_set_btn, shop_back_btn = draw_shop(screen,font, shop_bg_img)
+       shop_buy_soil_btn, shop_back_btn = draw_shop(screen,font, shop_bg_img)
        task_bar.draw(screen,current_day)
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       gh_set_btn, gh_back_btn = draw_greenhouse(screen, font, plants,gh_bg_img)
+       gh_set_btn, gh_back_btn, gh_upgrade_btn, pure_soil_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count)
 
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
@@ -143,7 +145,7 @@ while True:
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
-        save_game(current_day, has_seen_intro)
+        save_game(current_day, has_seen_intro, pure_soil_count)
         pygame.quit()
         sys.exit()
         
@@ -171,7 +173,7 @@ while True:
                   last_state = "MENU"
                   current_state = "SETTING"
              elif e_btn.collidepoint(mouse_pos):
-                   save_game(current_day, has_seen_intro)
+                   save_game(current_day, has_seen_intro, pure_soil_count)
                    pygame.quit()
                    sys.exit()
          
@@ -186,10 +188,22 @@ while True:
          elif current_state == "SHOP":
             if shop_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
+            elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
+               pure_soil_count += 1
 
          elif current_state == "GREENHOUSE":
             if gh_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
+            elif gh_upgrade_btn.collidepoint(mouse_pos):
+               pass
+            elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos) and pure_soil_count > 0:
+               pure_soil_count -= 1
+               for p in plants:
+                   if not p.is_dead:
+                      p.dust = 0
+                      p.growth += 20
+                      if p.growth > 100: p.growth = 100
+            
             else:
              for p in plants:
                 if p.rect.collidepoint(mouse_pos):

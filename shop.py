@@ -13,4 +13,9 @@ def draw_shop(screen, font, bg_img=None):
     back_text = small_font.render("Back", True, (255, 255, 255))
     screen.blit(back_text, (back_to_pharmacy_btn.x + 20, back_to_pharmacy_btn.y + 10))
 
-    return None, back_to_pharmacy_btn
+    but_soil_btn = pygame.Rect(200, 300, 200, 60)
+    pygame.draw.rect(screen, (139, 69, 19), but_soil_btn)
+    but_text = font.render("Buy Pure Soil", True, (255, 255, 255))
+    screen.blit(but_text, (but_soil_btn.x + 10, but_soil_btn.y + 10))
+
+    return but_soil_btn, back_to_pharmacy_btn

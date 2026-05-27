@@ -12,7 +12,6 @@ def draw_pharmacy(screen, bg_img):
     gh_font = pygame.font.SysFont("Arial",14)
     btn_text = gh_font.render("Greenhouse",True, (255,255,255))
     screen.blit(btn_text,(greenhouse_btn_rect.x + 2, greenhouse_btn_rect.y +12))
-
     crafting_btn_rect = pygame.Rect(1180,180,80,40)
     pygame.draw.rect(screen,(150,150,50),crafting_btn_rect)
 

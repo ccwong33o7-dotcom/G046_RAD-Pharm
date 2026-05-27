@@ -4,9 +4,17 @@ import os
 COLOR_BG = (30, 30, 30)
 COLOR_TEXT = (200, 200, 200)
 
+try:
+    img_pure_soil = pygame.image.load("image/PureSoil.jpg").convert_alpha()
+    img_pure_soil = pygame.transform.scale(img_pure_soil, (80, 80))
+except:
+    img_pure_soil = None
+    print("Warning: Pure Soil image not found")
+    
+
 class Plant:
-    def __init__(self, x_pos, name, dust_speed):
-        self.rect = pygame.Rect(x_pos, 420, 120, 160)
+    def __init__(self, x_pos, y_pos, name, dust_speed, width=120, height=160):
+        self.rect = pygame.Rect(x_pos, y_pos, width, height)
         self.name = name
         self.growth = 0
         self.dust = 0
@@ -19,9 +27,9 @@ class Plant:
 
 
         try:
-            self.img_seedling = pygame.image.load("image/seedling.png").convert_alpha()
-            self.img_bud = pygame.image.load("image/bud.png").convert_alpha()
-            self.img_flower = pygame.image.load("image/flower.png").convert_alpha()
+            self.img_seedling = pygame.image.load("image/Aloe1.png").convert_alpha()
+            self.img_bud = pygame.image.load("image/Aloe2.png").convert_alpha()
+            self.img_flower = pygame.image.load("image/Aloe3.png").convert_alpha()
 
             self.img_wilt_1 = pygame.image.load("image/wilt_1.png").convert_alpha()
             self.img_wilt_2 = pygame.image.load("image/wilt_2.png").convert_alpha()
@@ -32,7 +40,7 @@ class Plant:
             pygame.quit()
             import sys
             sys.exit()
-    
+        
     def update(self):
         self.dust += self.dust_speed
         if self.dust > 100: 
@@ -57,7 +65,6 @@ class Plant:
 
     
     def draw(self, surface):
-        current_image = None
 
         if self.growth >= 100:
             current_image = self.img_flower
@@ -76,16 +83,21 @@ class Plant:
             else:
                 current_image = self.img_bud
         
+        orig_w, orig_h = current_image.get_size()
+        scale_factor = 160 / orig_h
+        new_w = int(orig_w * scale_factor)
+        new_h = int(orig_h * scale_factor)
         scaled_image = pygame.transform.scale(current_image, (self.rect.width, self.rect.height))
         surface.blit(scaled_image, (self.rect.x, self.rect.y))
 
         font_small = pygame.font.SysFont("Arial", 18)
         name_txt = font_small.render(f"{self.name}", True, COLOR_TEXT)
         stats_txt = font_small.render(f"D:{int(self.dust)}% G:{int(self.growth)}%", True, COLOR_TEXT)
-        surface.blit(name_txt, (self.rect.x, self.rect.y - 40))
-        surface.blit(stats_txt, (self.rect.x, self.rect.y - 20))
+        surface.blit(name_txt, (self.rect.x, self.rect.y - 30))
+        surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
+     
 
-def draw_greenhouse(screen, font, plant_list, bg_image=None):
+def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0):
     if bg_image:
         screen.blit(bg_image, (0,0))
     else:
@@ -94,6 +106,9 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None):
     for p in plant_list:
         p.update()
         p.draw(screen)
+
+    upgrade_btn_rect = pygame.Rect(100, 50, 100, 40)
+    pygame.draw.rect(screen, (100, 80, 50), upgrade_btn_rect)
 
 
     small_font = pygame.font.SysFont("Arial", 20)
@@ -106,7 +121,24 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None):
     screen.blit(small_font.render("Setting", True, (255, 255, 255)), (1165, 40))
     screen.blit(small_font.render("Back", True, (255, 255, 255)), (1175, 90))
 
-    return setting_btn_rect, back_btn_rect
+    pure_soil_btn_rect = pygame.Rect(660, 615, 80, 80)
+
+    if pure_soil_count > 0:
+
+        if img_pure_soil:
+            screen.blit(img_pure_soil,(pure_soil_btn_rect.x, pure_soil_btn_rect.y))
+        else:
+            pygame.draw.rect(screen, (139, 69, 19), pure_soil_btn_rect)
+        
+        count_txt = small_font.render(f"x{pure_soil_count}", True, (255, 255, 255))
+        screen.blit(count_txt, (pure_soil_btn_rect.x + 55, pure_soil_btn_rect.y + 55))
+    
+    else:
+        pygame.draw.rect(screen, (80, 80, 80), pure_soil_btn_rect, 2)
+        zero_txt = small_font.render("0", True, (120, 120, 120))
+        screen.blit(zero_txt, (pure_soil_btn_rect.x + 35, pure_soil_btn_rect.y + 30))
+
+    return setting_btn_rect,  back_btn_rect, upgrade_btn_rect, pure_soil_btn_rect
 
 
 
