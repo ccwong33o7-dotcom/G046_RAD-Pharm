@@ -72,7 +72,7 @@ progress = load_game()
 current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
 pure_soil_count = progress.get("pure_soil", 0)
-pure_soil_count = 1
+pure_soil_count = int(pure_soil_count) if isinstance(pure_soil_count, (int, float)) else 0
 
 has_seen_intro = False
 
