@@ -1,11 +1,23 @@
 import pygame
 import sys
+import os
 
 def show_intro(screen, clock):
     screen_width = screen.get_width()
+    screen_height = screen.get_height()
     title_font = pygame.font.SysFont("Arial", 44, bold=True)
     text_font = pygame.font.SysFont("Arial", 24)
     tip_font = pygame.font.SysFont("Arial", 18, italic=True)
+
+    bg_path = os.path.join("image", "intro_bg.jpeg")
+
+    try:
+        intro_bg = pygame.image.load(bg_path).convert()
+        intro_bg = pygame.transform.scale(intro_bg, (screen_width, screen_height))
+    except pygame.error as e:
+        print(f"[ERROR] Cannot find or load image: {bg_path}. Details: {e}")
+        intro_bg = pygame.Surface((screen_width, screen_height))
+        intro_bg.fill((20, 18, 18))
 
     story_scenes = [
         [
@@ -41,10 +53,10 @@ def show_intro(screen, clock):
 
     running = True
     while running:
-        screen.fill((20, 18, 18)) 
+        screen.blit(intro_bg, (0, 0)) 
 
         title_surf = title_font.render("Welcome to RAD-PHARM", True, (140, 20, 20)) # Crimson Red
-        title_x = (screen_width - title_surf.get_width()) // 2  # 👈 居中计算
+        title_x = (screen_width - title_surf.get_width()) // 2  
         screen.blit(title_surf, (title_x, 45))
 
         pygame.draw.line(screen, (70, 65, 65), (140, 110), (screen_width - 140, 110), 2)

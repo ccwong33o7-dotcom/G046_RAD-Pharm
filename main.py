@@ -9,6 +9,7 @@ from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant
 from crafting import draw_crafting, update_crafting, animate_crafting
 from intro import show_intro
+from taskbar import TaskBar
 
 pygame.init()
 
@@ -79,6 +80,8 @@ pygame.event.clear()
 
 clock= pygame.time.Clock()
 
+task_bar = TaskBar(Width)
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
@@ -87,6 +90,7 @@ while True:
        if menu_bg_img:
           screen.blit(menu_bg_img, (0,0))
        s_btn, set_btn, e_btn = draw_menu(screen, font, mouse_pos)
+
     elif current_state == "INTRO":
         show_intro(screen, clock)
         has_seen_intro = True
@@ -95,14 +99,14 @@ while True:
 
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
-       pharmacy_set_btn, pharmacy_to_shop_btn, greenhouse_btn, crafting_btn = draw_pharmacy(screen, font, pharmacy_bg_img)
+       greenhouse_btn, crafting_btn = draw_pharmacy(screen, pharmacy_bg_img)
 
-       day_tag = font.render(f"DAY {current_day} / 10", True, (200, 50, 50))
-       screen.blit(day_tag, (20, 20))
+       task_bar.draw(screen, current_day)
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
        shop_set_btn, shop_back_btn = draw_shop(screen,font)
+       task_bar.draw(screen,current_day)
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
@@ -118,10 +122,14 @@ while True:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
 
+       task_bar.draw(screen,current_day)
+
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
       crafting_btn_set_btn, crafting_back_btn = draw_crafting(screen, font)
       animate_crafting()
+
+      task_bar.draw(screen,current_day)
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
@@ -137,6 +145,16 @@ while True:
          update_crafting(event) 
 
       if event.type == pygame.MOUSEBUTTONDOWN: 
+         if current_state not in ["MENU", "SETTING"]:
+            clicked_top = task_bar.check_click(mouse_pos)
+            if clicked_top == "settings":
+               last_state = current_state 
+               current_state = "SETTING"
+               continue 
+            elif clicked_top == "shop":
+               current_state = "SHOP"
+               continue
+            
          if current_state == "MENU":
              if s_btn.collidepoint(mouse_pos):
                   if not has_seen_intro:
@@ -152,28 +170,17 @@ while True:
                    sys.exit()
          
          elif current_state == "PHARMACY":
-            if pharmacy_set_btn.collidepoint(mouse_pos):
-               last_state ="PHARMACY"
-               current_state = "SETTING"
-            elif pharmacy_to_shop_btn.collidepoint(mouse_pos):
-               current_state = "SHOP"
-            elif greenhouse_btn.collidepoint(mouse_pos):
+            if greenhouse_btn.collidepoint(mouse_pos):
                current_state = "GREENHOUSE"
             elif crafting_btn.collidepoint(mouse_pos):
                current_state = "CRAFTING"
 
          elif current_state == "SHOP":
-            if shop_set_btn.collidepoint(mouse_pos):
-               last_state = "SHOP"
-               current_state = "SETTING"
-            elif shop_back_btn.collidepoint(mouse_pos):
+            if shop_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
 
          elif current_state == "GREENHOUSE":
-            if gh_set_btn.collidepoint(mouse_pos):
-               last_state = "GREENHOUSE"
-               current_state = "SETTING"
-            elif gh_back_btn.collidepoint(mouse_pos):
+            if gh_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
             else:
              for p in plants:
@@ -181,17 +188,9 @@ while True:
                     p.clean()
 
          elif current_state == "CRAFTING":
-            if crafting_btn_set_btn.collidepoint(mouse_pos):
-               last_state = "CRAFTING"
-               current_state = "SETTING"
-            elif crafting_back_btn.collidepoint(mouse_pos):
+            if crafting_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
 
-         elif current_state == "SETTING":
-            pass
- 
-         elif current_state in ["SHOP", "JUNKYARD", "GREENHOUSE", "CRAFTING"]:
-            pass
 
     pygame.display.flip()
     clock.tick(60)
