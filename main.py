@@ -7,7 +7,7 @@ from setting import run_setting
 from pharmacy import draw_pharmacy
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant
-from crafting import draw_crafting, update_crafting, animate_crafting 
+from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
 from intro import show_intro
 from taskbar import TaskBar
 
@@ -52,6 +52,7 @@ try:
 except:
     crafting_bg_img = None
     print("Warning: Crafting background image not found")
+
 
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
@@ -132,6 +133,14 @@ while True:
        if ready_to_craft:
             msg = font.render("MEDICINE READY!", True, (0, 255, 0))
             screen.blit(msg, (Width//2 - 150, 50))
+
+            for p in plants:
+               if p.growth >= 100 and not p.harvested:
+                  inventory[p.name] += 1
+                  p.harvested = True
+
+            print(f"{p.name} added to crafting inventory!")
+
        elif any_dead:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))

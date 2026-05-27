@@ -16,6 +16,7 @@ class Plant:
         self.dust_speed = dust_speed 
         self.is_dead = False
         self.death_timer = 0
+        self.harvested = False
 
         self.img_growth = []
         self.img_dead = []
