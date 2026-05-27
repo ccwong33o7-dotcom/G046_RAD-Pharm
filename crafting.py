@@ -68,9 +68,6 @@ def update_crafting(event):
     if event.type == pygame.MOUSEBUTTONDOWN:
         mouse_pos = event.pos
 
-        if crafting_btn_set_btn.collidepoint(mouse_pos):
-            return "SETTING"
-        
         if crafting_back_btn.collidepoint(mouse_pos):
             return "PHARMACY"
         
@@ -137,10 +134,8 @@ def draw_crafting(screen, font):
                          (bar_x + marker_pos, 340, 10, 70))
 
     # Buttons
-    pygame.draw.rect(screen, (100, 100, 100), crafting_btn_set_btn)
     pygame.draw.rect(screen, (100, 100, 100), crafting_back_btn)
 
-    screen.blit(font.render("Setting", True, (255, 255, 255)), (1080, 50))
     screen.blit(font.render("Back", True, (255, 255, 255)), (1080, 150))
 
     return crafting_btn_set_btn, crafting_back_btn

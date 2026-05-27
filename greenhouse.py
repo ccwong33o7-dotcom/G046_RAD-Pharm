@@ -122,11 +122,8 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0):
     small_font = pygame.font.SysFont("Arial", 20)
     setting_btn_rect = pygame.Rect(1150, 30, 100, 40)
     back_btn_rect = pygame.Rect(1150, 80, 100, 40)
-    
-    pygame.draw.rect(screen, (150, 50, 50), setting_btn_rect)
+
     pygame.draw.rect(screen, (100, 100, 250), back_btn_rect)
-    
-    screen.blit(small_font.render("Setting", True, (255, 255, 255)), (1165, 40))
     screen.blit(small_font.render("Back", True, (255, 255, 255)), (1175, 90))
 
     pure_soil_btn_rect = pygame.Rect(700, 615, 100, 100)

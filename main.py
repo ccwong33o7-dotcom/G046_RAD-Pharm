@@ -118,7 +118,7 @@ while True:
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       gh_set_btn, gh_back_btn, gh_upgrade_btn, pure_soil_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count)
+       _, gh_back_btn, gh_upgrade_btn, pure_soil_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count)
 
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
@@ -134,7 +134,7 @@ while True:
 
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
-      crafting_btn_set_btn, crafting_back_btn = draw_crafting(screen, font)
+      _, crafting_back_btn = draw_crafting(screen, font)
       animate_crafting()
 
       task_bar.draw(screen,current_day)
