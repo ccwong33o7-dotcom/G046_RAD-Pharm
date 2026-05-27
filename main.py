@@ -40,6 +40,12 @@ try:
 except:
    pharmacy_bg_img = None
    print("Warning: Pharmacy scene image not found")
+try:
+   shop_bg_img = pygame.image.load("image/shop_bg.jpeg").convert()
+   shop_bg_img = pygame.transform.scale(shop_bg_img, (Width, Height))
+except:
+   shop_bg_img = None
+   print("Warning: Shop scene image not found")
 
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
@@ -99,13 +105,13 @@ while True:
 
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
-       greenhouse_btn, crafting_btn = draw_pharmacy(screen, pharmacy_bg_img)
+       greenhouse_btn, crafting_btn, shop_btn = draw_pharmacy(screen, pharmacy_bg_img)
 
        task_bar.draw(screen, current_day)
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       shop_set_btn, shop_back_btn = draw_shop(screen,font)
+       shop_set_btn, shop_back_btn = draw_shop(screen,font, shop_bg_img)
        task_bar.draw(screen,current_day)
 
     elif current_state == "GREENHOUSE":
@@ -174,6 +180,8 @@ while True:
                current_state = "GREENHOUSE"
             elif crafting_btn.collidepoint(mouse_pos):
                current_state = "CRAFTING"
+            elif shop_btn.collidepoint(mouse_pos):
+               current_state = "SHOP"
 
          elif current_state == "SHOP":
             if shop_back_btn.collidepoint(mouse_pos):

@@ -20,4 +20,10 @@ def draw_pharmacy(screen, bg_img):
     btn_text = small_font.render("Crafting",True, (255,255,255))
     screen.blit(btn_text,(crafting_btn_rect.x + 5, crafting_btn_rect.y +10))
 
-    return greenhouse_btn_rect, crafting_btn_rect
+    shop_btn_rect = pygame.Rect(1180,230,80,40) 
+    pygame.draw.rect(screen,(180,100,50),shop_btn_rect) 
+
+    shop_text = small_font.render("Shop",True, (255,255,255))
+    screen.blit(shop_text,(shop_btn_rect.x + 18, shop_btn_rect.y +10))
+
+    return greenhouse_btn_rect, crafting_btn_rect, shop_btn_rect
