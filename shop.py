@@ -18,4 +18,14 @@ def draw_shop(screen, font, bg_img=None):
     buy_text = font.render("Buy Pure Soil", True, (255, 255, 255))
     screen.blit(buy_text, (buy_soil_btn.x + 10, buy_soil_btn.y + 10))
 
-    return buy_soil_btn, back_to_pharmacy_btn
+    buy_canopy_btn = pygame.Rect(450, 300, 250, 60)
+    pygame.draw.rect(screen, (50, 150, 50), buy_canopy_btn)
+    canopy_text = font.render("Buy Intact Canopy", True, (255, 255, 255))
+    screen.blit(canopy_text, (buy_canopy_btn.x + 10, buy_canopy_btn.y + 10))
+
+    buy_oxygen_btn = pygame.Rect(650, 300, 350, 60)
+    pygame.draw.rect(screen, (70, 70, 150), buy_oxygen_btn)
+    oxygen_text = font.render("Buy Oxygen Recycler", True, (255, 255, 255))
+    screen.blit(oxygen_text, (buy_oxygen_btn.x + 10, buy_oxygen_btn.y + 10))
+
+    return buy_soil_btn, buy_canopy_btn, buy_oxygen_btn, back_to_pharmacy_btn

@@ -1,5 +1,7 @@
 {
     "current_day": 1,
     "has_seen_intro": true,
-    "pure_soil": 0
+    "pure_soil": 0,
+    "has_intact_canopy": true,
+    "has_oxygen_recycler": false
 }

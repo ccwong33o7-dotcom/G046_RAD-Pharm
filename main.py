@@ -67,11 +67,17 @@ def load_game():
                 return json.load(f)
         except:
             pass
-    return {"current_day": 1, "has_seen_intro": False, "pure_soil": 0}
+    return {"current_day": 1, "has_seen_intro": False, "pure_soil": 0, "has_intact_canopy": False, "has_oxygen_recycler": False}
 
-def save_game(day_num, seen_intro, pure_soil_count):
+def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler):
     """Writes active day progression and intro milestones to disk."""
-    data = {"current_day": day_num, "has_seen_intro": seen_intro, "pure_soil": pure_soil_count}
+    data = {
+       "current_day": day_num, 
+       "has_seen_intro": seen_intro, 
+       "pure_soil": pure_soil_count, 
+       "has_intact_canopy": has_intact_canopy, 
+       "has_oxygen_recycler": has_oxygen_recycler
+       }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
@@ -80,7 +86,8 @@ current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
 pure_soil_count = progress.get("pure_soil", 0)
 pure_soil_count = int(pure_soil_count) if isinstance(pure_soil_count, (int, float)) else 0
-
+has_intact_canopy = progress.get("has_intact_canopy", False)
+has_oxygen_recycler = progress.get("has_oxygen_recycler", False)
 has_seen_intro = False
 
 current_state="MENU"
@@ -109,7 +116,7 @@ while True:
     elif current_state == "INTRO":
         show_intro(screen, clock)
         has_seen_intro = True
-        save_game(current_day, has_seen_intro, pure_soil_count)  
+        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
         current_state = "PHARMACY" 
 
     elif current_state == "PHARMACY":
@@ -120,12 +127,12 @@ while True:
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       shop_buy_soil_btn, shop_back_btn = draw_shop(screen,font, shop_bg_img)
+       shop_buy_soil_btn, shop_buy_canopy_btn, shop_buy_oxygen_btn, shop_back_btn = draw_shop(screen,font, shop_bg_img)
        task_bar.draw(screen,current_day)
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       _, gh_back_btn, gh_upgrade_btn, pure_soil_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count)
+       gh_back_btn, gh_upgrade_btn, pure_soil_btn, oxygen_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
 
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
@@ -160,7 +167,7 @@ while True:
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
-        save_game(current_day, has_seen_intro, pure_soil_count)
+        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy)
         pygame.quit()
         sys.exit()
         
@@ -205,12 +212,20 @@ while True:
                current_state = "PHARMACY"
             elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
                pure_soil_count += 1
+            elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
+               has_intact_canopy = True
+               print("Intact Canopy purchased!")
+            elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
+               has_oxygen_recycler = True
+               print("Oxygen Recycler purchased!")
 
          elif current_state == "GREENHOUSE":
             if gh_back_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
             elif gh_upgrade_btn.collidepoint(mouse_pos):
-               pass
+               if has_intact_canopy:
+                  print("You clicked the Intact Canopy! Now you can implement its effect.")
+
             elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos) and pure_soil_count > 0:
                pure_soil_count -= 1
                for p in plants:
@@ -218,6 +233,14 @@ while True:
                       p.dust = 0
                       p.growth += 20
                       if p.growth > 100: p.growth = 100
+            
+            elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos) and has_oxygen_recycler:
+               has_oxygen_recycler = False
+
+               for p in plants:
+                     if not p.is_dead:
+                        p.growth += 30
+                        if p.growth >100: p.growth = 100
             
             else:
              for p in plants:

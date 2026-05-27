@@ -5,6 +5,8 @@ COLOR_BG = (30, 30, 30)
 COLOR_TEXT = ( 0, 255, 0)
 
 img_pure_soil = None
+img_intact_canopy = None
+img_oxygen_recycler = None
 
     
 class Plant:
@@ -93,8 +95,9 @@ class Plant:
         surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
      
 
-def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0):
-    global img_pure_soil
+def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, has_intact_canopy=False, has_oxygen_recycler=False):
+    global img_pure_soil, img_intact_canopy, img_oxygen_recycler
+    small_font = pygame.font.SysFont("Arial", 20)
 
     if img_pure_soil is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
@@ -107,6 +110,31 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0):
                 except pygame.error as e:
                     print(f"Error loading pure soil image: {e}")
                     img_pure_soil = None
+    
+    if img_intact_canopy is None:
+        for ext in [".jpg", ".png", ".JPG", ".PNG"]:
+            possible_path = f"image/IntactCanopy{ext}"
+            if os.path.exists(possible_path):
+                try:
+                    img_intact_canopy = pygame.image.load(possible_path).convert_alpha()
+                    img_intact_canopy = pygame.transform.scale(img_intact_canopy, (100, 100))
+                    break
+                except pygame.error as e:
+                    print(f"Error loading intact canopy image: {e}")
+                    img_intact_canopy = None
+    
+    if img_oxygen_recycler is None:
+        for ext in [".jpg", ".png", ".JPG", ".PNG"]:
+            possible_path = f"image/OxygenRecycler{ext}"
+            if os.path.exists(possible_path):
+                try:
+                    img_oxygen_recycler = pygame.image.load(possible_path).convert_alpha()
+                    img_oxygen_recycler = pygame.transform.scale(img_oxygen_recycler, (100, 100))
+                    break
+                except pygame.error as e:
+                    print(f"Error loading oxygen recycler image: {e}")
+                    img_oxygen_recycler = None
+
     if bg_image:
         screen.blit(bg_image, (0,0))
     else:
@@ -116,38 +144,43 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0):
         p.update()
         p.draw(screen)
 
-    upgrade_btn_rect = pygame.Rect(100, 50, 100, 40)
-    pygame.draw.rect(screen, (100, 80, 50), upgrade_btn_rect)
+    canopy_btn_rect = pygame.Rect(1120, 615, 100, 100)
 
-
-    small_font = pygame.font.SysFont("Arial", 20)
-    setting_btn_rect = pygame.Rect(1150, 30, 100, 40)
     back_btn_rect = pygame.Rect(1150, 80, 100, 40)
-    
-    pygame.draw.rect(screen, (150, 50, 50), setting_btn_rect)
     pygame.draw.rect(screen, (100, 100, 250), back_btn_rect)
-    
-    screen.blit(small_font.render("Setting", True, (255, 255, 255)), (1165, 40))
     screen.blit(small_font.render("Back", True, (255, 255, 255)), (1175, 90))
+    
+    if has_intact_canopy:
+        if img_intact_canopy:
+            screen.blit(img_intact_canopy,(canopy_btn_rect.x, canopy_btn_rect.y))
+        else:
+            pygame.draw.rect(screen, (34, 139, 34), canopy_btn_rect)
+            screen.blit(font.render("Canopy", True, (255, 255, 255)), (canopy_btn_rect.x + 15, canopy_btn_rect.y + 40))
+    else:  
+        pygame.draw.rect(screen, (80, 80, 80), canopy_btn_rect, 2)
+        screen.blit(small_font.render("Locked", True, (120, 120, 120)), (canopy_btn_rect.x + 20, canopy_btn_rect.y + 40))
+
 
     pure_soil_btn_rect = pygame.Rect(700, 615, 100, 100)
-
-    if pure_soil_count > 0:
-
-        if img_pure_soil:
+    if img_pure_soil:
             screen.blit(img_pure_soil,(pure_soil_btn_rect.x, pure_soil_btn_rect.y))
-        else:
+    else:
             pygame.draw.rect(screen, (139, 69, 19), pure_soil_btn_rect)
-        
+
+    if pure_soil_count > 0:   
         count_txt = small_font.render(f"x{pure_soil_count}", True, (255, 255, 255))
-        screen.blit(count_txt, (pure_soil_btn_rect.x + 75, pure_soil_btn_rect.y + 75))
     
     else:
-        pygame.draw.rect(screen, (80, 80, 80), pure_soil_btn_rect, 2)
-        zero_txt = small_font.render("0", True, (120, 120, 120))
-        screen.blit(zero_txt, (pure_soil_btn_rect.x + 45, pure_soil_btn_rect.y + 35))
+        count_txt = small_font.render(f"x{pure_soil_count}", True, (180, 180, 180))
+    screen.blit(count_txt, (pure_soil_btn_rect.x + 75, pure_soil_btn_rect.y + 75))
 
-    return setting_btn_rect,  back_btn_rect, upgrade_btn_rect, pure_soil_btn_rect
+    oxygen_btn_rect = pygame.Rect(900, 615, 100, 100)
+    if img_oxygen_recycler:
+        screen.blit(img_oxygen_recycler, (oxygen_btn_rect.x, oxygen_btn_rect.y))
+    else:
+        pygame.draw.rect(screen, (70, 70, 150), oxygen_btn_rect)
+
+    return  back_btn_rect, canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect
 
 
 
