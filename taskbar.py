@@ -17,7 +17,7 @@ class TaskBar:
     def load_assets(self):
         base_path = os.path.dirname(os.path.abspath(__file__))
         
-        setting_path = os.path.join(base_path, "image", "setting_button.png")
+        setting_path = os.path.join(base_path, "image", "button", "setting_button.png")
         if os.path.exists(setting_path):
             try:
                 img = pygame.image.load(setting_path).convert_alpha()
