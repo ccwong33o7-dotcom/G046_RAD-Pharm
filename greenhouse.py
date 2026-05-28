@@ -25,13 +25,13 @@ class Plant:
 
 
         try:
-            self.img_seedling = pygame.image.load("image/Aloe1.png").convert_alpha()
-            self.img_bud = pygame.image.load("image/Aloe2.png").convert_alpha()
-            self.img_flower = pygame.image.load("image/Aloe3.png").convert_alpha()
+            self.img_seedling = pygame.image.load("image/plant/Aloe1.png").convert_alpha()
+            self.img_bud = pygame.image.load("image/plant/Aloe2.png").convert_alpha()
+            self.img_flower = pygame.image.load("image/plant/Aloe3.png").convert_alpha()
 
-            self.img_wilt_1 = pygame.image.load("image/wilt_1.png").convert_alpha()
-            self.img_wilt_2 = pygame.image.load("image/wilt_2.png").convert_alpha()
-            self.img_wilt_3 = pygame.image.load("image/wilt_3.png").convert_alpha()
+            self.img_wilt_1 = pygame.image.load("image/plant/wilt_1.png").convert_alpha()
+            self.img_wilt_2 = pygame.image.load("image/plant/wilt_2.png").convert_alpha()
+            self.img_wilt_3 = pygame.image.load("image/plant/wilt_3.png").convert_alpha()
         
         except pygame.error as e:
             print(f"Error loading images: {e}")
@@ -101,7 +101,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
 
     if img_pure_soil is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
-            possible_path = f"image/PureSoil{ext}"
+            possible_path = f"image/button/PureSoil{ext}"
             if os.path.exists(possible_path):
                 try:
                     img_pure_soil = pygame.image.load(possible_path).convert_alpha()
@@ -113,7 +113,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     
     if img_intact_canopy is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
-            possible_path = f"image/IntactCanopy{ext}"
+            possible_path = f"image/button/IntactCanopy{ext}"
             if os.path.exists(possible_path):
                 try:
                     img_intact_canopy = pygame.image.load(possible_path).convert_alpha()
@@ -125,7 +125,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     
     if img_oxygen_recycler is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
-            possible_path = f"image/OxygenRecycler{ext}"
+            possible_path = f"image/button/OxygenRecycler{ext}"
             if os.path.exists(possible_path):
                 try:
                     img_oxygen_recycler = pygame.image.load(possible_path).convert_alpha()
