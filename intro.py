@@ -9,7 +9,7 @@ def show_intro(screen, clock):
     text_font = pygame.font.SysFont("Arial", 24)
     tip_font = pygame.font.SysFont("Arial", 18, italic=True)
 
-    bg_path = os.path.join("image", "intro_bg.jpeg")
+    bg_path = os.path.join("image", "background", "intro_bg.jpeg")
 
     try:
         intro_bg = pygame.image.load(bg_path).convert()
