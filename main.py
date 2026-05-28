@@ -23,46 +23,46 @@ Height= 720
 
 screen = pygame.display.set_mode((Width, Height))
 try:
-   gh_bg_img = pygame.image.load("image/greenhouse_3.png").convert()
+   gh_bg_img = pygame.image.load("image/background/greenhouse_3.png").convert()
    gh_bg_img = pygame.transform.smoothscale(gh_bg_img, (Width, Height))
 except:
    gh_bg_img = None
    print("Warning: Greenhouse background image not fount")
 try:
-   menu_bg_img = pygame.image.load("image/mainmenu.png").convert()
+   menu_bg_img = pygame.image.load("image/background/mainmenu.png").convert()
    menu_bg_img = pygame.transform.smoothscale(menu_bg_img, (Width, Height))
 except:
    menu_bg_img = None
    print("Warning: MainMenu image not found")
 try:
-   pharmacy_bg_img = pygame.image.load("image/pharmacy scene.png").convert()
+   pharmacy_bg_img = pygame.image.load("image/background/pharmacy scene.png").convert()
    pharmacy_bg_img = pygame.transform.smoothscale(pharmacy_bg_img, (Width, Height))
 except:
    pharmacy_bg_img = None
    print("Warning: Pharmacy scene image not found")
 try:
-   shop_bg_img = pygame.image.load("image/shop_bgnbutton.jpeg").convert()
+   shop_bg_img = pygame.image.load("image/background/shop_bgnbutton.jpeg").convert()
    shop_bg_img = pygame.transform.smoothscale(shop_bg_img, (Width, Height))
 except:
    shop_bg_img = None
    print("Warning: Shop scene image not found")
 try:
-    crafting_bg_img = pygame.image.load("image/Lab_background.png").convert()
+    crafting_bg_img = pygame.image.load("image/background/Lab_background.png").convert()
     crafting_bg_img = pygame.transform.smoothscale(crafting_bg_img, (Width, Height))
 except:
     crafting_bg_img = None
     print("Warning: Crafting background image not found")
 try:
-    btn_soil = pygame.image.load("image/195_button.png").convert_alpha()
+    btn_soil = pygame.image.load("image/button/195_button.png").convert_alpha()
     btn_soil = pygame.transform.smoothscale(btn_soil, (120, 65))
     
-    btn_oxygen = pygame.image.load("image/200_button.png").convert_alpha()
+    btn_oxygen = pygame.image.load("image/button/200_button.png").convert_alpha()
     btn_oxygen = pygame.transform.smoothscale(btn_oxygen, (120, 65))
     
-    btn_canopy = pygame.image.load("image/225_button.png").convert_alpha()
+    btn_canopy = pygame.image.load("image/button/225_button.png").convert_alpha()
     btn_canopy = pygame.transform.smoothscale(btn_canopy, (120, 65))
     
-    btn_30 = pygame.image.load("image/30_button.png").convert_alpha()
+    btn_30 = pygame.image.load("image/button/30_button.png").convert_alpha()
     btn_30 = pygame.transform.smoothscale(btn_30, (120,65))
 except Exception as e:
     btn_soil = btn_oxygen = btn_canopy = btn_30 = None
