@@ -6,7 +6,7 @@ class TaskBar:
         self.screen_width = screen_width
 
         self.setting_icon = None
-        self.cookies_icon = None
+        self.cookie_icon = None
         self.load_assets()
         self.settings_btn_rect = pygame.Rect(45,20,48,48)
 
@@ -26,14 +26,18 @@ class TaskBar:
             except Exception as e:
                 print(f"TaskBar: Setting Icon Failed: {e}")
 
-        cookie_path = os.path.join(base_path, "image", "Cookies_currency.png")
+        cookie_path = os.path.join(base_path, "image", "icon", "Cookies_currency.png")
         if os.path.exists(cookie_path):
             try:
                 c_img = pygame.image.load(cookie_path).convert_alpha()
                 self.cookie_icon = pygame.transform.smoothscale(c_img, (48, 48))
                 print("TaskBar: Cookies Currency Icon Loaded Successfully")
             except Exception as e:
-                print(f"TaskBar: Setting Icon Failed: {e}")
+                self.cookie_icon = None
+                print(f"TaskBar: Cookie Icon Failed: {e}")
+        else:
+            self.cookie_icon = None
+            print("TaskBar: Cookie_currency.png not found at path")
 
     def draw(self, screen, current_day,cookies):
         if self.setting_icon:
