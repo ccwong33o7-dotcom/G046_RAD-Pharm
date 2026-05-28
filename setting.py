@@ -7,7 +7,7 @@ def run_setting(screen, back_to):
   UI_font = pygame.font.SysFont("Arial",30)
   clock = pygame.time.Clock()
 
-  popup_width, popup_height = 440,540
+  popup_width, popup_height = 400,600
   popup_rect = pygame.Rect((1280 - popup_width)//2, (720- popup_height)//2, popup_width, popup_height)
 
   image_path = "image/Setting_bg.png" 

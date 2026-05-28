@@ -3,5 +3,5 @@
     "has_seen_intro": true,
     "pure_soil": 0,
     "has_intact_canopy": true,
-    "has_oxygen_recycler": false
+    "has_oxygen_recycler": 5
 }

@@ -24,34 +24,49 @@ Height= 720
 screen = pygame.display.set_mode((Width, Height))
 try:
    gh_bg_img = pygame.image.load("image/greenhouse_3.png").convert()
-   gh_bg_img = pygame.transform.scale(gh_bg_img, (Width, Height))
+   gh_bg_img = pygame.transform.smoothscale(gh_bg_img, (Width, Height))
 except:
    gh_bg_img = None
    print("Warning: Greenhouse background image not fount")
 try:
    menu_bg_img = pygame.image.load("image/mainmenu.png").convert()
-   menu_bg_img = pygame.transform.scale(menu_bg_img, (Width, Height))
+   menu_bg_img = pygame.transform.smoothscale(menu_bg_img, (Width, Height))
 except:
    menu_bg_img = None
    print("Warning: MainMenu image not found")
 try:
    pharmacy_bg_img = pygame.image.load("image/pharmacy scene.png").convert()
-   pharmacy_bg_img = pygame.transform.scale(pharmacy_bg_img, (Width, Height))
+   pharmacy_bg_img = pygame.transform.smoothscale(pharmacy_bg_img, (Width, Height))
 except:
    pharmacy_bg_img = None
    print("Warning: Pharmacy scene image not found")
 try:
-   shop_bg_img = pygame.image.load("image/shop_bg.jpeg").convert()
-   shop_bg_img = pygame.transform.scale(shop_bg_img, (Width, Height))
+   shop_bg_img = pygame.image.load("image/shop_bgnbutton.jpeg").convert()
+   shop_bg_img = pygame.transform.smoothscale(shop_bg_img, (Width, Height))
 except:
    shop_bg_img = None
    print("Warning: Shop scene image not found")
 try:
     crafting_bg_img = pygame.image.load("image/Lab_background.png").convert()
-    crafting_bg_img = pygame.transform.scale(crafting_bg_img, (Width, Height))
+    crafting_bg_img = pygame.transform.smoothscale(crafting_bg_img, (Width, Height))
 except:
     crafting_bg_img = None
     print("Warning: Crafting background image not found")
+try:
+    btn_soil = pygame.image.load("image/195_button.png").convert_alpha()
+    btn_soil = pygame.transform.smoothscale(btn_soil, (120, 65))
+    
+    btn_oxygen = pygame.image.load("image/200_button.png").convert_alpha()
+    btn_oxygen = pygame.transform.smoothscale(btn_oxygen, (120, 65))
+    
+    btn_canopy = pygame.image.load("image/225_button.png").convert_alpha()
+    btn_canopy = pygame.transform.smoothscale(btn_canopy, (120, 65))
+    
+    btn_30 = pygame.image.load("image/30_button.png").convert_alpha()
+    btn_30 = pygame.transform.smoothscale(btn_30, (120,65))
+except Exception as e:
+    btn_soil = btn_oxygen = btn_canopy = btn_30 = None
+    print(f"Warning: Failed to load price button images: {e}")
 
 
 pygame.display.set_caption("Game")
@@ -67,7 +82,7 @@ def load_game():
                 return json.load(f)
         except:
             pass
-    return {"current_day": 1, "has_seen_intro": False, "pure_soil": 0, "has_intact_canopy": False, "has_oxygen_recycler": False}
+    return {"current_day": 1, "has_seen_intro": False, "pure_soil": 0, "has_intact_canopy": False, "has_oxygen_recycler": False,"cookies": 5}
 
 def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler):
     """Writes active day progression and intro milestones to disk."""
@@ -88,6 +103,7 @@ pure_soil_count = progress.get("pure_soil", 0)
 pure_soil_count = int(pure_soil_count) if isinstance(pure_soil_count, (int, float)) else 0
 has_intact_canopy = progress.get("has_intact_canopy", False)
 has_oxygen_recycler = progress.get("has_oxygen_recycler", False)
+cookies_count = progress.get("cookies", 5)
 has_seen_intro = False
 
 current_state="MENU"
@@ -123,12 +139,12 @@ while True:
        screen.fill((0, 0, 0))
        greenhouse_btn, crafting_btn, shop_btn = draw_pharmacy(screen, pharmacy_bg_img)
 
-       task_bar.draw(screen, current_day)
+       task_bar.draw(screen, current_day, cookies_count)
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       shop_buy_soil_btn, shop_buy_canopy_btn, shop_buy_oxygen_btn, shop_back_btn = draw_shop(screen,font, shop_bg_img)
-       task_bar.draw(screen,current_day)
+       shop_buy_soil_btn, shop_buy_canopy_btn, shop_buy_oxygen_btn, shop_back_btn = draw_shop(screen, font, shop_bg_img, btn_soil, btn_oxygen, btn_canopy, btn_30)
+       task_bar.draw(screen,current_day, cookies_count)
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
@@ -152,14 +168,14 @@ while True:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
 
-       task_bar.draw(screen,current_day)
+       task_bar.draw(screen,current_day,cookies_count)
 
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
       _, crafting_back_btn = draw_crafting(screen, crafting_bg_img, font)
       animate_crafting()
 
-      task_bar.draw(screen,current_day)
+      task_bar.draw(screen,current_day,cookies_count)
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
@@ -167,7 +183,7 @@ while True:
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy)
+        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, cookies_count)
         pygame.quit()
         sys.exit()
         
@@ -195,7 +211,7 @@ while True:
                   last_state = "MENU"
                   current_state = "SETTING"
              elif e_btn.collidepoint(mouse_pos):
-                   save_game(current_day, has_seen_intro, pure_soil_count)
+                   save_game(current_day, has_seen_intro, pure_soil_count, cookies_count)
                    pygame.quit()
                    sys.exit()
          
@@ -208,16 +224,29 @@ while True:
                current_state = "SHOP"
 
          elif current_state == "SHOP":
-            if shop_back_btn.collidepoint(mouse_pos):
-               current_state = "PHARMACY"
-            elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
-               pure_soil_count += 1
-            elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
-               has_intact_canopy = True
-               print("Intact Canopy purchased!")
-            elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
-               has_oxygen_recycler = True
-               print("Oxygen Recycler purchased!")
+             if shop_back_btn.collidepoint(mouse_pos):
+                current_state = "PHARMACY"
+             elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
+                if cookies_count >= 195:
+                    cookies_count -= 195
+                    pure_soil_count += 1
+                    print("Pure Soil purchased!")
+                else:
+                    print("Not enough Cookies!")
+             elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
+                if cookies_count >= 225 and not has_intact_canopy:
+                    cookies_count -= 225
+                    has_intact_canopy = True
+                    print("Intact Canopy purchased!")
+                else:
+                    print("Not enough Cookies!")
+             elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
+                if cookies_count >= 200 and not has_oxygen_recycler:
+                    cookies_count -= 200
+                    has_oxygen_recycler = True
+                    print("Oxygen Recycler purchased!")
+                else:
+                    print("Not enough Cookies!")
 
          elif current_state == "GREENHOUSE":
             if gh_back_btn.collidepoint(mouse_pos):
