@@ -10,7 +10,7 @@ def run_setting(screen, back_to):
   popup_width, popup_height = 400,600
   popup_rect = pygame.Rect((1280 - popup_width)//2, (720- popup_height)//2, popup_width, popup_height)
 
-  image_path = "image/Setting_bg.png" 
+  image_path = "image/background/Setting_bg.png" 
 
   try:
         scroll_bg = pygame.image.load(image_path).convert_alpha()
