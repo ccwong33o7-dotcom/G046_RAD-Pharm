@@ -23,7 +23,7 @@ def draw_map(screen, map_bg_img, font, mouse_pos, img_greenhouse, img_shop, img_
         screen.blit(img_lab, (lab_rect.x, lab_rect.y))
     
     if shop_rect.collidepoint(mouse_pos):
-        label = font.render("Shop", True, (240, 1920, 60))
+        label = font.render("Shop", True, (240, 190, 60))
         screen.blit(label, (shop_rect.x + 30, shop_rect.y - 40))
     elif greenhouse_rect.collidepoint(mouse_pos):
         label = font.render("Greenhouse", True, (240, 190, 60))
