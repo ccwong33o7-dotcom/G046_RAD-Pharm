@@ -10,6 +10,7 @@ from greenhouse import draw_greenhouse, Plant
 from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
 from intro import show_intro
 from taskbar import TaskBar
+from map import draw_map
 
 pygame.init()
 
@@ -53,6 +54,12 @@ except:
     crafting_bg_img = None
     print("Warning: Crafting background image not found")
 try:
+    map_bg_img = pygame.image.load("image/background/Map background.png").convert()
+    map_bg_img = pygame.transform.smoothscale(map_bg_img, (Width, Height))
+except:
+    map_bg_img = None
+    print("Warning: Map background image not found")
+try:
     btn_soil = pygame.image.load("image/button/195_button.png").convert_alpha()
     btn_soil = pygame.transform.smoothscale(btn_soil, (120, 65))
     
@@ -67,6 +74,23 @@ try:
 except Exception as e:
     btn_soil = btn_oxygen = btn_canopy = btn_30 = None
     print(f"Warning: Failed to load price button images: {e}")
+
+try:
+    img_pharmacy = pygame.image.load("image/button/PH_button.png").convert_alpha()
+    img_pharmacy = pygame.transform.smoothscale(img_pharmacy, (220, 160))
+
+    img_lab = pygame.image.load("image/button/Lab_button.png").convert_alpha()
+    img_lab = pygame.transform.smoothscale(img_lab, (220, 160))
+
+    img_shop = pygame.image.load("image/button/Shop_button.png").convert_alpha()
+    img_shop = pygame.transform.smoothscale(img_shop, (220, 160))
+
+    img_greenhouse = pygame.image.load("image/button/GH_button.png").convert_alpha()
+    img_greenhouse = pygame.transform.smoothscale(img_greenhouse, (220, 160))
+except Exception as e:
+    img_pharmacy = img_lab = img_shop = img_greenhouse = None
+    print(f"Warning: Failed to load map building buttons: {e}")
+
 
 
 pygame.display.set_caption("Game")
@@ -133,13 +157,18 @@ while True:
         show_intro(screen, clock)
         has_seen_intro = True
         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
-        current_state = "PHARMACY" 
+        current_state = "MAP" 
 
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
        greenhouse_btn, crafting_btn, shop_btn = draw_pharmacy(screen, pharmacy_bg_img)
 
        task_bar.draw(screen, current_day, cookies_count)
+    
+    elif current_state == "MAP":
+       screen.fill((0, 0, 0))
+       to_gh_btn, to_shop_btn, to_craft_btn, to_pharmacy_btn = draw_map(screen, map_bg_img, font, mouse_pos, img_greenhouse, img_shop, img_lab, img_pharmacy)
+       task_bar.draw(screen,current_day,cookies_count)
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
@@ -206,7 +235,7 @@ while True:
                   if not has_seen_intro:
                         current_state = "INTRO"
                   else:
-                        current_state = "PHARMACY"  
+                        current_state = "MAP"  
              elif set_btn.collidepoint(mouse_pos):
                   last_state = "MENU"
                   current_state = "SETTING"
@@ -222,10 +251,24 @@ while True:
                current_state = "CRAFTING"
             elif shop_btn.collidepoint(mouse_pos):
                current_state = "SHOP"
+         
+         elif current_state == "MAP":
+            if to_gh_btn.collidepoint(mouse_pos):
+               current_state = "GREENHOUSE"
+               print("Entering to Greenhouse...")
+            elif to_shop_btn.collidepoint(mouse_pos):
+               current_state = "SHOP"
+               print("Entering to Shop...")
+            elif to_craft_btn.collidepoint(mouse_pos):
+               current_state = "CRAFTING"
+               print("Entering to Crafting...")
+            elif to_pharmacy_btn.collidepoint(mouse_pos):
+               current_state = "PHARMACY"
+               print("Entering to Pharmacy...")
 
          elif current_state == "SHOP":
              if shop_back_btn.collidepoint(mouse_pos):
-                current_state = "PHARMACY"
+                current_state = "MAP"
              elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
                 if cookies_count >= 195:
                     cookies_count -= 195
@@ -250,7 +293,7 @@ while True:
 
          elif current_state == "GREENHOUSE":
             if gh_back_btn.collidepoint(mouse_pos):
-               current_state = "PHARMACY"
+               current_state = "MAP"
             elif gh_upgrade_btn.collidepoint(mouse_pos):
                if has_intact_canopy:
                   print("You clicked the Intact Canopy! Now you can implement its effect.")
@@ -278,7 +321,9 @@ while True:
 
          elif current_state == "CRAFTING":
             if crafting_back_btn.collidepoint(mouse_pos):
-               current_state = "PHARMACY"
+               current_state = "MAP"
+
+         
 
 
     pygame.display.flip()
