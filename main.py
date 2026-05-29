@@ -226,6 +226,9 @@ while True:
                last_state = current_state 
                current_state = "SETTING"
                continue 
+            elif clicked_top == "map":
+               current_state = "MAP"
+               continue
             elif clicked_top == "shop":
                current_state = "SHOP"
                continue
