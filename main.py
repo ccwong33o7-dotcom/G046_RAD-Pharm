@@ -177,21 +177,13 @@ while True:
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
 
        if ready_to_craft:
             msg = font.render("MEDICINE READY!", True, (0, 255, 0))
             screen.blit(msg, (Width//2 - 150, 50))
-
-            for p in plants:
-               if p.growth >= 100 and not p.harvested:
-                  inventory[p.name] += 1
-                  p.harvested = True
-
-            print(f"{p.name} added to crafting inventory!")
-
        elif any_dead:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
@@ -287,10 +279,31 @@ while True:
                     print("Not enough Cookies!")
 
          elif current_state == "GREENHOUSE":
-            if plant_seed_btn and plant_seed_btn.collidepoint(mouse_pos):
-                print("You clicked [Plant Seed]! Add your seed-planting logic here.")
+            if plant_seed_btn.collidepoint(mouse_pos):
+               print("You clicked the Plant Seed! Now you can implement its effect.")
+               for p in plants:
+                  if p.is_dead:
+                     p.growth = 0
+                     p.dust = 0
+                     p.is_dead = False
+                     p.harvested = False
+                     p.death_timer = 0
+                     print(f"Reseeded {p.name}!")
+            elif harvest_btn.collidepoint(mouse_pos):
+                harvested_something = False
+                for p in plants:
+                     if p.growth >= 100 and not p.harvested and not p.is_dead:
+                           inventory[p.name] += 1
+                           p.harvested = True
+                           harvested_something = True
+                           print(f"Harvested {p.name} added to lab!")
+                if harvested_something:
+                    print("Harvest successful!")
+                else:
+                     print("No plants ready to harvest!")
                 
-            if gh_upgrade_btn.collidepoint(mouse_pos):
+
+            elif gh_upgrade_btn.collidepoint(mouse_pos):
                if has_intact_canopy:
                   print("You clicked the Intact Canopy! Now you can implement its effect.")
 
