@@ -42,7 +42,7 @@ except:
    pharmacy_bg_img = None
    print("Warning: Pharmacy scene image not found")
 try:
-   shop_bg_img = pygame.image.load("image/background/shop_bgnbutton.jpeg").convert()
+   shop_bg_img = pygame.image.load("image/background/shop_bgnbtn.png").convert()
    shop_bg_img = pygame.transform.smoothscale(shop_bg_img, (Width, Height))
 except:
    shop_bg_img = None
@@ -61,16 +61,16 @@ except:
     print("Warning: Map background image not found")
 try:
     btn_soil = pygame.image.load("image/button/195_button.png").convert_alpha()
-    btn_soil = pygame.transform.smoothscale(btn_soil, (120, 65))
+    btn_soil = pygame.transform.smoothscale(btn_soil, (96, 52))
     
     btn_oxygen = pygame.image.load("image/button/200_button.png").convert_alpha()
-    btn_oxygen = pygame.transform.smoothscale(btn_oxygen, (120, 65))
+    btn_oxygen = pygame.transform.smoothscale(btn_oxygen, (96, 52))
     
     btn_canopy = pygame.image.load("image/button/225_button.png").convert_alpha()
-    btn_canopy = pygame.transform.smoothscale(btn_canopy, (120, 65))
+    btn_canopy = pygame.transform.smoothscale(btn_canopy, (96, 52))
     
     btn_30 = pygame.image.load("image/button/30_button.png").convert_alpha()
-    btn_30 = pygame.transform.smoothscale(btn_30, (120,65))
+    btn_30 = pygame.transform.smoothscale(btn_30, (96,52))
 except Exception as e:
     btn_soil = btn_oxygen = btn_canopy = btn_30 = None
     print(f"Warning: Failed to load price button images: {e}")

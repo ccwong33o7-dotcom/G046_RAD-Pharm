@@ -9,8 +9,8 @@ class TaskBar:
         self.cookie_icon = None
         self.map_icon = None
         self.load_assets()
-        self.settings_btn_rect = pygame.Rect(45,20,48,48)
-        self.map_btn_rect = pygame.Rect(110,20,48,48)
+        self.settings_btn_rect = pygame.Rect(57,21,47,47)
+        self.map_btn_rect = pygame.Rect(130,21,48,48)
 
         self.font = pygame.font.SysFont("Agency FB", 34, bold=True) 
         self.money_font = pygame.font.SysFont("Agency FB", 38, bold=True)
@@ -23,7 +23,7 @@ class TaskBar:
         if os.path.exists(setting_path):
             try:
                 img = pygame.image.load(setting_path).convert_alpha()
-                self.setting_icon = pygame.transform.smoothscale(img, (48, 48))
+                self.setting_icon = pygame.transform.smoothscale(img, (47, 47))
                 print("TaskBar: Setting Icon Loaded Successfully")
             except Exception as e:
                 print(f"TaskBar: Setting Icon Failed: {e}")

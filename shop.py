@@ -15,19 +15,19 @@ def draw_shop(screen, font, bg_img=None,btn_soil=None, btn_oxygen=None, btn_cano
 
     force_small_font = pygame.font.SysFont("Arial", 20, bold=True)
 
-    buy_sedative_btn = pygame.Rect(277, 210, 147, 80)
+    buy_sedative_btn = pygame.Rect(297, 210, 147, 80)
     if btn_30:
         screen.blit(btn_30, (buy_sedative_btn.x, buy_sedative_btn.y))
     else:
         pygame.draw.rect(screen, (139, 69, 19), buy_sedative_btn)
 
-    buy_ration_btn = pygame.Rect(277, 365, 147, 80)
+    buy_ration_btn = pygame.Rect(297, 365, 147, 80)
     if btn_30:
         screen.blit(btn_30, (buy_ration_btn.x, buy_ration_btn.y))
     else:
         pygame.draw.rect(screen, (139, 69, 19), buy_ration_btn)
 
-    buy_soil_btn = pygame.Rect(720, 210, 160, 50)
+    buy_soil_btn = pygame.Rect(690, 210, 160, 50)
     if btn_soil:
         screen.blit(btn_soil, (buy_soil_btn.x, buy_soil_btn.y))
     else:
@@ -35,7 +35,7 @@ def draw_shop(screen, font, bg_img=None,btn_soil=None, btn_oxygen=None, btn_cano
         buy_text = force_small_font.render("195", True, (255, 255, 255))
         screen.blit(buy_text, (buy_soil_btn.x + 55, buy_soil_btn.y + 12))
 
-    buy_canopy_btn = pygame.Rect(720, 513, 160, 50)
+    buy_canopy_btn = pygame.Rect(690, 520, 160, 50)
     if btn_canopy:
         screen.blit(btn_canopy, (buy_canopy_btn.x, buy_canopy_btn.y))
     else:
@@ -43,7 +43,7 @@ def draw_shop(screen, font, bg_img=None,btn_soil=None, btn_oxygen=None, btn_cano
         canopy_text = force_small_font.render("225", True, (255, 255, 255))
         screen.blit(canopy_text, (buy_canopy_btn.x + 55, buy_canopy_btn.y + 12))
 
-    buy_oxygen_btn = pygame.Rect(720, 361, 160, 50)
+    buy_oxygen_btn = pygame.Rect(690, 361, 160, 50)
     if btn_oxygen:
         screen.blit(btn_oxygen, (buy_oxygen_btn.x, buy_oxygen_btn.y))
     else:
