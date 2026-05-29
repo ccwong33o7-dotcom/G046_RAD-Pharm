@@ -8,10 +8,10 @@ def draw_map(screen, map_bg_img, font, mouse_pos, img_greenhouse, img_shop, img_
        error_txt = font.render("Map background not found", True, (255, 0, 0))
        screen.blit(error_txt, (1280 // 2 - 150, 720 // 2))
     
-    shop_rect = pygame.Rect(180, 130, 220, 160)
-    greenhouse_rect = pygame.Rect(820, 140, 220, 160)
-    pharmacy_rect = pygame.Rect(530, 280, 220, 160)
-    lab_rect = pygame.Rect(220, 430, 220, 160)
+    shop_rect = pygame.Rect(180, 130, 260, 190)
+    greenhouse_rect = pygame.Rect(820, 140, 270, 200)
+    pharmacy_rect = pygame.Rect(530, 260, 270, 200)
+    lab_rect = pygame.Rect(220, 430, 280, 210)
 
     if img_shop:
         screen.blit(img_shop, (shop_rect.x, shop_rect.y))
