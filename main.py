@@ -177,8 +177,7 @@ while True:
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
-
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
 
@@ -288,6 +287,9 @@ while True:
                     print("Not enough Cookies!")
 
          elif current_state == "GREENHOUSE":
+            if plant_seed_btn and plant_seed_btn.collidepoint(mouse_pos):
+                print("You clicked [Plant Seed]! Add your seed-planting logic here.")
+                
             if gh_upgrade_btn.collidepoint(mouse_pos):
                if has_intact_canopy:
                   print("You clicked the Intact Canopy! Now you can implement its effect.")
