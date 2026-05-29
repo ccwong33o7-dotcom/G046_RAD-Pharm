@@ -64,7 +64,7 @@ class TaskBar:
         day_text = f"DAY {current_day}"
         day_surf = self.font.render(day_text, True, (200, 204, 207))
         day_x = 612 - (day_surf.get_width() // 2)
-        day_y = 35
+        day_y = 25
         screen.blit(day_surf, (day_x, day_y))
 
         money_text = f"{cookies}"
@@ -80,7 +80,7 @@ class TaskBar:
             screen.blit(self.cookie_icon, (base_x, cookie_y))
 
         text_x = base_x + cookie_w + 15
-        text_y = 33
+        text_y = 23
 
         screen.blit(money_surf, (text_x, text_y))
 
