@@ -161,7 +161,7 @@ while True:
 
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
-       greenhouse_btn, crafting_btn, shop_btn = draw_pharmacy(screen, pharmacy_bg_img)
+       draw_pharmacy(screen, pharmacy_bg_img)
 
        task_bar.draw(screen, current_day, cookies_count)
     
@@ -247,13 +247,6 @@ while True:
                    pygame.quit()
                    sys.exit()
          
-         elif current_state == "PHARMACY":
-            if greenhouse_btn.collidepoint(mouse_pos):
-               current_state = "GREENHOUSE"
-            elif crafting_btn.collidepoint(mouse_pos):
-               current_state = "CRAFTING"
-            elif shop_btn.collidepoint(mouse_pos):
-               current_state = "SHOP"
          
          elif current_state == "MAP":
             if to_gh_btn.collidepoint(mouse_pos):
