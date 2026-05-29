@@ -10,7 +10,7 @@ class TaskBar:
         self.map_icon = None
         self.load_assets()
         self.settings_btn_rect = pygame.Rect(45,20,48,48)
-        self.map_btn_rect = pygame.Rect(110,20,48,48)
+        self.map_btn_rect = pygame.Rect(110,20,57,57)
 
         self.font = pygame.font.SysFont("Agency FB", 34, bold=True) 
         self.money_font = pygame.font.SysFont("Agency FB", 38, bold=True)
@@ -32,7 +32,7 @@ class TaskBar:
         if os.path.exists(map_path):
             try:
                 img = pygame.image.load(map_path).convert_alpha()
-                self.map_icon = pygame.transform.smoothscale(img, (48, 48))
+                self.map_icon = pygame.transform.smoothscale(img, (57, 57))
                 print("TaskBar: Map Icon Loaded Successfully")
             except Exception as e:
                 print(f"TaskBar: Map Icon Failed: {e}")
