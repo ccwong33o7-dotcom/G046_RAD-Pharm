@@ -7,8 +7,10 @@ class TaskBar:
 
         self.setting_icon = None
         self.cookie_icon = None
+        self.map_icon = None
         self.load_assets()
         self.settings_btn_rect = pygame.Rect(45,20,48,48)
+        self.map_btn_rect = pygame.Rect(110,20,48,48)
 
         self.font = pygame.font.SysFont("Agency FB", 34, bold=True) 
         self.money_font = pygame.font.SysFont("Agency FB", 38, bold=True)
@@ -25,6 +27,15 @@ class TaskBar:
                 print("TaskBar: Setting Icon Loaded Successfully")
             except Exception as e:
                 print(f"TaskBar: Setting Icon Failed: {e}")
+        
+        map_path = os.path.join(base_path, "image", "button", "Map button.png")
+        if os.path.exists(map_path):
+            try:
+                img = pygame.image.load(map_path).convert_alpha()
+                self.map_icon = pygame.transform.smoothscale(img, (48, 48))
+                print("TaskBar: Map Icon Loaded Successfully")
+            except Exception as e:
+                print(f"TaskBar: Map Icon Failed: {e}")
 
         cookie_path = os.path.join(base_path, "image", "icon", "Cookies_currency.png")
         if os.path.exists(cookie_path):
@@ -44,6 +55,11 @@ class TaskBar:
             screen.blit(self.setting_icon, (self.settings_btn_rect.x, self.settings_btn_rect.y))
         else:
             pygame.draw.circle(screen, (150, 50, 50), self.settings_btn_rect.center, 20)
+        
+        if self.map_icon:
+            screen.blit(self.map_icon, (self.map_btn_rect.x, self.map_btn_rect.y))
+        else:
+            pygame.draw.circle(screen, (50, 100, 150), self.map_btn_rect.center, 20)
 
         day_text = f"DAY {current_day}"
         day_surf = self.font.render(day_text, True, (200, 204, 207))
@@ -71,4 +87,6 @@ class TaskBar:
     def check_click(self, mouse_pos):
         if self.settings_btn_rect.collidepoint(mouse_pos):
             return "settings"
+        if self.map_btn_rect.collidepoint(mouse_pos):
+            return "map"
         return None
