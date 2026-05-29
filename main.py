@@ -77,16 +77,16 @@ except Exception as e:
 
 try:
     img_pharmacy = pygame.image.load("image/button/PH_button.png").convert_alpha()
-    img_pharmacy = pygame.transform.smoothscale(img_pharmacy, (220, 160))
+    img_pharmacy = pygame.transform.smoothscale(img_pharmacy, (270, 200))
 
     img_lab = pygame.image.load("image/button/Lab_button.png").convert_alpha()
-    img_lab = pygame.transform.smoothscale(img_lab, (220, 160))
+    img_lab = pygame.transform.smoothscale(img_lab, (280, 210))
 
     img_shop = pygame.image.load("image/button/Shop_button.png").convert_alpha()
-    img_shop = pygame.transform.smoothscale(img_shop, (220, 160))
+    img_shop = pygame.transform.smoothscale(img_shop, (260, 190))
 
     img_greenhouse = pygame.image.load("image/button/GH_button.png").convert_alpha()
-    img_greenhouse = pygame.transform.smoothscale(img_greenhouse, (220, 160))
+    img_greenhouse = pygame.transform.smoothscale(img_greenhouse, (270, 200))
 except Exception as e:
     img_pharmacy = img_lab = img_shop = img_greenhouse = None
     print(f"Warning: Failed to load map building buttons: {e}")
