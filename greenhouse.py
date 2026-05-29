@@ -146,9 +146,6 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
 
     canopy_btn_rect = pygame.Rect(1120, 615, 100, 100)
 
-    back_btn_rect = pygame.Rect(1150, 80, 100, 40)
-    pygame.draw.rect(screen, (100, 100, 250), back_btn_rect)
-    screen.blit(small_font.render("Back", True, (255, 255, 255)), (1175, 90))
     
     if has_intact_canopy:
         if img_intact_canopy:
@@ -180,7 +177,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     else:
         pygame.draw.rect(screen, (70, 70, 150), oxygen_btn_rect)
 
-    return  back_btn_rect, canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect
+    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect
 
 
 
