@@ -7,6 +7,7 @@ COLOR_TEXT = ( 0, 255, 0)
 img_pure_soil = None
 img_intact_canopy = None
 img_oxygen_recycler = None
+img_plant_seed = None
 
     
 class Plant:
@@ -96,7 +97,7 @@ class Plant:
      
 
 def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, has_intact_canopy=False, has_oxygen_recycler=False):
-    global img_pure_soil, img_intact_canopy, img_oxygen_recycler
+    global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed
     small_font = pygame.font.SysFont("Arial", 20)
 
     if img_pure_soil is None:
@@ -134,6 +135,19 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
                 except pygame.error as e:
                     print(f"Error loading oxygen recycler image: {e}")
                     img_oxygen_recycler = None
+    
+    if img_plant_seed is None:
+        for ext in [".jpg", ".png", ".JPG", ".PNG"]:
+            possible_path = f"image/button/Plant Seed button{ext}"
+            if os.path.exists(possible_path):
+                try:
+                    img_plant_seed = pygame.image.load(possible_path).convert_alpha()
+                    img_plant_seed = pygame.transform.scale(img_plant_seed, (240, 65))
+                    break
+                except pygame.error as e:
+                    print(f"Error loading plant seed image: {e}")
+                    img_plant_seed = None
+
 
     if bg_image:
         screen.blit(bg_image, (0,0))
@@ -144,9 +158,13 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
         p.update()
         p.draw(screen)
 
+    plant_seed_btn_rect = pygame.Rect(40, 630, 240, 65)
+    if img_plant_seed:
+        screen.blit(img_plant_seed, (plant_seed_btn_rect.x, plant_seed_btn_rect.y))
+    else:
+        pygame.draw.rect(screen, (0, 255, 0), plant_seed_btn_rect)
+        
     canopy_btn_rect = pygame.Rect(1120, 615, 100, 100)
-
-    
     if has_intact_canopy:
         if img_intact_canopy:
             screen.blit(img_intact_canopy,(canopy_btn_rect.x, canopy_btn_rect.y))
@@ -177,7 +195,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     else:
         pygame.draw.rect(screen, (70, 70, 150), oxygen_btn_rect)
 
-    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect
+    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect
 
 
 
