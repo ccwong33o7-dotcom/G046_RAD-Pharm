@@ -157,7 +157,7 @@ while True:
         show_intro(screen, clock)
         has_seen_intro = True
         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
-        current_state = "MAP" 
+        current_state = "PHARMACY" 
 
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
@@ -177,7 +177,7 @@ while True:
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       gh_back_btn, gh_upgrade_btn, pure_soil_btn, oxygen_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
 
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
@@ -238,7 +238,7 @@ while True:
                   if not has_seen_intro:
                         current_state = "INTRO"
                   else:
-                        current_state = "MAP"  
+                        current_state = "PHARMACY"  
              elif set_btn.collidepoint(mouse_pos):
                   last_state = "MENU"
                   current_state = "SETTING"
@@ -295,9 +295,7 @@ while True:
                     print("Not enough Cookies!")
 
          elif current_state == "GREENHOUSE":
-            if gh_back_btn.collidepoint(mouse_pos):
-               current_state = "MAP"
-            elif gh_upgrade_btn.collidepoint(mouse_pos):
+            if gh_upgrade_btn.collidepoint(mouse_pos):
                if has_intact_canopy:
                   print("You clicked the Intact Canopy! Now you can implement its effect.")
 
