@@ -8,6 +8,7 @@ img_pure_soil = None
 img_intact_canopy = None
 img_oxygen_recycler = None
 img_plant_seed = None
+img_harvest = None
 
     
 class Plant:
@@ -96,9 +97,12 @@ class Plant:
         surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
      
 
-def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, has_intact_canopy=False, has_oxygen_recycler=False):
-    global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed
+def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False):
+    global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed, img_harvest
     small_font = pygame.font.SysFont("Arial", 20)
+
+    plant_seed_btn_rect = pygame.Rect(25, 630, 215, 65)
+    harvest_btn_rect = pygame.Rect(315, 630, 260, 65)
 
     if img_pure_soil is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
@@ -149,6 +153,20 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
                     img_plant_seed = None
 
 
+    if img_harvest is None:
+        for ext in [".jpg", ".png", ".JPG", ".PNG"]:
+            possible_path = f"image/button/Harvest button{ext}"
+            if os.path.exists(possible_path):
+                try:
+                    img_harvest = pygame.image.load(possible_path).convert_alpha()
+                    img_harvest = pygame.transform.scale(img_harvest, (260, 65))
+                    break
+                except pygame.error as e:
+                    print(f"Error loading harvest image: {e}")
+                    img_harvest = None
+
+
+
     if bg_image:
         screen.blit(bg_image, (0,0))
     else:
@@ -157,12 +175,30 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     for p in plant_list:
         p.update()
         p.draw(screen)
-
-    plant_seed_btn_rect = pygame.Rect(40, 630, 240, 65)
+    
     if img_plant_seed:
         screen.blit(img_plant_seed, (plant_seed_btn_rect.x, plant_seed_btn_rect.y))
     else:
-        pygame.draw.rect(screen, (0, 255, 0), plant_seed_btn_rect)
+        pygame.draw.rect(screen, (0, 255, 0), plant_seed_btn_rect, 2)
+        txt = small_font.render("Plant Seed", True, (0, 255, 0))
+        screen.blit(txt, (plant_seed_btn_rect.x + 50, plant_seed_btn_rect.y + 20))
+
+    any_plant_ready = any(p.growth >= 100 and not p.harvested and not p.is_dead for p in plant_list)
+
+    if img_harvest:
+        screen.blit(img_harvest, (harvest_btn_rect.x, harvest_btn_rect.y))
+
+    else:
+        if any_plant_ready:
+            pygame.draw.rect(screen, (255, 0, 0), harvest_btn_rect, 2)
+            txt = small_font.render("Harvest", True, (255, 0, 0))
+        else:
+            pygame.draw.rect(screen, (100, 100, 100), harvest_btn_rect, 2)
+            txt = small_font.render("Harvest", True, (100, 100, 100))
+        screen.blit(txt, (harvest_btn_rect.x + 100, harvest_btn_rect.y + 20))
+            
+    
+
         
     canopy_btn_rect = pygame.Rect(1120, 615, 100, 100)
     if has_intact_canopy:
@@ -195,7 +231,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     else:
         pygame.draw.rect(screen, (70, 70, 150), oxygen_btn_rect)
 
-    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect
+    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect, harvest_btn_rect
 
 
 
