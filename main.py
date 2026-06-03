@@ -43,7 +43,7 @@ except:
    pharmacy_bg_img = None
    print("Warning: Pharmacy scene image not found")
 try:
-   shop_bg_img = pygame.image.load("image/background/shopbg.jpeg").convert()
+   shop_bg_img = pygame.image.load("image/background/shopwithouttb.png").convert()
    shop_bg_img = pygame.transform.smoothscale(shop_bg_img, (Width, Height))
 except:
    shop_bg_img = None
@@ -202,18 +202,14 @@ while True:
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
        draw_pharmacy(screen, pharmacy_bg_img)
-
-       task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys)
     
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
        to_gh_btn, to_shop_btn, to_craft_btn, to_pharmacy_btn = draw_map(screen, map_bg_img, font, mouse_pos, img_greenhouse, img_shop, img_lab, img_pharmacy)
-       task_bar.draw(screen,current_day,cookies_count, saved_people, weather_sys)
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
        shop_buy_soil_btn, shop_buy_canopy_btn, shop_buy_oxygen_btn, shop_back_btn = draw_shop(screen, font, shop_bg_img, btn_soil, btn_oxygen, btn_canopy, btn_30)
-       task_bar.draw(screen,current_day, cookies_count, saved_people, weather_sys)
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
@@ -228,18 +224,17 @@ while True:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
 
-       task_bar.draw(screen,current_day,cookies_count, saved_people, weather_sys)
-
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
       _, crafting_back_btn = draw_crafting(screen, crafting_bg_img, font)
       animate_crafting()
 
-      task_bar.draw(screen,current_day,cookies_count, saved_people, weather_sys)
-
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
        pygame.event.clear()
+
+    if current_state not in ["MENU", "SETTING", "INTRO", "WEATHER_EXPLAIN"]:
+        task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys)
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -265,8 +260,6 @@ while True:
             elif clicked_top == "map":
                current_state = "MAP"
                continue
-            elif clicked_top == "shop":
-               current_state = "SHOP"
             elif clicked_top == "weather":
                print(f"TaskBar: Weather Icon Clicked! Current weather is {weather_sys.current_weather}")
                continue
