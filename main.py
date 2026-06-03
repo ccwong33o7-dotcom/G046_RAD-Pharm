@@ -249,6 +249,13 @@ while True:
           if event.key == pygame.K_k:
               saved_people += 1
               print(f"Test: Saved 1 person. Progress: {saved_people}/25") 
+          if event.key == pygame.K_h:
+              for p in plants:
+                  p.growth = 100
+                  p.is_dead = False
+                  p.harvested = False
+              print("Test: All plants are now fully grown! Press Harvest Button now!")
+
 
       if event.type == pygame.MOUSEBUTTONDOWN: 
          if current_state not in ["MENU", "SETTING","INTRO", "WEATHER_EXPLAIN"]:
@@ -323,7 +330,7 @@ while True:
                print("You clicked the Plant Seed! Now you can implement its effect.")
                for p in plants:
                   if p.is_dead:
-                     p.growth = 0
+                     p.growth = 100
                      p.dust = 0
                      p.is_dead = False
                      p.harvested = False
@@ -333,10 +340,18 @@ while True:
                 harvested_something = False
                 for p in plants:
                      if p.growth >= 100 and not p.harvested and not p.is_dead:
-                           inventory[p.name] += 1
+                           
+                           if p.name in inventory:
+                               inventory[p.name] += 1
+                           else:
+                               inventory[p.name] = 1
+                           
                            p.harvested = True
+                           p.growth = 0  
+                           p.dust = 0
                            harvested_something = True
                            print(f"Harvested {p.name} added to lab!")
+                           
                 if harvested_something:
                     print("Harvest successful!")
                 else:
