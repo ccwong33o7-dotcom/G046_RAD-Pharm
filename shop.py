@@ -1,6 +1,9 @@
 import pygame
 
-def draw_shop(screen, font, bg_img=None,btn_soil=None, btn_oxygen=None, btn_canopy=None,btn_30=None):
+def draw_shop(screen, font, bg_img=None,
+              btn_soil=None, btn_oxygen=None,
+              btn_canopy=None, btn_30=None,
+              btn_50=None, btn_60=None):
     if bg_img:
         screen.blit(bg_img, (0, 0))  
     else:
@@ -51,4 +54,16 @@ def draw_shop(screen, font, bg_img=None,btn_soil=None, btn_oxygen=None, btn_cano
         oxygen_text = force_small_font.render("200", True, (255, 255, 255))
         screen.blit(oxygen_text, (buy_oxygen_btn.x + 55, buy_oxygen_btn.y + 12))
 
-    return buy_soil_btn, buy_canopy_btn, buy_oxygen_btn, back_to_pharmacy_btn
+    buy_speed_serum_btn = pygame.Rect(1000, 250, 96, 52)
+    if btn_50:
+        screen.blit(btn_50, buy_speed_serum_btn)
+    else:
+        pygame.draw.rect(screen, (50, 200, 50), buy_speed_serum_btn)
+
+    buy_blood_stop_btn = pygame.Rect(1000, 410, 96, 52)
+    if btn_60:
+        screen.blit(btn_60, buy_blood_stop_btn)
+    else:
+        pygame.draw.rect(screen, (50, 200, 50), buy_blood_stop_btn)
+
+    return (buy_soil_btn,buy_canopy_btn,buy_oxygen_btn,buy_speed_serum_btn,buy_blood_stop_btn,back_to_pharmacy_btn)

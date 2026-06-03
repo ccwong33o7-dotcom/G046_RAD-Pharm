@@ -3,7 +3,7 @@
     "has_seen_intro": true,
     "pure_soil": 0,
     "has_intact_canopy": true,
-    "has_oxygen_recycler": 5,
+    "has_oxygen_recycler": false,
     "cookies": 5,
     "saved_people": 0
 }

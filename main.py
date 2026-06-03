@@ -78,8 +78,14 @@ try:
     
     btn_30 = pygame.image.load("image/button/30_button.png").convert_alpha()
     btn_30 = pygame.transform.smoothscale(btn_30, (96,52))
+
+    btn_50 = pygame.image.load("image/button/50_button.png").convert_alpha()
+    btn_50 = pygame.transform.smoothscale(btn_50, (96,52))
+
+    btn_60 = pygame.image.load("image/button/60_button.png").convert_alpha()    
+    btn_60 = pygame.transform.smoothscale(btn_60, (96,52))
 except Exception as e:
-    btn_soil = btn_oxygen = btn_canopy = btn_30 = None
+    btn_soil = btn_oxygen = btn_canopy = btn_30 = btn_50 = btn_60 = None
     print(f"Warning: Failed to load price button images: {e}")
 
 try:
@@ -209,8 +215,8 @@ while True:
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       shop_buy_soil_btn, shop_buy_canopy_btn, shop_buy_oxygen_btn, shop_back_btn = draw_shop(screen, font, shop_bg_img, btn_soil, btn_oxygen, btn_canopy, btn_30)
-
+       (shop_buy_soil_btn,shop_buy_canopy_btn,shop_buy_oxygen_btn,shop_buy_speed_serum_btn,shop_buy_blood_stop_btn,shop_back_btn) = draw_shop(screen,font,shop_bg_img,btn_soil,btn_oxygen,btn_canopy,btn_30,btn_50,btn_60
+)
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
@@ -218,7 +224,7 @@ while True:
        gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
 
        if ready_to_craft:
-            msg = font.render("MEDICINE READY!", True, (0, 255, 0))
+            msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
             screen.blit(msg, (Width//2 - 150, 50))
        elif any_dead:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
@@ -324,7 +330,22 @@ while True:
                     print("Oxygen Recycler purchased!")
                 else:
                     print("Not enough Cookies!")
+             elif shop_buy_speed_serum_btn.collidepoint(mouse_pos):
+                if cookies_count >= 50 and has_Speed_Serum:
+                    cookies_count -= 50
+                    has_Speed_Serum = True
+                    print("Speed Serum purchased!")
+                else:
+                    print("Not enough Cookies!")
 
+             elif shop_buy_blood_stop_btn.collidepoint(mouse_pos):
+                if cookies_count >= 60 and has_Blood_Stop:
+                    cookies_count -= 60
+                    has_Blood_Stop = True
+                    print("Bought Blood Stop!")
+                else:
+                    print("Not enough Cookies!")
+ 
          elif current_state == "GREENHOUSE":
             if plant_seed_btn.collidepoint(mouse_pos):
                print("You clicked the Plant Seed! Now you can implement its effect.")
@@ -346,14 +367,15 @@ while True:
                            else:
                                inventory[p.name] = 1
                            
-                           p.harvested = True
-                           p.growth = 0  
+                           p.growth = 0
                            p.dust = 0
+                           p.harvested = False
                            harvested_something = True
                            print(f"Harvested {p.name} added to lab!")
-                           
+                           print(f"Current amount: {inventory[p.name]}")
+
                 if harvested_something:
-                    print("Harvest successful!")
+                    print("Harvest successful!")    
                 else:
                      print("No plants ready to harvest!")
                 
