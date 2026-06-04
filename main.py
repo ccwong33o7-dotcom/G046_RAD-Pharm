@@ -215,7 +215,7 @@ while True:
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       (shop_buy_soil_btn,shop_buy_canopy_btn,shop_buy_oxygen_btn,shop_buy_speed_serum_btn,shop_buy_blood_stop_btn,shop_back_btn) = draw_shop(screen,font,shop_bg_img,btn_soil,btn_oxygen,btn_canopy,btn_30,btn_50,btn_60
+       (shop_buy_soil_btn,shop_buy_canopy_btn,shop_buy_oxygen_btn,shop_buy_speed_serum_btn,shop_buy_blood_stop_btn) = draw_shop(screen,font,shop_bg_img,btn_soil,btn_oxygen,btn_canopy,btn_30,btn_50,btn_60
 )
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
