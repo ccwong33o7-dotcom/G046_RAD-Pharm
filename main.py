@@ -108,6 +108,7 @@ except Exception as e:
 
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
+msg_font = pygame.font.SysFont("Comic Sans MS", 26)
 ui_font = pygame.font.SysFont("Agency FB", 36, bold=True)
 
 SAVE_FILE = "save_data.json"
@@ -120,7 +121,19 @@ def load_game():
                 return json.load(f)
         except:
             pass
-    return {"current_day": 1, "has_seen_intro": False, "pure_soil": 0, "has_intact_canopy": False, "has_oxygen_recycler": False,"cookies": 5,"saved_people": 0}
+    return {
+        "current_day": 1, 
+        "has_seen_intro": False, 
+        "pure_soil": 0, 
+        "has_intact_canopy": False, 
+        "has_oxygen_recycler": False,
+        "cookies": 5,
+        "saved_people": 0,
+        "sedative": 0,
+        "ration_pack": 0,
+        "speed_serum": 0,
+        "blood_stop": 0
+    }
 
 def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_amt, saved_people_count):
     """Writes active day progression and intro milestones to disk."""
@@ -131,7 +144,11 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxyge
        "has_intact_canopy": has_intact_canopy, 
        "has_oxygen_recycler": has_oxygen_recycler,
        "cookies": cookies_amt,
-       "saved_people": saved_people_count
+       "saved_people": saved_people_count,
+       "sedative": sedative_count,
+       "ration_pack": ration_count,
+       "speed_serum": int(has_Speed_Serum),
+       "blood_stop": int(has_Blood_Stop)
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -145,6 +162,11 @@ has_intact_canopy = progress.get("has_intact_canopy", False)
 has_oxygen_recycler = progress.get("has_oxygen_recycler", False)
 cookies_count = progress.get("cookies", 5)
 saved_people = progress.get("saved_people", 0)
+sedative_count = progress.get("sedative", 0)
+ration_count = progress.get("ration_pack", 0)
+has_Speed_Serum = bool(progress.get("speed_serum", 0))
+has_Blood_Stop = bool(progress.get("blood_stop", 0))
+
 has_seen_intro = False
 
 current_state="MENU"
@@ -162,6 +184,14 @@ clock= pygame.time.Clock()
 task_bar = TaskBar(Width)
 weather_sys = WeatherSystem()
 weather_sys.update_weather(current_day)
+
+flash_message = ""
+flash_message_timer = 0
+
+def trigger_message(text):
+    global flash_message, flash_message_timer
+    flash_message = text
+    flash_message_timer = 180
 
 while True:
     mouse_pos = pygame.mouse.get_pos()
@@ -217,6 +247,9 @@ while True:
        screen.fill((0, 0, 0))
        (shop_buy_soil_btn,shop_buy_canopy_btn,shop_buy_oxygen_btn,shop_buy_speed_serum_btn,shop_buy_blood_stop_btn) = draw_shop(screen,font,shop_bg_img,btn_soil,btn_oxygen,btn_canopy,btn_30,btn_50,btn_60
 )
+       shop_buy_sedative_btn = pygame.Rect(325, 230, 96, 52)
+       shop_buy_ration_btn = pygame.Rect(325, 387, 96, 52)
+
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
@@ -241,6 +274,22 @@ while True:
 
     if current_state not in ["MENU", "SETTING", "INTRO", "WEATHER_EXPLAIN"]:
         task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys)
+
+    if flash_message_timer > 0:
+        flash_message_timer -= 1
+
+        text_surf = msg_font.render(flash_message, True, (160, 160, 160))
+        text_surf = text_surf.convert_alpha()  
+
+        if flash_message_timer < 60:
+            alpha = int((flash_message_timer / 60) * 255)
+        else:
+            alpha = 255
+        text_surf.set_alpha(alpha)
+
+        text_rect = text_surf.get_rect(center=(Width // 2, Height - 50))
+        
+        screen.blit(text_surf, text_rect)
 
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -307,44 +356,67 @@ while True:
                print("Entering to Pharmacy...")
 
          elif current_state == "SHOP":
-             if taskbar.map_btn_rect.collidepoint(mouse_pos):
-                current_state = "MAP"
-             elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
-                if cookies_count >= 195:
-                    cookies_count -= 195
-                    pure_soil_count += 1
-                    print("Pure Soil purchased!")
-                else:
-                    print("Not enough Cookies!")
-             elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
-                if cookies_count >= 225 and not has_intact_canopy:
-                    cookies_count -= 225
-                    has_intact_canopy = True
-                    print("Intact Canopy purchased!")
-                else:
-                    print("Not enough Cookies!")
-             elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
-                if cookies_count >= 200 and not has_oxygen_recycler:
-                    cookies_count -= 200
-                    has_oxygen_recycler = True
-                    print("Oxygen Recycler purchased!")
-                else:
-                    print("Not enough Cookies!")
-             elif shop_buy_speed_serum_btn.collidepoint(mouse_pos):
-                if cookies_count >= 50 and has_Speed_Serum:
-                    cookies_count -= 50
-                    has_Speed_Serum = True
-                    print("Speed Serum purchased!")
-                else:
-                    print("Not enough Cookies!")
+             if shop_buy_sedative_btn.collidepoint(mouse_pos):
+                 if cookies_count >= 30:
+                     cookies_count -= 30
+                     sedative_count += 1
+                     trigger_message("Sedative purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Sedative!")
 
-             elif shop_buy_blood_stop_btn.collidepoint(mouse_pos):
-                if cookies_count >= 60 and has_Blood_Stop:
-                    cookies_count -= 60
-                    has_Blood_Stop = True
-                    print("Bought Blood Stop!")
-                else:
-                    print("Not enough Cookies!")
+             elif shop_buy_ration_btn.collidepoint(mouse_pos):
+                 if cookies_count >= 30:
+                     cookies_count -= 30
+                     ration_count += 1
+                     trigger_message("Ration Pack purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Ration Pack!")
+
+             elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
+                 if cookies_count >= 195:
+                     cookies_count -= 195
+                     pure_soil_count += 1
+                     trigger_message("Pure Soil purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Pure Soil!")
+
+             elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
+                 print(f"DEBUG: Clicked Canopy Button! Current status: {has_intact_canopy}")
+                 if has_intact_canopy:
+                     trigger_message("You already own Intact Canopy!")
+                 elif cookies_count >= 225:
+                     cookies_count -= 225
+                     has_intact_canopy = True
+                     trigger_message("Intact Canopy purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Intact Canopy!")
+
+             elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
+                 print(f"DEBUG: Clicked Oxygen Button! Current status: {has_oxygen_recycler}")
+                 if has_oxygen_recycler:
+                     trigger_message("You already own Oxygen Recycler!")
+                 elif cookies_count >= 200:
+                     cookies_count -= 200
+                     has_oxygen_recycler = True
+                     trigger_message("Oxygen Recycler purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Oxygen Recycler!")
+
+             elif shop_buy_speed_serum_btn and shop_buy_speed_serum_btn.collidepoint(mouse_pos):
+                 if cookies_count >= 50:
+                     cookies_count -= 50
+                     has_Speed_Serum = True
+                     trigger_message("Speed Serum purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Speed Serum!")
+
+             elif shop_buy_blood_stop_btn and shop_buy_blood_stop_btn.collidepoint(mouse_pos):
+                 if cookies_count >= 60:
+                     cookies_count -= 60
+                     has_Blood_Stop = True
+                     trigger_message("Blood Stop purchased!")
+                 else:
+                     trigger_message("Not enough Cookies for Blood Stop!")
  
          elif current_state == "GREENHOUSE":
             if plant_seed_btn.collidepoint(mouse_pos):
