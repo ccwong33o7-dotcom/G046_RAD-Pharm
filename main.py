@@ -307,7 +307,7 @@ while True:
                print("Entering to Pharmacy...")
 
          elif current_state == "SHOP":
-             if shop_back_btn.collidepoint(mouse_pos):
+             if taskbar.map_btn_rect.collidepoint(mouse_pos):
                 current_state = "MAP"
              elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
                 if cookies_count >= 195:

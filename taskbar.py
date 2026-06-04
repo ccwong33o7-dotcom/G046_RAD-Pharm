@@ -10,15 +10,15 @@ class TaskBar:
         self.map_icon = None
         self.weather_icon = None
         self.survivor_icon = None
-        self.bar_height = 46
-        self.y_offset = 8
+        self.bar_height = 65
+        self.y_offset = 0
         self.load_assets()
 
-        self.settings_btn_rect = pygame.Rect(80, 6 + self.y_offset, 34, 34)
-        self.map_btn_rect = pygame.Rect(140, 6 + self.y_offset, 34, 34)
-        self.weather_btn_rect = pygame.Rect(200, 6 + self.y_offset, 34, 34)
+        self.settings_btn_rect = pygame.Rect(50, 10 + self.y_offset, 42, 42)
+        self.map_btn_rect = pygame.Rect(115, 10 + self.y_offset, 42, 42)
+        self.weather_btn_rect = pygame.Rect(175, 10 + self.y_offset, 42, 42)
 
-        self.font = pygame.font.SysFont("Agency FB", 26, bold=True) 
+        self.font = pygame.font.SysFont("Agency FB", 32, bold=True) 
         self.money_font = pygame.font.SysFont("Agency FB", 28, bold=True)
         self.small_font = pygame.font.SysFont("Arial", 12)
 
@@ -40,7 +40,7 @@ class TaskBar:
         if os.path.exists(setting_path):
             try:
                 img = pygame.image.load(setting_path).convert_alpha()
-                self.setting_icon = pygame.transform.smoothscale(img, (34, 34))
+                self.setting_icon = pygame.transform.smoothscale(img, (42, 42))
                 print("TaskBar: Setting Icon Loaded Successfully")
             except Exception as e:
                 print(f"TaskBar: Setting Icon Failed: {e}")
@@ -49,7 +49,7 @@ class TaskBar:
         if os.path.exists(map_path):
             try:
                 img = pygame.image.load(map_path).convert_alpha()
-                self.map_icon = pygame.transform.smoothscale(img, (34, 34))
+                self.map_icon = pygame.transform.smoothscale(img, (42, 42))
                 print("TaskBar: Map Icon Loaded Successfully")
             except Exception as e:
                 print(f"TaskBar: Map Icon Failed: {e}")
@@ -58,7 +58,7 @@ class TaskBar:
         if os.path.exists(weather_path):
             try:
                 img = pygame.image.load(weather_path).convert_alpha()
-                self.weather_icon = pygame.transform.smoothscale(img, (34, 34))
+                self.weather_icon = pygame.transform.smoothscale(img, (42, 42))
                 print("TaskBar: Weather Icon Loaded Successfully")
             except Exception as e:
                 print(f"TaskBar: Weather Icon Failed: {e}")
@@ -69,7 +69,7 @@ class TaskBar:
         if os.path.exists(cookie_path):
             try:
                 c_img = pygame.image.load(cookie_path).convert_alpha()
-                self.cookie_icon = pygame.transform.smoothscale(c_img, (34, 34))
+                self.cookie_icon = pygame.transform.smoothscale(c_img, (42, 42))
                 print("TaskBar: Cookies Currency Icon Loaded Successfully")
             except Exception as e:
                 self.cookie_icon = None
@@ -82,7 +82,7 @@ class TaskBar:
         if os.path.exists(survivor_path):
             try:
                 s_img = pygame.image.load(survivor_path).convert_alpha()
-                self.survivor_icon = pygame.transform.smoothscale(s_img, (28, 28))
+                self.survivor_icon = pygame.transform.smoothscale(s_img, (36, 36))
                 print("TaskBar: Survivor Icon Loaded Successfully")
             except Exception as e:
                 self.survivor_icon = None
@@ -113,13 +113,13 @@ class TaskBar:
                 dynamic_icon = weather_sys_param.weather_icons[weather_sys_param.current_weather]
 
         if dynamic_icon:
-            dynamic_icon = pygame.transform.smoothscale(dynamic_icon, (34, 34))
+            dynamic_icon = pygame.transform.smoothscale(dynamic_icon, (42, 42))
             screen.blit(dynamic_icon, (self.weather_btn_rect.x, self.weather_btn_rect.y))
 
         day_text = f"DAY {current_day}"
-        day_surf = self.font.render(day_text, True, (200, 204, 207))
+        day_surf = self.font.render(day_text, True, (220, 204, 207))
         day_x = (self.screen_width // 2) - (day_surf.get_width() // 2)
-        day_y = 8 + self.y_offset
+        day_y = 20 + self.y_offset
         screen.blit(day_surf, (day_x, day_y))
 
         money_text = f"{cookies}"
@@ -128,19 +128,19 @@ class TaskBar:
         if self.cookie_icon and self.cookie_icon.get_size() != (cookie_w, cookie_h):
             self.cookie_icon = pygame.transform.smoothscale(self.cookie_icon, (cookie_w, cookie_h))
 
-        base_x = 900 
-        cookie_y = 6 + self.y_offset
+        base_x = 992
+        cookie_y = 14 + self.y_offset
 
         if self.cookie_icon:
             screen.blit(self.cookie_icon, (base_x, cookie_y))
 
         text_x = base_x + 34 + 10
-        text_y = 5 + self.y_offset
+        text_y = 23 + self.y_offset
 
         screen.blit(money_surf, (text_x, text_y))
 
-        survivor_x = text_x + money_surf.get_width() + 40
-        survivor_y = 9 + self.y_offset
+        survivor_x = text_x + money_surf.get_width() + 55
+        survivor_y = 13 + self.y_offset
 
         if self.survivor_icon:
             screen.blit(self.survivor_icon, (survivor_x, survivor_y))
@@ -148,7 +148,7 @@ class TaskBar:
         people_text = f"{saved_people} / 25"
         people_surf = self.money_font.render(people_text, True, (230, 230, 230))
         people_text_x = survivor_x + 28 + 10
-        people_text_y = 5 + self.y_offset
+        people_text_y = 23 + self.y_offset
         screen.blit(people_surf, (people_text_x, people_text_y))
 
     def check_click(self, mouse_pos):
