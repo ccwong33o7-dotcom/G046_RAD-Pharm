@@ -4,7 +4,7 @@ import os
 import json
 from menu import draw_menu
 from setting import run_setting
-from pharmacy import draw_pharmacy
+import pharmacy 
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant, draw_plant_menu
 from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
@@ -37,7 +37,7 @@ except:
    menu_bg_img = None
    print("Warning: MainMenu image not found")
 try:
-   pharmacy_bg_img = pygame.image.load("image/background/pharmacy scene.png").convert()
+   pharmacy_bg_img = pygame.image.load("image/background/Pharmacy_background.png").convert()
    pharmacy_bg_img = pygame.transform.smoothscale(pharmacy_bg_img, (Width, Height))
 except:
    pharmacy_bg_img = None
@@ -204,6 +204,10 @@ def trigger_message(text):
 show_plant_menu = False
 plant_menu_rect = pygame.Rect(0, 0, 0, 0)
 
+initial_count = min(current_day, 4)
+pharmacy.change_customer_count(initial_count)
+print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
@@ -217,6 +221,9 @@ while True:
             current_day = 1 
             
         weather_sys.update_weather(current_day) 
+        next_day_customers = min(current_day, 4)
+        pharmacy.change_customer_count(next_day_customers)
+        print(f"New Day! Spawned {next_day_customers} customers.")
         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
 
     if current_state == "MENU":
@@ -248,7 +255,7 @@ while True:
             
     elif current_state == "PHARMACY":
        screen.fill((0, 0, 0))
-       draw_pharmacy(screen, pharmacy_bg_img)
+       pharmacy.draw_pharmacy(screen, pharmacy_bg_img)
     
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -324,6 +331,18 @@ while True:
                   p.harvested = False
               print("Test: All plants are now fully grown! Press Harvest Button now!")
 
+          if event.key == pygame.K_1:
+              pharmacy.change_customer_count(1)
+              print("Test Key: Switched to 1 customer")
+          if event.key == pygame.K_2:
+              pharmacy.change_customer_count(2)
+              print("Test Key: Switched to 2 customers")
+          if event.key == pygame.K_3:
+              pharmacy.change_customer_count(3)
+              print("Test Key: Switched to 3 customers")
+          if event.key == pygame.K_4:
+              pharmacy.change_customer_count(4)
+              print("Test Key: Switched to 4 customers")
 
       if event.type == pygame.MOUSEBUTTONDOWN: 
          if current_state not in ["MENU", "SETTING","INTRO", "WEATHER_EXPLAIN"]:
