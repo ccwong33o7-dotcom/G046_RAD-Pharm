@@ -10,6 +10,8 @@ img_oxygen_recycler = None
 img_plant_seed = None
 img_harvest = None
 img_plant_menu_bg = None
+img_thorn_btn = None
+img_aloe_btn = None
     
 class Plant:
     def __init__(self, x_pos, y_pos, name, dust_speed, width=120, height=160):
@@ -243,7 +245,7 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect, harvest_btn_rect
 
 def draw_plant_menu(screen):
-    global img_plant_menu_bg
+    global img_plant_menu_bg, img_aloe_btn, img_thorn_btn
     
     menu_w, menu_h = 550, 425
     rect = pygame.Rect((1280 - menu_w) // 2, (720 - menu_h) // 2, menu_w, menu_h)
@@ -272,5 +274,41 @@ def draw_plant_menu(screen):
         debug_font = pygame.font.SysFont("Arial", 24)
         error_txt = debug_font.render("ERROR: PlantSeed_bg.jpg missing!", True, (255, 0, 0))
         screen.blit(error_txt, (rect.x + 50, rect.y + 50))
+    
+    if img_aloe_btn is None:
+        for ext in [".png", ".jpg", ".PNG", ".JPG"]:
+            possible_path = f"image/button/AloeVera_button{ext}"
+            if os.path.exists(possible_path):
+                try:
+                    img_aloe_btn = pygame.image.load(possible_path).convert_alpha()
+                    img_aloe_btn = pygame.transform.smoothscale(img_aloe_btn, (150, 200)) # 缩放到合适大小
+                    break
+                except pygame.error as e:
+                    print(f"Error loading AloeVera button: {e}")
+
+    if img_thorn_btn is None:
+        for ext in [".png", ".jpg", ".PNG", ".JPG"]:
+            possible_path = f"image/button/Thorn_button{ext}"
+            if os.path.exists(possible_path):
+                try:
+                    img_thorn_btn = pygame.image.load(possible_path).convert_alpha()
+                    img_thorn_btn = pygame.transform.smoothscale(img_thorn_btn, (150, 200))
+                    break
+                except pygame.error as e:
+                    print(f"Error loading Thorn button: {e}")
+
+    aloe_btn_rect = pygame.Rect(rect.x + 70, rect.y + 110, 150, 200)
+    thorn_btn_rect = pygame.Rect(rect.x + 330, rect.y + 110, 150, 200)
+
+    if img_aloe_btn:
+        screen.blit(img_aloe_btn, (aloe_btn_rect.x, aloe_btn_rect.y))
+    else:
+        pygame.draw.rect(screen, (0, 255, 0), aloe_btn_rect, 2) 
+
+    if img_thorn_btn:
+        screen.blit(img_thorn_btn, (thorn_btn_rect.x, thorn_btn_rect.y))
+    else:
+        pygame.draw.rect(screen, (255, 0, 0), thorn_btn_rect, 2) 
         
-    return rect
+   
+    return rect, aloe_btn_rect, thorn_btn_rect
