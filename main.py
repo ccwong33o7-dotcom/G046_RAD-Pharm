@@ -156,16 +156,24 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxyge
 progress = load_game()
 current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
+
 pure_soil_count = progress.get("pure_soil", 0)
 pure_soil_count = int(pure_soil_count) if isinstance(pure_soil_count, (int, float)) else 0
+
 has_intact_canopy = progress.get("has_intact_canopy", False)
 has_oxygen_recycler = progress.get("has_oxygen_recycler", False)
+
+intact_canopy_count = 1 if has_intact_canopy else 0
+oxygen_recycler_count = 1 if has_oxygen_recycler else 0
+
 cookies_count = progress.get("cookies", 5)
 saved_people = progress.get("saved_people", 0)
 sedative_count = progress.get("sedative", 0)
 ration_count = progress.get("ration_pack", 0)
 has_Speed_Serum = bool(progress.get("speed_serum", 0))
 has_Blood_Stop = bool(progress.get("blood_stop", 0))
+oxygen_recycler_active = 1 if has_oxygen_recycler else 0
+intact_canopy_active = 1 if has_intact_canopy else 0
 
 has_seen_intro = False
 
@@ -254,7 +262,7 @@ while True:
        screen.fill((0, 0, 0))
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, has_intact_canopy, has_oxygen_recycler)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, has_oxygen_recycler, ready_to_craft)
 
        if ready_to_craft:
             msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
@@ -387,6 +395,7 @@ while True:
                  elif cookies_count >= 225:
                      cookies_count -= 225
                      has_intact_canopy = True
+                     intact_canopy_count = 1
                      trigger_message("Intact Canopy purchased!")
                  else:
                      trigger_message("Not enough Cookies for Intact Canopy!")
@@ -398,6 +407,7 @@ while True:
                  elif cookies_count >= 200:
                      cookies_count -= 200
                      has_oxygen_recycler = True
+                     oxygen_recycler_count = 1
                      trigger_message("Oxygen Recycler purchased!")
                  else:
                      trigger_message("Not enough Cookies for Oxygen Recycler!")
@@ -466,6 +476,7 @@ while True:
             
             elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos) and has_oxygen_recycler:
                has_oxygen_recycler = False
+               oxygen_recycler_count = 0
 
                for p in plants:
                      if not p.is_dead:
