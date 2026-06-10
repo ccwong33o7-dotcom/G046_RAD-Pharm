@@ -1,5 +1,6 @@
 import pygame
 from customer import CustomerManager
+from crafting import inventory
 
 inventory_bar_img_original = None
 
@@ -32,11 +33,30 @@ def draw_pharmacy(screen, bg_img):
         screen.fill((255,250,200))
 
     customer_manager.draw_all(screen)
+    
+    font = pygame.font.SysFont("Arial", 28)
+
+    rad_text = font.render(f"Rad-Ointment: {inventory['Rad-Ointment']}", True, (255,255,255))
+    speed_text = font.render(f"Speed Serum: {inventory['Speed Serum']}", True, (255,255,255))
+    blood_text = font.render(f"Blood-Stop: {inventory['Blood-Stop']}", True, (255,255,255))
+
+    screen.blit(rad_text, (850, 250))
+    screen.blit(speed_text, (850, 300))
+    screen.blit(blood_text, (850, 350))
 
     if inventory_bar_img:
         x_pos = -275
         y_pos = 170
         screen.blit(inventory_bar_img, (x_pos, y_pos))
+    
+        sell_rad_btn = pygame.Rect(850, 450, 200, 50)
+
+    pygame.draw.rect(screen, (0,200,0), sell_rad_btn)
+
+    btn_text = font.render("Sell Rad", True, (255,255,255))
+    screen.blit(btn_text, (890, 460))
+
+    return sell_rad_btn
 
    
-    return True
+    

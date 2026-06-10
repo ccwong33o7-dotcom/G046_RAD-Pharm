@@ -49,7 +49,7 @@ except:
    shop_bg_img = None
    print("Warning: Shop scene image not found")
 try:
-    crafting_bg_img = pygame.image.load("image/background/Lab_background.png").convert()
+    crafting_bg_img = pygame.image.load("image/background/lab_without_taskbar.png").convert()
     crafting_bg_img = pygame.transform.smoothscale(crafting_bg_img, (Width, Height))
 except:
     crafting_bg_img = None
@@ -254,8 +254,8 @@ while True:
             current_state = next_state
             
     elif current_state == "PHARMACY":
-       screen.fill((0, 0, 0))
-       pharmacy.draw_pharmacy(screen, pharmacy_bg_img)
+        screen.fill((0, 0, 0))
+        sell_rad_btn = pharmacy.draw_pharmacy(screen, pharmacy_bg_img)
     
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -371,7 +371,18 @@ while True:
                    save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
                    pygame.quit()
                    sys.exit()
-         
+         elif current_state == "PHARMACY":
+
+             if sell_rad_btn.collidepoint(mouse_pos):
+
+                 if inventory["Rad-Ointment"] > 0:
+                     inventory["Rad-Ointment"] -= 1
+                     cookies_count += 20
+                     saved_people += 1
+                     print("Medicine sold!")
+
+                 else:
+                     print("No Rad-Ointment left!")
          
          elif current_state == "MAP":
             if to_gh_btn.collidepoint(mouse_pos):

@@ -60,8 +60,6 @@ def craft_success(item_name):
     inventory[item_name] += 1
         
 
-    screen.fill(COLOUR_BG)
-
 def update_crafting(event):
     global game_state, pending_item, marker_pos, marker_speed
 
