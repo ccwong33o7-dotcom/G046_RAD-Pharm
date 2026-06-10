@@ -6,7 +6,7 @@ from menu import draw_menu
 from setting import run_setting
 from pharmacy import draw_pharmacy
 from shop import draw_shop
-from greenhouse import draw_greenhouse, Plant
+from greenhouse import draw_greenhouse, Plant, draw_plant_menu
 from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
 from intro import show_intro
 from taskbar import TaskBar
@@ -201,6 +201,9 @@ def trigger_message(text):
     flash_message = text
     flash_message_timer = 180
 
+show_plant_menu = False
+plant_menu_rect = pygame.Rect(0, 0, 0, 0)
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
@@ -270,7 +273,9 @@ while True:
        elif any_dead:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
-
+       if show_plant_menu:
+           plant_menu_rect = draw_plant_menu(screen)
+           
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
       _, crafting_back_btn = draw_crafting(screen, crafting_bg_img, font)
@@ -429,16 +434,16 @@ while True:
                      trigger_message("Not enough Cookies for Blood Stop!")
  
          elif current_state == "GREENHOUSE":
+            if show_plant_menu:
+                if not plant_menu_rect.collidepoint(mouse_pos):
+                    show_plant_menu = False
+                    print("Closed Plant Menu")
+                else:
+                    print("Clicked inside Plant Menu! (You can put seed selection buttons here later)")
+                continue 
             if plant_seed_btn.collidepoint(mouse_pos):
-               print("You clicked the Plant Seed! Now you can implement its effect.")
-               for p in plants:
-                  if p.is_dead:
-                     p.growth = 100
-                     p.dust = 0
-                     p.is_dead = False
-                     p.harvested = False
-                     p.death_timer = 0
-                     print(f"Reseeded {p.name}!")
+               print("Opening Plant Seed Menu...")
+               show_plant_menu = True  
             elif harvest_btn.collidepoint(mouse_pos):
                 harvested_something = False
                 for p in plants:
