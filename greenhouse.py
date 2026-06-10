@@ -97,7 +97,7 @@ class Plant:
         surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
      
 
-def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False):
+def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, oxygen_count=0, canopy_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False):
     global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed, img_harvest
     small_font = pygame.font.SysFont("Arial", 20)
 
@@ -196,20 +196,17 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
             pygame.draw.rect(screen, (100, 100, 100), harvest_btn_rect, 2)
             txt = small_font.render("Harvest", True, (100, 100, 100))
         screen.blit(txt, (harvest_btn_rect.x + 100, harvest_btn_rect.y + 20))
-            
-    
-
         
     canopy_btn_rect = pygame.Rect(1120, 615, 100, 100)
-    if has_intact_canopy:
-        if img_intact_canopy:
-            screen.blit(img_intact_canopy,(canopy_btn_rect.x, canopy_btn_rect.y))
-        else:
+    if img_intact_canopy:
+        screen.blit(img_intact_canopy, (canopy_btn_rect.x, canopy_btn_rect.y))
+    else:  
+        if has_intact_canopy:
             pygame.draw.rect(screen, (34, 139, 34), canopy_btn_rect)
             screen.blit(font.render("Canopy", True, (255, 255, 255)), (canopy_btn_rect.x + 15, canopy_btn_rect.y + 40))
-    else:  
-        pygame.draw.rect(screen, (80, 80, 80), canopy_btn_rect, 2)
-        screen.blit(small_font.render("Locked", True, (120, 120, 120)), (canopy_btn_rect.x + 20, canopy_btn_rect.y + 40))
+        else:  
+            pygame.draw.rect(screen, (80, 80, 80), canopy_btn_rect, 2)
+            screen.blit(small_font.render("Locked", True, (120, 120, 120)), (canopy_btn_rect.x + 20, canopy_btn_rect.y + 40))
 
 
     pure_soil_btn_rect = pygame.Rect(700, 615, 100, 100)
@@ -217,19 +214,31 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
             screen.blit(img_pure_soil,(pure_soil_btn_rect.x, pure_soil_btn_rect.y))
     else:
             pygame.draw.rect(screen, (139, 69, 19), pure_soil_btn_rect)
-
-    if pure_soil_count > 0:   
-        count_txt = small_font.render(f"x{pure_soil_count}", True, (255, 255, 255))
     
-    else:
-        count_txt = small_font.render(f"x{pure_soil_count}", True, (180, 180, 180))
-    screen.blit(count_txt, (pure_soil_btn_rect.x + 75, pure_soil_btn_rect.y + 75))
-
     oxygen_btn_rect = pygame.Rect(900, 615, 100, 100)
     if img_oxygen_recycler:
         screen.blit(img_oxygen_recycler, (oxygen_btn_rect.x, oxygen_btn_rect.y))
     else:
         pygame.draw.rect(screen, (70, 70, 150), oxygen_btn_rect)
+    
+
+    circle_radius = 13
+    badge_font = pygame.font.SysFont("Arial", 12, bold=True)
+
+    buttons_with_counts = [
+        (pure_soil_btn_rect, pure_soil_count),
+        (oxygen_btn_rect, oxygen_count),
+        (canopy_btn_rect, canopy_count)
+    ]
+
+    for btn_rect, count in buttons_with_counts:
+        circle_center = (btn_rect.x + 90, btn_rect.y + 5)
+        
+        pygame.draw.circle(screen, (185, 25, 15), circle_center, circle_radius)
+        
+        count_txt = badge_font.render(f"x{count}", True, (255, 255, 255))
+        txt_rect = count_txt.get_rect(center=circle_center)
+        screen.blit(count_txt, txt_rect)
 
     return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect, harvest_btn_rect
 
