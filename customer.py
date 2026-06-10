@@ -15,8 +15,18 @@ class Customer:
             self.image = pygame.Surface((120, 300), pygame.SRCALPHA)
             self.image.fill((200, 0, 0, 150))
 
-    def draw(self, screen, x, y):
-        screen.blit(self.image, (x, y))
+        self.current_x = 1280  
+        self.target_x = 1280   
+        self.speed = 5
+
+    def update(self):
+        if self.current_x > self.target_x:
+            self.current_x -= self.speed
+            if self.current_x < self.target_x:
+                self.current_x = self.target_x
+
+    def draw(self, screen, y_pos):
+        screen.blit(self.image, (self.current_x, y_pos))
 
 
 class CustomerManager:
@@ -35,19 +45,30 @@ class CustomerManager:
         available_count = min(count, len(self.image_paths))
         chosen_paths = random.sample(self.image_paths, available_count)
         
-        for path in chosen_paths:
-            self.active_customers.append(Customer(path))
+        screen_w = pygame.display.get_surface().get_width() if pygame.display.get_surface() else 1280
+        
+        for i, path in enumerate(chosen_paths):
+            customer = Customer(path)
+            
+            spacing = screen_w // (available_count + 1)
+            target_x = spacing * (i + 1) - (customer.image.get_width() // 2)
+            
+            customer.target_x = target_x
+            customer.current_x = screen_w + (i * 80) 
+            
+            self.active_customers.append(customer)
+
+    def update_all(self):
+        for customer in self.active_customers:
+            customer.update()
 
     def draw_all(self, screen):
         if not self.active_customers:
             return
 
-        screen_w, screen_h = screen.get_size()
-        num_customers = len(self.active_customers)
-        y_pos = 340 
+        y_pos = 98
         
-        for i, customer in enumerate(self.active_customers):
-            spacing = screen_w // (num_customers + 1)
-            x_pos = spacing * (i + 1) - (customer.image.get_width() // 2)
-            
-            customer.draw(screen, x_pos, y_pos)
+        self.update_all()
+        
+        for customer in self.active_customers:
+            customer.draw(screen, y_pos)
