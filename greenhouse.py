@@ -9,7 +9,7 @@ img_intact_canopy = None
 img_oxygen_recycler = None
 img_plant_seed = None
 img_harvest = None
-
+img_plant_menu_bg = None
     
 class Plant:
     def __init__(self, x_pos, y_pos, name, dust_speed, width=120, height=160):
@@ -242,7 +242,35 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
 
     return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect, harvest_btn_rect
 
+def draw_plant_menu(screen):
+    global img_plant_menu_bg
+    
+    menu_w, menu_h = 550, 425
+    rect = pygame.Rect((1280 - menu_w) // 2, (720 - menu_h) // 2, menu_w, menu_h)
+    
+    if img_plant_menu_bg is None:
+        possible_path = "image/background/PlantSeed_bg.png"
+        
+        if os.path.exists(possible_path):
+            try:
+                img_plant_menu_bg = pygame.image.load(possible_path).convert_alpha()
+                img_plant_menu_bg = pygame.transform.smoothscale(img_plant_menu_bg, (menu_w, menu_h))
+                print("[SUCCESS] PlantSeed_bg.jpg loaded successfully into memory!")
+            except Exception as e:
+                print(f"[ERROR] File exists, but Pygame failed to read it: {e}")
+        else:
+            print(f"[ERROR] Cannot find image file! Expected absolute path: {os.path.abspath(possible_path)}")
 
-
-
-
+    
+    if img_plant_menu_bg:
+        screen.blit(img_plant_menu_bg, rect)
+    else:
+        overlay = pygame.Surface((menu_w, menu_h), pygame.SRCALPHA)
+        overlay.fill((0, 255, 0, 200)) # Green with 200 alpha transparency
+        screen.blit(overlay, rect)
+        
+        debug_font = pygame.font.SysFont("Arial", 24)
+        error_txt = debug_font.render("ERROR: PlantSeed_bg.jpg missing!", True, (255, 0, 0))
+        screen.blit(error_txt, (rect.x + 50, rect.y + 50))
+        
+    return rect
