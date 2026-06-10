@@ -203,6 +203,8 @@ def trigger_message(text):
 
 show_plant_menu = False
 plant_menu_rect = pygame.Rect(0, 0, 0, 0)
+aloe_btn_rect = pygame.Rect(0, 0, 0, 0)  
+thorn_btn_rect = pygame.Rect(0, 0, 0, 0)
 
 initial_count = min(current_day, 4)
 pharmacy.change_customer_count(initial_count)
@@ -281,7 +283,7 @@ while True:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
        if show_plant_menu:
-           plant_menu_rect = draw_plant_menu(screen)
+           plant_menu_rect, aloe_btn_rect, thorn_btn_rect = draw_plant_menu(screen)
            
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
@@ -465,12 +467,27 @@ while True:
  
          elif current_state == "GREENHOUSE":
             if show_plant_menu:
-                if not plant_menu_rect.collidepoint(mouse_pos):
+                if aloe_btn_rect.collidepoint(mouse_pos):
+                    print("Clicked Aloe Vera! Planting Aloe Vera seed...")
+
+                    plant_a.growth = 0
+                    plant_a.dust = 0
+                    plant_a.is_dead = False
+                    show_plant_menu = False
+                    trigger_message("Aloe Vera planted!")
+                    
+                elif thorn_btn_rect.collidepoint(mouse_pos):
+                    print("Clicked Rusty Thorn! Planting Rusty Thorn seed...")
+                    plant_b.growth = 0
+                    plant_b.dust = 0
+                    plant_b.is_dead = False
+                    show_plant_menu = False 
+                    trigger_message("Rusty Thorn planted!")
+                    
+                elif not plant_menu_rect.collidepoint(mouse_pos):
                     show_plant_menu = False
                     print("Closed Plant Menu")
-                else:
-                    print("Clicked inside Plant Menu! (You can put seed selection buttons here later)")
-                continue 
+                continue
             if plant_seed_btn.collidepoint(mouse_pos):
                print("Opening Plant Seed Menu...")
                show_plant_menu = True  
