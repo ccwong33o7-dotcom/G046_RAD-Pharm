@@ -37,10 +37,12 @@ except:
    menu_bg_img = None
    print("Warning: MainMenu image not found")
 try:
-   pharmacy_bg_img = pygame.image.load("image/background/Pharmacy_background.png").convert()
+   pharmacy_bg_img = pygame.image.load("image/background/Pharmacy_bg.png").convert()
    pharmacy_bg_img = pygame.transform.smoothscale(pharmacy_bg_img, (Width, Height))
+   pharmacy_counter_img = pygame.image.load("image/button/counter_bg.png").convert_alpha()
 except:
    pharmacy_bg_img = None
+   pharmacy_counter_img = None
    print("Warning: Pharmacy scene image not found")
 try:
    shop_bg_img = pygame.image.load("image/background/shopwithouttb.png").convert()
@@ -210,6 +212,14 @@ initial_count = min(current_day, 4)
 pharmacy.change_customer_count(initial_count)
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
 
+has_money_on_table = False
+
+pharmacy_buttons = {
+    "sell_rad": pygame.Rect(850, 450, 200, 50),
+    "gun": pygame.Rect(180, 480, 120, 120),
+    "money": pygame.Rect(720, 430, 100, 100)
+}
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
@@ -257,7 +267,7 @@ while True:
             
     elif current_state == "PHARMACY":
         screen.fill((0, 0, 0))
-        sell_rad_btn = pharmacy.draw_pharmacy(screen, pharmacy_bg_img)
+        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table)
     
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -375,16 +385,25 @@ while True:
                    sys.exit()
          elif current_state == "PHARMACY":
 
-             if sell_rad_btn.collidepoint(mouse_pos):
+             if pharmacy_buttons["sell_rad"].collidepoint(mouse_pos):
 
-                 if inventory["Rad-Ointment"] > 0:
-                     inventory["Rad-Ointment"] -= 1
-                     cookies_count += 20
-                     saved_people += 1
-                     print("Medicine sold!")
-
+                 if inventory.get("Rad-Ointment", 0) > 0:
+                        inventory["Rad-Ointment"] -= 1
+                        has_money_on_table = True 
+                        trigger_message("Buyer left cookies on the counter! Click it to collect!")
                  else:
-                     print("No Rad-Ointment left!")
+                     trigger_message("No Rad-Ointment left to sell!")
+
+             elif pharmacy_buttons["gun"].collidepoint(mouse_pos):
+                print("Gun clicked!")
+                trigger_message("You grabbed the Gun! Ready to shoot.")
+                    
+             elif has_money_on_table and pharmacy_buttons["money"].collidepoint(mouse_pos):
+                cookies_count += 20
+                saved_people += 1
+                has_money_on_table = False 
+                print("Cookies collected!")
+                trigger_message("+20 Cookies collected into wallet!")
          
          elif current_state == "MAP":
             if to_gh_btn.collidepoint(mouse_pos):
