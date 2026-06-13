@@ -39,7 +39,7 @@ except:
 try:
    pharmacy_bg_img = pygame.image.load("image/background/Pharmacy_bg.png").convert()
    pharmacy_bg_img = pygame.transform.smoothscale(pharmacy_bg_img, (Width, Height))
-   pharmacy_counter_img = pygame.image.load("image/button/counter_bg.png").convert_alpha()
+   pharmacy_counter_img = pygame.image.load("image/button/counterbgnew.png").convert_alpha()
 except:
    pharmacy_bg_img = None
    pharmacy_counter_img = None
@@ -147,8 +147,8 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxyge
        "has_oxygen_recycler": has_oxygen_recycler,
        "cookies": cookies_amt,
        "saved_people": saved_people_count,
-       "sedative": sedative_count,
-       "ration_pack": ration_count,
+       "sedative": progress.get("sedative", 0),
+       "ration_pack": progress.get("ration_pack", 0),
        "speed_serum": int(has_Speed_Serum),
        "blood_stop": int(has_Blood_Stop)
        }
@@ -170,8 +170,7 @@ oxygen_recycler_count = 1 if has_oxygen_recycler else 0
 
 cookies_count = progress.get("cookies", 5)
 saved_people = progress.get("saved_people", 0)
-sedative_count = progress.get("sedative", 0)
-ration_count = progress.get("ration_pack", 0)
+
 has_Speed_Serum = bool(progress.get("speed_serum", 0))
 has_Blood_Stop = bool(progress.get("blood_stop", 0))
 oxygen_recycler_active = 1 if has_oxygen_recycler else 0
@@ -267,7 +266,7 @@ while True:
             
     elif current_state == "PHARMACY":
         screen.fill((0, 0, 0))
-        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table)
+        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress)
     
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -275,10 +274,11 @@ while True:
        
     elif current_state == "SHOP":
        screen.fill((0, 0, 0))
-       (shop_buy_soil_btn,shop_buy_canopy_btn,shop_buy_oxygen_btn,shop_buy_speed_serum_btn,shop_buy_blood_stop_btn) = draw_shop(screen,font,shop_bg_img,btn_soil,btn_oxygen,btn_canopy,btn_30,btn_50,btn_60
-)
-       shop_buy_sedative_btn = pygame.Rect(325, 230, 96, 52)
-       shop_buy_ration_btn = pygame.Rect(325, 387, 96, 52)
+       (shop_buy_soil_btn, shop_buy_canopy_btn, shop_buy_oxygen_btn, 
+        shop_buy_speed_serum_btn, shop_buy_blood_stop_btn, 
+        shop_buy_sedative_btn, shop_buy_ration_btn) = draw_shop(
+            screen, font, shop_bg_img, btn_soil, btn_oxygen, btn_canopy, btn_30, btn_50, btn_60
+        )
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
@@ -423,16 +423,16 @@ while True:
              if shop_buy_sedative_btn.collidepoint(mouse_pos):
                  if cookies_count >= 30:
                      cookies_count -= 30
-                     sedative_count += 1
-                     trigger_message("Sedative purchased!")
+                     progress["sedative"] += 1
+                     trigger_message("Sedative purchased! Pharmacy updated.")
                  else:
                      trigger_message("Not enough Cookies for Sedative!")
 
              elif shop_buy_ration_btn.collidepoint(mouse_pos):
                  if cookies_count >= 30:
                      cookies_count -= 30
-                     ration_count += 1
-                     trigger_message("Ration Pack purchased!")
+                     progress["ration_pack"] += 1
+                     trigger_message("Ration Pack purchased! Pharmacy updated.")
                  else:
                      trigger_message("Not enough Cookies for Ration Pack!")
 

@@ -6,7 +6,7 @@ class Customer:
         try:
             self.image = pygame.image.load(img_path).convert_alpha()
             
-            target_h = 420
+            target_h = 340
             w, h = self.image.get_size()
             target_w = int(w * (target_h / h))
             self.image = pygame.transform.smoothscale(self.image, (target_w, target_h))
@@ -52,6 +52,7 @@ class CustomerManager:
             
             spacing = screen_w // (available_count + 1)
             target_x = spacing * (i + 1) - (customer.image.get_width() // 2)
+            target_x += -150
             
             customer.target_x = target_x
             customer.current_x = screen_w + (i * 80) 
@@ -66,7 +67,7 @@ class CustomerManager:
         if not self.active_customers:
             return
 
-        y_pos = 98
+        y_pos = 177
         
         self.update_all()
         

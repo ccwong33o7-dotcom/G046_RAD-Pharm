@@ -59,4 +59,4 @@ def draw_shop(screen, font, bg_img=None,
     else:
         pygame.draw.rect(screen, (50, 200, 50), buy_blood_stop_btn)
 
-    return (buy_soil_btn,buy_canopy_btn,buy_oxygen_btn,buy_speed_serum_btn,buy_blood_stop_btn)
+    return (buy_soil_btn, buy_canopy_btn, buy_oxygen_btn, buy_speed_serum_btn, buy_blood_stop_btn, buy_sedative_btn, buy_ration_btn)
