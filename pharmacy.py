@@ -103,7 +103,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     if bloodstop_icon_img:
         scaled_img = pygame.transform.smoothscale(bloodstop_icon_img, (BTN_W, BTN_H))
         screen.blit(scaled_img, (bloodstop_rect.x, bloodstop_rect.y))
-        blood_count = label_font.render(f"Count: {inventory['Blood-Stop']}", True, (255, 255, 255))
+        blood_count = label_font.render(f"Count: {inventory.get('Blood-Stop', 0)}", True, (255, 255, 255))
         screen.blit(blood_count, (bloodstop_rect.x + 12, bloodstop_rect.y + BTN_H + 5))
     else:
         pygame.draw.rect(screen, (180, 60, 60), bloodstop_rect, 2)
@@ -111,7 +111,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     if speedserum_icon_img:
         scaled_img = pygame.transform.smoothscale(speedserum_icon_img, (BTN_W, BTN_H))
         screen.blit(scaled_img, (speedserum_rect.x, speedserum_rect.y))
-        speed_count = label_font.render(f"Count: {inventory['Speed Serum']}", True, (255, 255, 255))
+        speed_count = label_font.render(f"Count: {inventory.get('Speed Serum', 0)}", True, (255, 255, 255))
         screen.blit(speed_count, (speedserum_rect.x + 12, speedserum_rect.y + BTN_H + 5))
     else:
         pygame.draw.rect(screen, (60, 120, 180), speedserum_rect, 2)
