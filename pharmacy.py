@@ -2,7 +2,6 @@ import pygame
 import sys
 import math
 import os
-from customer import CustomerManager
 from crafting import inventory
 
 
@@ -34,12 +33,17 @@ sedative_icon_img = load_and_scale("image/button/sedative_button.png", ICON_SIZE
 bloodstop_icon_img = load_and_scale("image/button/bloodstop_button.png", ICON_SIZE, "bloodstop_button.png")
 speedserum_icon_img = load_and_scale("image/button/speedserum_button.png", ICON_SIZE, "speedserum_button.png")
 
-customer_manager = CustomerManager()
+_global_manager_ref = None
 
 def change_customer_count(count):
-    customer_manager.spawn_customers(count)
+    if _global_manager_ref:
+        _global_manager_ref.spawn_customers(count)
 
-def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progress_dict=None):
+def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progress_dict=None, external_manager=None):
+    global _global_manager_ref
+    if external_manager:
+        _global_manager_ref = external_manager
+    
     screen_w, screen_h = screen.get_size()
     bg_rect = pygame.Rect(0, 0, 1280, 720)
     
@@ -48,7 +52,8 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     else:
         screen.fill((255,250,200))
 
-    customer_manager.draw_all(screen)
+    if external_manager:
+        external_manager.draw_all(screen)
 
     if counter_img:
         target_width = 1280
@@ -77,7 +82,13 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     bloodstop_rect   = pygame.Rect(START_X + 2 * SPACING_X, START_Y, BTN_W, BTN_H)
     speedserum_rect  = pygame.Rect(START_X + 3 * SPACING_X, START_Y, BTN_W, BTN_H)
     
-    cookie_rect = None
+    cookie_rect = pygame.Rect(720, 430, 100, 100)
+
+    if money_waiting_to_collect:
+        if cookie_icon_img:
+            screen.blit(cookie_icon_img, (cookie_rect.x, cookie_rect.y))
+        else:
+            pygame.draw.circle(screen, (240, 200, 20), cookie_rect.center, 40)
 
     label_font = pygame.font.SysFont("Arial", 16, bold=True)
 
@@ -117,7 +128,8 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
         pygame.draw.rect(screen, (60, 120, 180), speedserum_rect, 2)
     
     font = pygame.font.SysFont("Arial", 28)
-    rad_text = font.render(f"Rad-Ointment: {inventory['Rad-Ointment']}", True, (255,255,255))
+    rad_val = inventory.get('Rad-Ointment', 0)
+    rad_text = font.render(f"Rad-Ointment: {rad_val}", True, (255,255,255))
     screen.blit(rad_text, (960, 220))
     
     sell_rad_btn = pygame.Rect(960, 350, 180, 45)
@@ -132,5 +144,6 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
         "ration_pack": ration_pack_rect,
         "sedative": sedative_rect,
         "blood_stop": bloodstop_rect,
-        "speed_serum": speedserum_rect
+        "speed_serum": speedserum_rect,
+        "sell_button": sell_rad_btn
     }

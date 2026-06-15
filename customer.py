@@ -1,5 +1,6 @@
 import pygame
 import random
+from crafting import inventory as crafting_inventory
 
 class Customer:
     def __init__(self, img_path):
@@ -29,7 +30,7 @@ class Customer:
         self.current_x = 1280  
         self.target_x = 1280   
         self.speed = 8
-        self.rect = pygame.Rect(0, 0, 0, 0)
+        self.sell_btn_rect = pygame.Rect(0, 0, 0, 0)
 
         self.possible_requests = ["ration_pack", "sedative", "blood_stop", "speed_serum"]
         self.requested_item = random.choice(self.possible_requests[:4])  
@@ -70,19 +71,46 @@ class Customer:
                 icon_y = bubble_y + 65
                 screen.blit(self.item_icon, (icon_x, icon_y))
 
-    def check_click(self, mouse_pos, selected_item, inventory_dict):
+            btn_w, btn_h = 70, 25
+            btn_x = bubble_x + (self.bubble_image.get_width() - btn_w) // 2
+            btn_y = bubble_y + 145  
+ 
+            self.sell_btn_rect = pygame.Rect(btn_x, btn_y, btn_w, btn_h)
+            
+            pygame.draw.rect(screen, (46, 204, 113), self.sell_btn_rect, border_radius=4)
+            
+            btn_font = pygame.font.SysFont("Arial", 13, bold=True)
+            text_surf = btn_font.render("SELL", True, (255, 255, 255))
+            text_x = btn_x + (btn_w - text_surf.get_width()) // 2
+            text_y = btn_y + (btn_h - text_surf.get_height()) // 2
+            screen.blit(text_surf, (text_x, text_y))
+        else:
+            self.sell_btn_rect = pygame.Rect(0, 0, 0, 0)
+
+    def check_click(self, mouse_pos, selected_item, progress_dict):
         if self.current_x > self.target_x or self.is_satisfied:
             return False, "Not ready"
 
-        if self.rect.collidepoint(mouse_pos):
+        if self.sell_btn_rect.collidepoint(mouse_pos):
             if selected_item is None:
                 return False, "Please select an item from your hotbar first!"
             if selected_item != self.requested_item:
-                return False, "Wrong item! This is not what the customer requested."
-            if inventory_dict.get(selected_item, 0) <= 0:
+                return False, f"Wrong item! This customer requested {self.requested_item.replace('_', ' ').title()}."
+        
+            target_dict = progress_dict
+            dict_key = selected_item
+            
+            if selected_item == "blood_stop":
+                target_dict = crafting_inventory
+                dict_key = "Blood-Stop"
+            elif selected_item == "speed_serum":
+                target_dict = crafting_inventory
+                dict_key = "Speed Serum"
+
+            if target_dict.get(dict_key, 0) <= 0:
                 return False, "Out of stock! You don't have enough items to sell."
             
-            inventory_dict[selected_item] -= 1
+            target_dict[dict_key] -= 1
             self.is_satisfied = True
             return True, "Trade successful!"
             
@@ -156,13 +184,19 @@ class CustomerManager:
             screen.blit(text_surf, (x, y))
             self.feedback_timer -= 1
 
-    def handle_click(self, mouse_pos, selected_item, inventory_dict):
-        for customer in self.active_customers:
-            success, msg = customer.check_click(mouse_pos, selected_item, inventory_dict)
-            if success:
-                print(msg)
-                return True
-            elif msg != "No click" and msg != "Not ready":
-                print(f"Trade failed: {msg}")
-                return False
-        return False
+    def handle_click(self, mouse_pos, current_selected_item, merged_inventory):
+        if not self.active_customers:
+            return False, "No active customer"
+
+        current_customer = self.active_customers[0]
+        if current_customer.requested_item == current_selected_item:
+            if merged_inventory.get(current_selected_item, 0) > 0:
+                if hasattr(current_customer, 'state'):
+                    current_customer.state = "leaving"
+                self.active_customers.pop(0) 
+                
+                return True, "Success"
+            else:
+                return False, "No stock"
+        else:
+            return False, "Medicine does not match what customer wants!"

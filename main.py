@@ -150,8 +150,8 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxyge
        "saved_people": saved_people_count,
        "sedative": progress.get("sedative", 0),
        "ration_pack": progress.get("ration_pack", 0),
-       "speed_serum": int(has_Speed_Serum),
-       "blood_stop": int(has_Blood_Stop)
+       "speed_serum": inventory.get("Speed Serum", 0), 
+       "blood_stop": inventory.get("Blood-Stop", 0)
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -169,11 +169,11 @@ has_oxygen_recycler = progress.get("has_oxygen_recycler", False)
 intact_canopy_count = 1 if has_intact_canopy else 0
 oxygen_recycler_count = 1 if has_oxygen_recycler else 0
 
-cookies_count = progress.get("cookies", 5)
+cookies_count = progress.get("cookies", 35)
 saved_people = progress.get("saved_people", 0)
 
-has_Speed_Serum = bool(progress.get("speed_serum", 0))
-has_Blood_Stop = bool(progress.get("blood_stop", 0))
+inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
+inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
 oxygen_recycler_active = 1 if has_oxygen_recycler else 0
 intact_canopy_active = 1 if has_intact_canopy else 0
 
@@ -212,6 +212,7 @@ customer_manager = customer.CustomerManager()
 initial_count = min(current_day, 4)
 pharmacy.change_customer_count(initial_count)
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
+customer_manager.spawn_customers(initial_count)
 
 has_money_on_table = False
 current_selected_item = None
@@ -219,7 +220,12 @@ current_selected_item = None
 pharmacy_buttons = {
     "sell_rad": pygame.Rect(850, 450, 200, 50),
     "gun": pygame.Rect(180, 480, 120, 120),
-    "money": pygame.Rect(720, 430, 100, 100)
+    "money": pygame.Rect(720, 430, 100, 100),
+    "ration_pack": pygame.Rect(25, 532, 90, 90),
+    "sedative": pygame.Rect(131, 532, 90, 90),
+    "blood_stop": pygame.Rect(237, 532, 90, 90),
+    "speed_serum": pygame.Rect(343, 532, 90, 90),
+    "sell_button": pygame.Rect(850, 450, 200, 50)
 }
 
 while True:
@@ -269,7 +275,11 @@ while True:
             
     elif current_state == "PHARMACY":
         screen.fill((0, 0, 0))
-        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress)
+        if len(customer_manager.active_customers) == 0 and not has_money_on_table:
+            spawn_num = min(current_day, 4)
+            customer_manager.spawn_customers(spawn_num)
+            
+        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager)
         customer_manager.draw_all(screen)
 
     elif current_state == "MAP":
@@ -389,65 +399,87 @@ while True:
                    sys.exit()
                    
          elif current_state == "PHARMACY":
-             if pharmacy_buttons["ration_pack"].collidepoint(mouse_pos):
-                if progress["ration_pack"] <= 0:
+             
+             clicked_ui = False
+
+             if pharmacy_buttons.get("ration_pack") and pharmacy_buttons["ration_pack"].collidepoint(mouse_pos):
+                clicked_ui = True  
+                if progress.get("ration_pack", 0) <= 0:
                     customer_manager.show_message("No stock! Buy more Ration Packs at the SHOP.")
                     current_selected_item = None
                 else:
                     current_selected_item = "ration_pack"
                     trigger_message("Held: Ration Pack")
 
-             elif pharmacy_buttons["sedative"].collidepoint(mouse_pos):
-                if progress["sedative"] <= 0:
+             elif pharmacy_buttons.get("sedative") and pharmacy_buttons["sedative"].collidepoint(mouse_pos):
+                clicked_ui = True  
+                if progress.get("sedative", 0) <= 0:
                     customer_manager.show_message("No stock! Buy more Sedative at the SHOP.")
                     current_selected_item = None
                 else:
                     current_selected_item = "sedative"
                     trigger_message("Held: Sedative")
 
-             elif pharmacy_buttons["blood_stop"].collidepoint(mouse_pos):
-                if progress["blood_stop"] <= 0:
+             elif pharmacy_buttons.get("blood_stop") and pharmacy_buttons["blood_stop"].collidepoint(mouse_pos):
+                clicked_ui = True  
+                if inventory.get("Blood-Stop", 0) <= 0:
                     customer_manager.show_message("No stock! Craft Blood Stop at the CRAFTING LAB.")
                     current_selected_item = None
                 else:
                     current_selected_item = "blood_stop"
                     trigger_message("Held: Blood Stop")
 
-             elif pharmacy_buttons["speed_serum"].collidepoint(mouse_pos):
-                if progress["speed_serum"] <= 0:
+             elif pharmacy_buttons.get("speed_serum") and pharmacy_buttons["speed_serum"].collidepoint(mouse_pos):
+                clicked_ui = True  
+                if inventory.get("Speed Serum", 0) <= 0:
                     customer_manager.show_message("No stock! Craft Speed Serum at the CRAFTING LAB.")
                     current_selected_item = None
                 else:
                     current_selected_item = "speed_serum"
                     trigger_message("Held: Speed Serum")
 
-             elif pharmacy_buttons["sell_rad"].collidepoint(mouse_pos):
-                 if inventory.get("Rad-Ointment", 0) > 0:
-                      inventory["Rad-Ointment"] -= 1
-                      has_money_on_table = True 
-                      trigger_message("Buyer left cookies on the counter! Click it to collect!")
-                 else:
-                      trigger_message("No Rad-Ointment left to sell!")
-
-             elif pharmacy_buttons["gun"].collidepoint(mouse_pos):
+             elif pharmacy_buttons.get("gun") and pharmacy_buttons["gun"].collidepoint(mouse_pos):
+                clicked_ui = True
                 print("Gun clicked!")
                 trigger_message("You grabbed the Gun! Ready to shoot.")
                     
-             elif has_money_on_table and pharmacy_buttons["money"].collidepoint(mouse_pos):
+             elif has_money_on_table and pharmacy_buttons.get("money") and pharmacy_buttons["money"].collidepoint(mouse_pos):
+                clicked_ui = True
                 cookies_count += 20
                 saved_people += 1
                 has_money_on_table = False 
                 print("Cookies collected!")
                 trigger_message("+20 Cookies collected into wallet!")
 
-             else:
-                 success = customer_manager.handle_click(mouse_pos, current_selected_item, progress)
-                 if success:
-                     cookies_count += 20
-                     saved_people += 1
-                     current_selected_item = None 
-                     trigger_message("Trade successful! +20 Cookies!")
-                     save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+             elif pharmacy_buttons.get("sell_button") and pharmacy_buttons["sell_button"].collidepoint(mouse_pos):
+                 clicked_ui = True
+                 
+                 if current_selected_item is None:
+                     customer_manager.show_message("Hold a medicine from the hotbar first!")
+                 else:
+                     merged_inventory = {
+                         "ration_pack": progress.get("ration_pack", 0),
+                         "sedative": progress.get("sedative", 0),
+                         "blood_stop": inventory.get("Blood-Stop", 0),
+                         "speed_serum": inventory.get("Speed Serum", 0)
+                     }
+
+                     success, msg = customer_manager.handle_click(mouse_pos, current_selected_item, merged_inventory)
+                     
+                     if success:
+                         if current_selected_item == "ration_pack": progress["ration_pack"] -= 1
+                         elif current_selected_item == "sedative": progress["sedative"] -= 1
+                         elif current_selected_item == "blood_stop": inventory["Blood-Stop"] -= 1
+                         elif current_selected_item == "speed_serum": inventory["Speed Serum"] -= 1
+
+                         has_money_on_table = True
+                         current_selected_item = None
+                         customer_manager.show_message("Trade successful! Click cookies to collect!", is_success=True)
+                         trigger_message("Buyer left cookies on the counter!")
+                         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+                     else:
+                         customer_manager.show_message(msg if msg != "No click" else "Medicine does not match what customer wants!", is_success=False)
+                         trigger_message(msg if msg != "No click" else "Medicine does not match!")
          
          elif current_state == "MAP":
             if to_gh_btn.collidepoint(mouse_pos):
@@ -513,20 +545,20 @@ while True:
                      trigger_message("Not enough Cookies for Oxygen Recycler!")
 
              elif shop_buy_speed_serum_btn and shop_buy_speed_serum_btn.collidepoint(mouse_pos):
-                 if cookies_count >= 50:
-                     cookies_count -= 50
-                     has_Speed_Serum = True
-                     trigger_message("Speed Serum purchased!")
-                 else:
-                     trigger_message("Not enough Cookies for Speed Serum!")
+                  if cookies_count >= 50:
+                      cookies_count -= 50
+                      inventory["Speed Serum"] += 1 
+                      trigger_message("Speed Serum purchased!")
+                  else:
+                      trigger_message("Not enough Cookies for Speed Serum!")
 
              elif shop_buy_blood_stop_btn and shop_buy_blood_stop_btn.collidepoint(mouse_pos):
-                 if cookies_count >= 60:
-                     cookies_count -= 60
-                     has_Blood_Stop = True
-                     trigger_message("Blood Stop purchased!")
-                 else:
-                     trigger_message("Not enough Cookies for Blood Stop!")
+                  if cookies_count >= 60:
+                      cookies_count -= 60
+                      inventory["Blood-Stop"] += 1 
+                      trigger_message("Blood Stop purchased!")
+                  else:
+                      trigger_message("Not enough Cookies for Blood Stop!")
  
          elif current_state == "GREENHOUSE":
             if show_plant_menu:
