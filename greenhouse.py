@@ -12,6 +12,9 @@ img_harvest = None
 img_plant_menu_bg = None
 img_thorn_btn = None
 img_aloe_btn = None
+img_tire = None
+img_drum1 = None
+img_drum2 = None
     
 class Plant:
     def __init__(self, x_pos, y_pos, name, dust_speed, width=120, height=160):
@@ -29,13 +32,13 @@ class Plant:
 
 
         try:
-            self.img_seedling = pygame.image.load("image/plant/Aloe1.png").convert_alpha()
-            self.img_bud = pygame.image.load("image/plant/Aloe2.png").convert_alpha()
-            self.img_flower = pygame.image.load("image/plant/Aloe3.png").convert_alpha()
+            self.img_seedling = pygame.image.load("image/plant/Seedling aloe.png").convert_alpha()
+            self.img_bud = pygame.image.load("image/plant/Growing aloe.png").convert_alpha()
+            self.img_flower = pygame.image.load("image/plant/Aloe.png").convert_alpha()
 
-            self.img_wilt_1 = pygame.image.load("image/plant/wilt_1.png").convert_alpha()
-            self.img_wilt_2 = pygame.image.load("image/plant/wilt_2.png").convert_alpha()
-            self.img_wilt_3 = pygame.image.load("image/plant/wilt_3.png").convert_alpha()
+            self.img_wilt_1 = pygame.image.load("image/plant/Seedling aloe.png").convert_alpha()
+            self.img_wilt_2 = pygame.image.load("image/plant/Aloe wilt1.png").convert_alpha()
+            self.img_wilt_3 = pygame.image.load("image/plant/Aloe wilt2.png").convert_alpha()
         
         except pygame.error as e:
             print(f"Error loading images: {e}")
@@ -99,8 +102,9 @@ class Plant:
         surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
      
 
-def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, oxygen_count=0, canopy_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False):
+def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, oxygen_count=0, canopy_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False, locked_plots=None):
     global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed, img_harvest
+    global img_tire, img_drum1, img_drum2
     small_font = pygame.font.SysFont("Arial", 20)
 
     plant_seed_btn_rect = pygame.Rect(25, 630, 215, 65)
@@ -166,13 +170,27 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
                 except pygame.error as e:
                     print(f"Error loading harvest image: {e}")
                     img_harvest = None
-
+    
+    if img_tire is None and os.path.exists("image/Obstacles/Tires.png"):
+        img_tire = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Tires.png").convert_alpha(), (160, 110))
+    if img_drum1 is None and os.path.exists("image/Obstacles/Drum1.png"):
+        img_drum1 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum1.png").convert_alpha(), (115, 155))
+    if img_drum2 is None and os.path.exists("image/Obstacles/Drum 2.png"):
+        img_drum2 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum 2.png").convert_alpha(), (100, 140))
 
 
     if bg_image:
         screen.blit(bg_image, (0,0))
     else:
         screen.fill(COLOR_BG)
+    
+    if locked_plots:
+        for plot in locked_plots:
+            img = None
+            if plot['type'] == 'tire': img = img_tire
+            elif plot['type'] == 'drum1': img = img_drum1
+            elif plot['type'] == 'drum2': img = img_drum2
+            if img: screen.blit(img, (plot['x'], plot['y']))
     
     for p in plant_list:
         p.update()
