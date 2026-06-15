@@ -44,9 +44,6 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     if external_manager:
         _global_manager_ref = external_manager
     
-    screen_w, screen_h = screen.get_size()
-    bg_rect = pygame.Rect(0, 0, 1280, 720)
-    
     if bg_img:
         screen.blit(bg_img, (0,0))
     else:
@@ -58,12 +55,9 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     if counter_img:
         target_width = 1280
         target_height = 340
-        
         scaled_counter = pygame.transform.smoothscale(counter_img, (target_width, target_height))
-        
         pos_x = 0
         pos_y = 380
-        
         screen.blit(scaled_counter, (pos_x, pos_y))
 
     gun_rect = pygame.Rect(50, 395, 120, 120)
