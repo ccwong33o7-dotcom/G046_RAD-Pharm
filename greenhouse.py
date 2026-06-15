@@ -15,6 +15,9 @@ img_aloe_btn = None
 img_tire = None
 img_drum1 = None
 img_drum2 = None
+img_drum3 = None
+img_tire2 = None
+img_drum4 = None
     
 class Plant:
     def __init__(self, x_pos, y_pos, name, dust_speed, width=120, height=160):
@@ -104,7 +107,7 @@ class Plant:
 
 def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, oxygen_count=0, canopy_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False, locked_plots=None):
     global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed, img_harvest
-    global img_tire, img_drum1, img_drum2
+    global img_tire, img_drum1, img_drum2, img_drum3, img_tire2, img_drum4
     small_font = pygame.font.SysFont("Arial", 20)
 
     plant_seed_btn_rect = pygame.Rect(25, 630, 215, 65)
@@ -172,11 +175,17 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
                     img_harvest = None
     
     if img_tire is None and os.path.exists("image/Obstacles/Tires.png"):
-        img_tire = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Tires.png").convert_alpha(), (160, 110))
+        img_tire = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Tires.png").convert_alpha(), (170, 120))
     if img_drum1 is None and os.path.exists("image/Obstacles/Drum1.png"):
         img_drum1 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum1.png").convert_alpha(), (115, 155))
     if img_drum2 is None and os.path.exists("image/Obstacles/Drum 2.png"):
         img_drum2 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum 2.png").convert_alpha(), (100, 140))
+    if img_drum3 is None and os.path.exists("image/Obstacles/Drum 3.png"):
+        img_drum3 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum 3.png").convert_alpha(), (100, 140))
+    if img_tire2 is None and os.path.exists("image/Obstacles/Tires 2.png"):
+        img_tire2 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Tires 2.png").convert_alpha(), (120, 110))
+    if img_drum4 is None and os.path.exists("image/Obstacles/Drum 4.png"):
+        img_drum4 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum 4.png").convert_alpha(), (100, 140))
 
 
     if bg_image:
@@ -190,6 +199,9 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
             if plot['type'] == 'tire': img = img_tire
             elif plot['type'] == 'drum1': img = img_drum1
             elif plot['type'] == 'drum2': img = img_drum2
+            elif plot['type'] == 'drum3': img = img_drum3
+            elif plot['type'] == 'tire2': img = img_tire2
+            elif plot['type'] == 'drum4': img = img_drum4
             if img: screen.blit(img, (plot['x'], plot['y']))
     
     for p in plant_list:
