@@ -186,6 +186,12 @@ plant_a = Plant(950, 400, "Glowing Aloe", 0.05)
 plant_b = Plant(710, 400, "Rusty Thorn", 0.4)
 plants = [plant_a, plant_b]
 
+locked_plots = [
+    {'type': 'tire', 'x': 440, 'y': 420},
+    {'type': 'drum1', 'x': 200, 'y':380},
+    {'type': 'drum2', 'x': 290, 'y': 250}
+]
+
 pygame.event.pump()
 pygame.event.clear()
 
@@ -298,7 +304,7 @@ while True:
        screen.fill((0, 0, 0))
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, has_oxygen_recycler, ready_to_craft)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, has_oxygen_recycler, ready_to_craft, locked_plots=locked_plots)
 
        if ready_to_craft:
             msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
