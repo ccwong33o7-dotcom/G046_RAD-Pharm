@@ -189,7 +189,10 @@ plants = [plant_a, plant_b]
 locked_plots = [
     {'type': 'tire', 'x': 440, 'y': 420},
     {'type': 'drum1', 'x': 200, 'y':380},
-    {'type': 'drum2', 'x': 290, 'y': 250}
+    {'type': 'drum2', 'x': 290, 'y': 250},
+    {'type': 'drum3', 'x': 500, 'y': 250},
+    {'type': 'tire2', 'x': 690, 'y': 290},
+    {'type': 'drum4', 'x': 870, 'y': 250}
 ]
 
 pygame.event.pump()
