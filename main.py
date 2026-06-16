@@ -52,7 +52,7 @@ except:
    shop_bg_img = None
    print("Warning: Shop scene image not found")
 try:
-    crafting_bg_img = pygame.image.load("image/background/lab_without_taskbar.png").convert()
+    crafting_bg_img = pygame.image.load("image/background/Final_Lab_Background.jpeg").convert()
     crafting_bg_img = pygame.transform.smoothscale(crafting_bg_img, (Width, Height))
 except:
     crafting_bg_img = None
@@ -320,7 +320,7 @@ while True:
            
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
-      _, crafting_back_btn = draw_crafting(screen, crafting_bg_img, font)
+      draw_crafting(screen, crafting_bg_img, font)
       animate_crafting()
 
     elif current_state == "SETTING":
@@ -644,9 +644,7 @@ while True:
                 if p.rect.collidepoint(mouse_pos):
                     p.clean()
 
-         elif current_state == "CRAFTING":
-            if crafting_back_btn.collidepoint(mouse_pos):
-               current_state = "MAP"
+
 
          
 

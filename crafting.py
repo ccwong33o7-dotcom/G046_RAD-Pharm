@@ -17,9 +17,16 @@ def get_title_font():
         pygame.font.init()
     return pygame.font.SysFont("Arial", 32, bold=True)
 
-crafting_btn_set_btn = pygame.Rect(1080, 50, 150, 50)
-crafting_back_btn = pygame.Rect(1080, 150, 150, 50)
 
+
+try:
+    play_btn_img = pygame.image.load("image/button/Minigame_play_btn.png").convert_alpha()
+    play_btn_img = pygame.transform.smoothscale(play_btn_img, (180, 80))
+except:
+    play_btn_img = None
+    print("Warning: Play button image not found")
+
+play_btn_rect = pygame.Rect(550, 435, 180, 80)
 
 RECIPES = {
     "Rad-Ointment": {"Filtered water": 1, "Glowing Aloe": 1 , "Scrap Fiber": 1},
@@ -32,10 +39,19 @@ RECIPES = {
 inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber": "Infinite", "Glowing Aloe": 2, "Rusty Thorn":2 
              ,"Rad-Ointment": 0 , "Speed Serum": 0, "Lung-Clear": 0, "Blood-Stop": 0, "Pain Killer": 0}
 
+hidden_items = [
+    "Rad-Ointment",
+    "Speed Serum",
+    "Lung-Clear",
+    "Blood-Stop",
+    "Pain Killer"
+]
+
 game_state = "MENU"
 pending_item = ""
 marker_pos = 0
 marker_speed = 3
+minigame_started = False
 bar_width = 400
 bar_x = (screen_width // 2) - (bar_width // 2)
 target_zone = (100, 300)
@@ -61,85 +77,199 @@ def craft_success(item_name):
         
 
 def update_crafting(event):
-    global game_state, pending_item, marker_pos, marker_speed
 
-    if event.type == pygame.MOUSEBUTTONDOWN:
-        mouse_pos = event.pos
+    global game_state
+    global pending_item
+    global marker_pos
+    global marker_speed
+    global minigame_started
 
-        if crafting_back_btn.collidepoint(mouse_pos):
-            return "PHARMACY"
-        
     if game_state == "MENU":
+        minigame_started = False
         if event.type == pygame.KEYDOWN:
+
             selection = None
-            if event.key == pygame.K_1: selection = "Rad-Ointment"
-            elif event.key == pygame.K_2: selection = "Speed Serum"
-            elif event.key == pygame.K_3: selection = "Lung-Clear"
-            elif event.key == pygame.K_4: selection = "Blood-Stop"
-            elif event.key == pygame.K_5: selection = "Pain Killer"
+
+            if event.key == pygame.K_1:
+                selection = "Rad-Ointment"
+
+            elif event.key == pygame.K_2:
+                selection = "Speed Serum"
+
+            elif event.key == pygame.K_3:
+                selection = "Lung-Clear"
+
+            elif event.key == pygame.K_4:
+                selection = "Blood-Stop"
+
+            elif event.key == pygame.K_5:
+                selection = "Pain Killer"
 
             if selection:
+
                 if check_resources(selection):
+
                     pending_item = selection
+
                     game_state = "MINIGAME"
+
+                    minigame_started = False
+
                     marker_pos = 0
+                    marker_speed = 3
+
+                    print(f"Crafting {selection}")
+
                 else:
                     print("Missing ingredients!")
 
     elif game_state == "MINIGAME":
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if target_zone[0] <= marker_pos <= target_zone[1]:
-                craft_success(pending_item)
-                print("SUCCESS!")
-            else:
-                print("FAILED!")
-            game_state = "MENU"
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+
+            if not minigame_started:
+
+                if play_btn_rect.collidepoint(event.pos):
+
+                    minigame_started = True
+
+                    marker_pos = 0
+
+                    print("Minigame Started!")
+
+    if minigame_started:
+
+        if event.type == pygame.KEYDOWN:
+
+            if event.key == pygame.K_SPACE:
+
+                if target_zone[0] <= marker_pos <= target_zone[1]:
+
+                    craft_success(pending_item)
+
+                    print("SUCCESS!")
+
+                else:
+                    print("FAILED!")
+
+                game_state = "MENU"
+
+                minigame_started = False
+                
 
     return game_state
+
+
 
 def animate_crafting():
     global marker_pos, marker_speed
 
-    if game_state == "MINIGAME":
+    if game_state == "MINIGAME" and minigame_started:
+
         marker_pos += marker_speed
+
         if marker_pos >= bar_width or marker_pos <= 0:
             marker_speed *= -1
 
+
 def draw_crafting(screen, bg_image, font):
+
     if bg_image:
         screen.blit(bg_image, (0, 0))
     else:
         screen.fill(COLOUR_BG)
 
+    msg = get_title_font().render(
+        "Press 1-5 To Craft",
+        True,
+        COLOR_TEXT
+    )
 
-    msg = get_title_font().render("Press 1-5 to Craft", True, COLOR_TEXT)
-    screen.blit(msg, (500, 50))
+    screen.blit(msg, (500, 40))
 
 
-    y_offset = 150
+    small_font = pygame.font.SysFont("Arial", 22, bold=True)
+
+    visible_items = []
+
     for item, count in inventory.items():
-        color = (0, 255, 0) if count != "Infinite" else (255, 255, 255)
-        txt = font.render(f"{item}: {count}", True, color)
-        screen.blit(txt, (100, y_offset))
-        y_offset += 40
 
+        if item not in hidden_items:
+            visible_items.append((item, count))
+
+    positions = {
+        "Filtered water": (70, 665),
+        "Bio-Fuel": (350, 665),
+        "Scrap Fiber": (620, 665),
+        "Glowing Aloe": (900, 665),
+        "Rusty Thorn": (1080, 665)
+    }
+
+    for item, count in visible_items:
+
+        txt = small_font.render(
+            f"{item}: {count}",
+            True,
+            (255, 255, 255)
+        )
+
+        if item in positions:
+            screen.blit(txt, positions[item])
 
     if game_state == "MINIGAME":
+
         bar_x = (screen.get_width() // 2) - (bar_width // 2)
 
-        pygame.draw.rect(screen, (80, 80, 80), (bar_x, 350, bar_width, 50))
-        pygame.draw.rect(screen, (0, 255, 0),
-                         (bar_x + target_zone[0], 350,
-                          target_zone[1] - target_zone[0], 50))
-        pygame.draw.rect(screen, (255, 255, 255),
-                         (bar_x + marker_pos, 340, 10, 70))
+        pygame.draw.rect(
+            screen,
+            (80, 80, 80),
+            (bar_x, 350, bar_width, 50)
+        )
 
-    # Buttons
-    pygame.draw.rect(screen, (100, 100, 100), crafting_back_btn)
+        pygame.draw.rect(
+            screen,
+            (0, 255, 0),
+            (
+                bar_x + target_zone[0],
+                350,
+                target_zone[1] - target_zone[0],
+                50
+            )
+        )
 
-    screen.blit(font.render("Back", True, (255, 255, 255)), (1080, 150))
+        pygame.draw.rect(
+            screen,
+            (255, 255, 255),
+            (bar_x + marker_pos, 340, 10, 70)
+        )
 
-    return crafting_btn_set_btn, crafting_back_btn
+        # DRAW PLAY BUTTON HERE
+        if not minigame_started:
+
+            if play_btn_img:
+                screen.blit(play_btn_img, play_btn_rect)
+
+            else:
+                pygame.draw.rect(
+                    screen,
+                    (0, 180, 0),
+                    play_btn_rect,
+                    border_radius=12
+                )
+
+                txt = small_font.render(
+                    "PLAY",
+                    True,
+                    (255, 255, 255)
+                )
+
+                screen.blit(txt, (565, 585))
+
+
+
+    return play_btn_rect
+
+
  
 
 
