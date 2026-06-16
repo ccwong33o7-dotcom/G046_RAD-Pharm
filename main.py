@@ -4,8 +4,7 @@ import os
 import json
 from menu import draw_menu
 from setting import run_setting
-import pharmacy 
-import customer
+import pharmacy
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant, draw_plant_menu
 from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
@@ -217,7 +216,7 @@ plant_menu_rect = pygame.Rect(0, 0, 0, 0)
 aloe_btn_rect = pygame.Rect(0, 0, 0, 0)  
 thorn_btn_rect = pygame.Rect(0, 0, 0, 0)
 
-customer_manager = customer.CustomerManager()
+customer_manager = pharmacy.CustomerManager()
 initial_count = min(current_day, 4)
 pharmacy.change_customer_count(initial_count)
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
@@ -227,14 +226,13 @@ has_money_on_table = False
 current_selected_item = None
 
 pharmacy_buttons = {
-    "sell_rad": pygame.Rect(850, 450, 200, 50),
     "gun": pygame.Rect(180, 480, 120, 120),
     "money": pygame.Rect(720, 430, 100, 100),
     "ration_pack": pygame.Rect(25, 532, 90, 90),
     "sedative": pygame.Rect(131, 532, 90, 90),
     "blood_stop": pygame.Rect(237, 532, 90, 90),
     "speed_serum": pygame.Rect(343, 532, 90, 90),
-    "sell_button": pygame.Rect(850, 450, 200, 50)
+    "sell_rad": pygame.Rect(850, 450, 200, 50)
 }
 
 while True:
@@ -289,7 +287,6 @@ while True:
             customer_manager.spawn_customers(spawn_num)
             
         pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager)
-        customer_manager.draw_all(screen)
 
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -454,13 +451,13 @@ while True:
                     
              elif has_money_on_table and pharmacy_buttons.get("money") and pharmacy_buttons["money"].collidepoint(mouse_pos):
                 clicked_ui = True
-                cookies_count += 20
+                cookies_count += 45
                 saved_people += 1
                 has_money_on_table = False 
                 print("Cookies collected!")
-                trigger_message("+20 Cookies collected into wallet!")
+                trigger_message("+45 Cookies collected into wallet!")
 
-             elif pharmacy_buttons.get("sell_button") and pharmacy_buttons["sell_button"].collidepoint(mouse_pos):
+             elif pharmacy_buttons.get("sell_rad") and pharmacy_buttons["sell_rad"].collidepoint(mouse_pos):
                  clicked_ui = True
                  
                  if current_selected_item is None:
