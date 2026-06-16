@@ -366,15 +366,6 @@ while True:
           if event.key == pygame.K_1:
               pharmacy.change_customer_count(1)
               print("Test Key: Switched to 1 customer")
-          if event.key == pygame.K_2:
-              pharmacy.change_customer_count(2)
-              print("Test Key: Switched to 2 customers")
-          if event.key == pygame.K_3:
-              pharmacy.change_customer_count(3)
-              print("Test Key: Switched to 3 customers")
-          if event.key == pygame.K_4:
-              pharmacy.change_customer_count(4)
-              print("Test Key: Switched to 4 customers")
 
       if event.type == pygame.MOUSEBUTTONDOWN: 
          if current_state not in ["MENU", "SETTING","INTRO", "WEATHER_EXPLAIN"]:
