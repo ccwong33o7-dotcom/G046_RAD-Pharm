@@ -381,6 +381,45 @@ while True:
                print(f"TaskBar: Weather Icon Clicked! Current weather is {weather_sys.current_weather}")
                continue
             
+            if current_state == "GREENHOUSE":
+              clicked_clear = False
+              for p in plants:
+
+                  if p.is_dead and hasattr(p, 'delete_btn_rect') and p.delete_btn_rect and p.delete_btn_rect.collidepoint(mouse_pos):
+                      p.is_dead = False 
+                      p.growth = 0
+                      p.dust = 0
+                      p.death_timer = 0
+                      trigger_message("Plant discarded into bin!") 
+                      clicked_clear = True
+                      break 
+
+              if not clicked_clear:
+                  if show_plant_menu:
+
+                      if aloe_btn_rect.collidepoint(mouse_pos):
+                          show_plant_menu = False
+                      elif thorn_btn_rect.collidepoint(mouse_pos):
+                          show_plant_menu = False
+                      elif not plant_menu_rect.collidepoint(mouse_pos):
+                          show_plant_menu = False
+
+                  if plant_seed_btn.collidepoint(mouse_pos):
+                      show_plant_menu = True 
+                  elif harvest_btn.collidepoint(mouse_pos):
+                      pass
+                  elif gh_upgrade_btn.collidepoint(mouse_pos):
+                      pass
+                  elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos):
+                      pass
+                  elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos):
+                      pass
+                  else:
+                      for p in plants:
+                          if p.rect.collidepoint(mouse_pos) and not p.is_dead:
+                              p.clean()
+              continue
+
          if current_state == "MENU":
              if s_btn.collidepoint(mouse_pos):
                   if not has_seen_intro:
