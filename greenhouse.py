@@ -33,6 +33,10 @@ class Plant:
         self.img_growth = []
         self.img_dead = []
 
+        self.is_dead = False
+        self.death_timer = 0
+        self.delete_btn_rect = None
+
 
         try:
             self.img_seedling = pygame.image.load("image/plant/Seedling aloe.png").convert_alpha()
@@ -103,6 +107,16 @@ class Plant:
         stats_txt = font_small.render(f"D:{int(self.dust)}% G:{int(self.growth)}%", True, COLOR_TEXT)
         surface.blit(name_txt, (self.rect.x, self.rect.y - 30))
         surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
+
+        if self.is_dead:
+            self.delete_btn_rect = pygame.Rect(self.rect.x + 35, self.rect.y - 60, 50, 30)
+            pygame.draw.rect(surface, (139, 69, 19), self.delete_btn_rect) 
+            
+            small_font = pygame.font.SysFont("Arial", 12, bold=True)
+            txt = small_font.render("Clear", True, (255, 255, 255))
+            surface.blit(txt, (self.delete_btn_rect.x + 10, self.delete_btn_rect.y + 8))
+        else:
+            self.delete_btn_rect = None
      
 
 def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, oxygen_count=0, canopy_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False, locked_plots=None):
