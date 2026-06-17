@@ -181,8 +181,8 @@ has_seen_intro = False
 current_state="MENU"
 last_state = "MENU"
 
-plant_a = Plant(950, 400, "Glowing Aloe", 0.05)
-plant_b = Plant(710, 400, "Rusty Thorn", 0.4)
+plant_a = Plant(990, 380, "Glowing Aloe", 0.05)
+plant_b = Plant(710, 380, "Rusty Thorn", 0.4)
 plants = [plant_a, plant_b]
 
 locked_plots = [
@@ -601,9 +601,11 @@ while True:
                            print(f"Current amount: {inventory[p.name]}")
 
                 if harvested_something:
-                    print("Harvest successful!")    
+                    print("Harvest successful!")
+                    trigger_message("Harvest successful!")   
                 else:
                      print("No plants ready to harvest!")
+                     trigger_message("No plants ready to harvest!")
                 
 
             elif gh_upgrade_btn.collidepoint(mouse_pos):
