@@ -39,7 +39,7 @@ class Plant:
             self.img_bud = pygame.image.load("image/plant/Growing aloe.png").convert_alpha()
             self.img_flower = pygame.image.load("image/plant/Aloe.png").convert_alpha()
 
-            self.img_wilt_1 = pygame.image.load("image/plant/Seedling aloe.png").convert_alpha()
+            self.img_wilt_1 = pygame.image.load("image/plant/Aloe.png").convert_alpha()
             self.img_wilt_2 = pygame.image.load("image/plant/Aloe wilt1.png").convert_alpha()
             self.img_wilt_3 = pygame.image.load("image/plant/Aloe wilt2.png").convert_alpha()
         
