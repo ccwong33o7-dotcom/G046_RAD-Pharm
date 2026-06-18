@@ -2,6 +2,7 @@ import pygame
 import sys
 import os
 import json
+import random
 from menu import draw_menu
 from setting import run_setting
 import pharmacy
@@ -217,7 +218,7 @@ aloe_btn_rect = pygame.Rect(0, 0, 0, 0)
 thorn_btn_rect = pygame.Rect(0, 0, 0, 0)
 
 customer_manager = pharmacy.CustomerManager()
-initial_count = min(current_day, 4)
+initial_count = random.randint(1, 2)
 pharmacy.change_customer_count(initial_count)
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
 customer_manager.spawn_customers(initial_count)
@@ -248,7 +249,7 @@ while True:
             current_day = 1 
             
         weather_sys.update_weather(current_day) 
-        next_day_customers = min(current_day, 4)
+        next_day_customers = random.randint(1, 2)
         customer_manager.spawn_customers(next_day_customers)
         print(f"New Day! Spawned {next_day_customers} customers.")
         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
@@ -283,7 +284,7 @@ while True:
     elif current_state == "PHARMACY":
         screen.fill((0, 0, 0))
         if len(customer_manager.active_customers) == 0 and not has_money_on_table:
-            spawn_num = min(current_day, 4)
+            spawn_num =random.randint(1, 2)
             customer_manager.spawn_customers(spawn_num)
             
         pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager)
