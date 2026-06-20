@@ -236,17 +236,25 @@ pharmacy_buttons = {
     "sell_rad": pygame.Rect(850, 450, 200, 50)
 }
 
+show_day_transition = False
+transition_day = 0
+
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
     if saved_people >= 25:
         current_day += 1
         saved_people = 0 
+
+        show_day_transition = True
+        transition_day = current_day
+        
         print(f"Day Cleared! Welcome to Day {current_day}!")
         
         if current_day > 10:
             print("Victory! You survived all 10 days!")
-            current_day = 1 
+            trigger_message("You survived all 10 days! Victory!")
+            current_day = 1
             
         weather_sys.update_weather(current_day) 
         next_day_customers = random.randint(1, 2)
@@ -287,7 +295,7 @@ while True:
             spawn_num =random.randint(1, 2)
             customer_manager.spawn_customers(spawn_num)
             
-        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager)
+        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager, selected_item=current_selected_item)
 
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -336,10 +344,35 @@ while True:
         alpha = int((flash_message_timer / 60) * 255) if flash_message_timer < 60 else 255
         text_surf.set_alpha(alpha)
 
-        text_rect = text_surf.get_rect(center=(Width // 2, 680))
+        text_rect = text_surf.get_rect(center=(Width // 2, 695))
         screen.blit(text_surf, text_rect)
 
+    if show_day_transition:
+        overlay = pygame.Surface((Width, Height), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))
+        screen.blit(overlay, (0, 0))
+
+        font_big = pygame.font.SysFont("Comic Sans MS", 40, bold=True)
+        font_small = pygame.font.SysFont("Comic Sans MS", 15)
+        text1 = font_big.render(f"Welcome to Day {transition_day}!", True, (255, 255, 255))
+        text2 = font_small.render("Press any key to continue your journey.", True, (200, 200, 200))
+
+        rect1 = text1.get_rect(center=(Width//2, Height//2 - 40))
+        rect2 = text2.get_rect(center=(Width//2, Height//2 + 40))
+        screen.blit(text1, rect1)
+        screen.blit(text2, rect2)
+
     for event in pygame.event.get():
+      if show_day_transition:
+          if event.type == pygame.KEYDOWN:
+              show_day_transition = False
+              continue 
+          if event.type == pygame.QUIT:
+              save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+              pygame.quit()
+              sys.exit()
+          continue
+      
       if event.type == pygame.QUIT:
         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
         pygame.quit()
@@ -487,7 +520,8 @@ while True:
                  clicked_ui = True
                  
                  if current_selected_item is None:
-                     customer_manager.show_message("Hold a medicine from the hotbar first!")
+                     customer_manager.show_message("Hold a medicine from the hotbar first!", is_success=False)
+                     trigger_message("Please select an item first.")
                  else:
                      merged_inventory = {
                          "ration_pack": progress.get("ration_pack", 0),
@@ -496,14 +530,11 @@ while True:
                          "speed_serum": inventory.get("Speed Serum", 0)
                      }
 
-                     success, msg = customer_manager.handle_click(mouse_pos, current_selected_item, merged_inventory)
+                     if customer_manager.active_customers:
+                         current_customer = customer_manager.active_customers[0]
+                         success, msg = current_customer.check_click(mouse_pos, current_selected_item, merged_inventory)
                      
                      if success:
-                         if current_selected_item == "ration_pack": progress["ration_pack"] -= 1
-                         elif current_selected_item == "sedative": progress["sedative"] -= 1
-                         elif current_selected_item == "blood_stop": inventory["Blood-Stop"] -= 1
-                         elif current_selected_item == "speed_serum": inventory["Speed Serum"] -= 1
-
                          has_money_on_table = True
                          current_selected_item = None
                          customer_manager.show_message("Trade successful! Click cookies to collect!", is_success=True)

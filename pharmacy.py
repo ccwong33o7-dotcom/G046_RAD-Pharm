@@ -64,7 +64,7 @@ class Customer:
             if self.current_x < self.target_x:
                 self.current_x = self.target_x
 
-    def draw(self, screen, y_pos):
+    def draw(self, screen, y_pos, selected_item=None):
         self.rect = pygame.Rect(self.current_x, y_pos, self.image.get_width(), self.image.get_height())
         screen.blit(self.image, (self.current_x, y_pos))
 
@@ -82,7 +82,13 @@ class Customer:
             btn_x = bubble_x + (self.bubble_image.get_width() - btn_w) // 2
             btn_y = bubble_y + 130
             self.sell_btn_rect = pygame.Rect(btn_x, btn_y, btn_w, btn_h)
-            pygame.draw.rect(screen, (46, 204, 113), self.sell_btn_rect, border_radius=4)
+
+            if selected_item is not None and selected_item == self.requested_item:
+                btn_color = (46, 204, 113)  
+            else:
+                btn_color = (128, 128, 128)  
+
+            pygame.draw.rect(screen, btn_color, self.sell_btn_rect, border_radius=4)
             btn_font = pygame.font.SysFont("Arial", 13, bold=True)
             text_surf = btn_font.render("SELL", True, (255, 255, 255))
             screen.blit(text_surf, (btn_x + (btn_w - text_surf.get_width()) // 2,
@@ -172,12 +178,12 @@ class CustomerManager:
         self.feedback_timer = 120
         self.feedback_color = (50, 255, 50) if is_success else (255, 50, 50)
 
-    def draw_all(self, screen):
+    def draw_all(self, screen, selected_item=None):
         y_pos = 177
         self.update_all()
 
         for customer in self.active_customers:
-            customer.draw(screen, y_pos)
+            customer.draw(screen, y_pos,selected_item)
 
         if self.feedback_timer > 0 and self.feedback_text:
             text_surf = self.feedback_font.render(self.feedback_text, True, self.feedback_color)
@@ -189,7 +195,7 @@ class CustomerManager:
                 alpha = 255
             text_surf.set_alpha(alpha)
 
-            text_rect = text_surf.get_rect(center=(screen.get_width() // 2, 720))
+            text_rect = text_surf.get_rect(center=(screen.get_width() // 2, 695))
             screen.blit(text_surf, text_rect)
 
             self.feedback_timer -= 1
@@ -246,7 +252,7 @@ def change_customer_count(count):
     if _global_manager_ref:
         _global_manager_ref.spawn_customers(count)
 
-def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progress_dict=None, external_manager=None):
+def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progress_dict=None, external_manager=None, selected_item=None):
     global _global_manager_ref
     if external_manager:
         _global_manager_ref = external_manager
@@ -257,7 +263,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
         screen.fill((255,250,200))
 
     if external_manager:
-        external_manager.draw_all(screen)
+        external_manager.draw_all(screen, selected_item)
 
     if counter_img:
         target_width = 1280
