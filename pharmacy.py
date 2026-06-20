@@ -58,6 +58,25 @@ class Customer:
 
         self.is_satisfied = False
 
+    def set_requested_item(self, item):
+        self.requested_item = item
+        icon_paths = {
+            "ration_pack": "image/Customer/CI_rationpack.png",
+            "sedative": "image/Customer/CI_sedative.png",
+            "blood_stop": "image/Customer/CI_bloodstop.png",
+            "speed_serum": "image/Customer/CI_speedserum.png"
+        }
+        try:
+            icon_img = pygame.image.load(icon_paths[item]).convert_alpha()
+            target_icon_h = 55
+            orig_w, orig_h = icon_img.get_size()
+            target_icon_w = int(orig_w * (target_icon_h / orig_h))
+            self.item_icon = pygame.transform.smoothscale(icon_img, (target_icon_w, target_icon_h))
+        except Exception as e:
+            print(f"ERROR loading icon for {item}: {e}")
+            self.item_icon = pygame.Surface((55, 55))
+            self.item_icon.fill((0, 200, 200))
+
     def update(self):
         if self.current_x > self.target_x:
             self.current_x -= self.speed
@@ -148,7 +167,7 @@ class CustomerManager:
         self.feedback_timer = 0
         self.feedback_color = (255, 50, 50)
 
-    def spawn_customers(self, count):
+    def spawn_customers(self, count,force_ration=False):
         self.active_customers.clear()
 
         available_count = min(count, len(self.image_paths))
@@ -158,7 +177,8 @@ class CustomerManager:
 
         for i, path in enumerate(chosen_paths):
             customer = Customer(path)
-
+            if force_ration and i == 0: 
+                customer.set_requested_item("ration_pack")
             spacing = screen_w // (available_count + 1)
             target_x = spacing * (i + 1) - (customer.image.get_width() // 2)
             target_x += -150

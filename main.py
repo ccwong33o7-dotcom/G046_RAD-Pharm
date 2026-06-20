@@ -3,6 +3,7 @@ import sys
 import os
 import json
 import random
+import math
 from menu import draw_menu
 from setting import run_setting
 import pharmacy
@@ -135,7 +136,8 @@ def load_game():
         "sedative": 0,
         "ration_pack": 0,
         "speed_serum": 0,
-        "blood_stop": 0
+        "blood_stop": 0,
+        "tutorial_done": False 
     }
 
 def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_amt, saved_people_count):
@@ -151,7 +153,8 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxyge
        "sedative": progress.get("sedative", 0),
        "ration_pack": progress.get("ration_pack", 0),
        "speed_serum": inventory.get("Speed Serum", 0), 
-       "blood_stop": inventory.get("Blood-Stop", 0)
+       "blood_stop": inventory.get("Blood-Stop", 0),
+       "tutorial_done": tutorial_done 
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -171,6 +174,7 @@ oxygen_recycler_count = 1 if has_oxygen_recycler else 0
 
 cookies_count = progress.get("cookies", 35)
 saved_people = progress.get("saved_people", 0)
+tutorial_done = progress.get("tutorial_done", False)
 
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
@@ -219,9 +223,9 @@ thorn_btn_rect = pygame.Rect(0, 0, 0, 0)
 
 customer_manager = pharmacy.CustomerManager()
 initial_count = random.randint(1, 2)
-pharmacy.change_customer_count(initial_count)
+force_ration = not tutorial_done
+customer_manager.spawn_customers(initial_count, force_ration=force_ration)
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
-customer_manager.spawn_customers(initial_count)
 
 has_money_on_table = False
 current_selected_item = None
@@ -238,6 +242,111 @@ pharmacy_buttons = {
 
 show_day_transition = False
 transition_day = 0
+transition_anim_timer = 0
+
+tutorial_active = False
+tutorial_step = 0 
+tutorial_skip_rect = pygame.Rect(0, 0, 0, 0)
+tutorial_done_timer = 0
+tutorial_show_skip = True
+
+def start_tutorial():
+    global tutorial_active, tutorial_step, tutorial_done_timer
+    if progress.get("ration_pack", 0) == 0:
+        progress["ration_pack"] = 1
+        print("[Tutorial] Gave 1 Ration Pack for tutorial.")
+    tutorial_active = True
+    tutorial_step = 0
+    tutorial_done_timer = 0
+    print("[Tutorial] Started.")
+
+def draw_tutorial(screen, pharmacy_buttons):
+    global tutorial_skip_rect, tutorial_done_timer, tutorial_active, tutorial_done
+    
+    if not tutorial_active:
+        return
+    
+    if tutorial_step == 0:
+        if customer_manager.active_customers:
+            customer = customer_manager.active_customers[0]
+            if customer.current_x > customer.target_x:  
+                return  
+        else:
+            return
+    
+    overlay = pygame.Surface((Width, Height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 40))
+    screen.blit(overlay, (0, 0))
+    hint_text = ""
+
+    if tutorial_step == 0:
+        hint_text = "Step 1: Click on Ration Pack to select it."
+    elif tutorial_step == 1:
+        hint_text = "Step 2: Click the SELL button to trade with customer."
+    elif tutorial_step == 2:
+        hint_text = "Step 3: Click the cookies on the counter to collect reward!"
+    else:
+        hint_text = "Tutorial Complete! You're ready to help survivors."
+        if tutorial_done_timer == 0:
+            trigger_message("Tutorial complete! Buy supplies at SHOP or craft medicine at LAB to save survivors.")
+        tutorial_done_timer += 1
+        if tutorial_done_timer > 180:
+            tutorial_active = False
+            tutorial_done = True
+            save_game(current_day, has_seen_intro, pure_soil_count,
+                     has_intact_canopy, has_oxygen_recycler,
+                     cookies_count, saved_people)
+            print("[Tutorial] Finished and saved.")
+        return
+    
+    box_width = 480
+    box_height = 60
+    box_x = (Width - box_width) // 2
+    box_y = Height - 110
+    box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+    
+    pygame.draw.rect(screen, (20, 30, 60, 200), box_rect, border_radius=14)
+    pygame.draw.rect(screen, (255, 255, 255, 60), box_rect, width=2, border_radius=14)
+    
+    font_tut = pygame.font.SysFont("Segoe UI", 18, bold=True)
+    text_surf = font_tut.render(hint_text, True, (255, 255, 220))
+    text_rect = text_surf.get_rect(center=(Width // 2, box_y + box_height // 2))
+    screen.blit(text_surf, text_rect)
+
+    dot_y = box_y - 18
+    for i in range(3):
+        dot_x = Width // 2 - 24 + i * 24
+        if i == tutorial_step:
+            color = (0, 200, 255)
+            pygame.draw.circle(screen, color, (dot_x, dot_y), 7)
+            pygame.draw.circle(screen, (0, 200, 255, 80), (dot_x, dot_y), 11, 2)
+        else:
+            color = (160, 160, 160)
+            pygame.draw.circle(screen, color, (dot_x, dot_y), 5)
+    
+    tutorial_skip_rect = pygame.Rect(0, 0, 0, 0)
+
+def handle_tutorial_click(mouse_pos):
+    global tutorial_step, tutorial_active, tutorial_done
+    
+    if not tutorial_active:
+        return False
+    
+    return False
+
+def advance_tutorial():
+    global tutorial_step, tutorial_active, tutorial_done
+    
+    if not tutorial_active:
+        return
+    
+    if tutorial_step < 2:
+        tutorial_step += 1
+        print(f"[Tutorial] Advanced to step {tutorial_step}")
+    else:
+        tutorial_step = 3
+        trigger_message("Tutorial complete! Buy medicines at the Shop or craft in the Lab. Start saving survivors!")
+        print("[Tutorial] All steps completed!")
 
 while True:
     mouse_pos = pygame.mouse.get_pos()
@@ -248,6 +357,7 @@ while True:
 
         show_day_transition = True
         transition_day = current_day
+        transition_anim_timer = 0
         
         print(f"Day Cleared! Welcome to Day {current_day}!")
         
@@ -258,7 +368,7 @@ while True:
             
         weather_sys.update_weather(current_day) 
         next_day_customers = random.randint(1, 2)
-        customer_manager.spawn_customers(next_day_customers)
+        customer_manager.spawn_customers(next_day_customers, force_ration=False)
         print(f"New Day! Spawned {next_day_customers} customers.")
         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
 
@@ -291,11 +401,14 @@ while True:
             
     elif current_state == "PHARMACY":
         screen.fill((0, 0, 0))
+        if not tutorial_done and not tutorial_active:
+            start_tutorial()
         if len(customer_manager.active_customers) == 0 and not has_money_on_table:
             spawn_num =random.randint(1, 2)
-            customer_manager.spawn_customers(spawn_num)
+            customer_manager.spawn_customers(spawn_num, force_ration=False)
             
         pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager, selected_item=current_selected_item)
+        draw_tutorial(screen, pharmacy_buttons)
 
     elif current_state == "MAP":
        screen.fill((0, 0, 0))
@@ -348,19 +461,59 @@ while True:
         screen.blit(text_surf, text_rect)
 
     if show_day_transition:
+        transition_anim_timer += 1
         overlay = pygame.Surface((Width, Height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
 
-        font_big = pygame.font.SysFont("Comic Sans MS", 40, bold=True)
-        font_small = pygame.font.SysFont("Comic Sans MS", 15)
-        text1 = font_big.render(f"Welcome to Day {transition_day}!", True, (255, 255, 255))
-        text2 = font_small.render("Press any key to continue your journey.", True, (200, 200, 200))
-
-        rect1 = text1.get_rect(center=(Width//2, Height//2 - 40))
-        rect2 = text2.get_rect(center=(Width//2, Height//2 + 40))
-        screen.blit(text1, rect1)
-        screen.blit(text2, rect2)
+        box_width = 700
+        box_height = 240
+        box_rect = pygame.Rect(
+            (Width - box_width) // 2,
+            (Height - box_height) // 2 - 20,
+            box_width, box_height
+        )
+        pygame.draw.rect(screen, (20, 20, 40, 220), box_rect, border_radius=24)
+        pygame.draw.rect(screen, (100, 200, 255, 120), box_rect, width=3, border_radius=24)
+        
+        font_title = pygame.font.SysFont("Arial", 52, bold=True)
+        title_text = f"Welcome to Day {transition_day}!"
+        
+        shadow_surf = font_title.render(title_text, True, (0, 0, 0))
+        shadow_rect = shadow_surf.get_rect(center=(Width//2 + 2, Height//2 - 25 + 2))
+        screen.blit(shadow_surf, shadow_rect)
+        
+        main_surf = font_title.render(title_text, True, (255, 255, 255))
+        main_rect = main_surf.get_rect(center=(Width//2, Height//2 - 25))
+        screen.blit(main_surf, main_rect)
+        
+        line_y = Height // 2 + 20
+        for i in range(300):
+            alpha = int(200 * (1 - abs(i - 150) / 150))
+            pygame.draw.rect(screen, (100, 200, 255, alpha),
+                           (Width//2 - 150 + i, line_y, 1, 2))
+        
+        breath = int(150 + 105 * (0.5 + 0.5 * math.sin(transition_anim_timer * 0.04)))
+        font_sub = pygame.font.SysFont("Arial", 26)
+        sub_text = "Press any key to continue your journey."
+        sub_surf = font_sub.render(sub_text, True, (220, 220, 220))
+        sub_surf.set_alpha(breath)
+        sub_rect = sub_surf.get_rect(center=(Width//2, Height//2 + 65))
+        screen.blit(sub_surf, sub_rect)
+        
+        arrow_color = (100, 200, 255, breath)
+        arrow_points = [
+            (Width//2 + 160, Height//2 + 65 - 8),
+            (Width//2 + 160, Height//2 + 65 + 8),
+            (Width//2 + 160 + 16, Height//2 + 65)
+        ]
+        pygame.draw.polygon(screen, arrow_color, arrow_points)
+        
+        date_font = pygame.font.SysFont("Arial", 16)
+        date_text = f"Day {transition_day}  •  RAD-Pharm"
+        date_surf = date_font.render(date_text, True, (150, 150, 150))
+        date_rect = date_surf.get_rect(center=(Width//2, Height - 35))
+        screen.blit(date_surf, date_rect)
 
     for event in pygame.event.get():
       if show_day_transition:
@@ -397,6 +550,10 @@ while True:
               print("Test Key: Switched to 1 customer")
 
       if event.type == pygame.MOUSEBUTTONDOWN: 
+         if tutorial_active:
+                if handle_tutorial_click(mouse_pos):
+                    continue
+
          if current_state not in ["MENU", "SETTING","INTRO", "WEATHER_EXPLAIN"]:
             clicked_top = task_bar.check_click(mouse_pos)
             if clicked_top == "settings":
@@ -463,8 +620,7 @@ while True:
                    pygame.quit()
                    sys.exit()
                    
-         elif current_state == "PHARMACY":
-             
+         elif current_state == "PHARMACY":   
              clicked_ui = False
 
              if pharmacy_buttons.get("ration_pack") and pharmacy_buttons["ration_pack"].collidepoint(mouse_pos):
@@ -475,6 +631,8 @@ while True:
                 else:
                     current_selected_item = "ration_pack"
                     trigger_message("Held: Ration Pack")
+                    if tutorial_active and tutorial_step == 0:
+                            advance_tutorial()
 
              elif pharmacy_buttons.get("sedative") and pharmacy_buttons["sedative"].collidepoint(mouse_pos):
                 clicked_ui = True  
@@ -515,6 +673,8 @@ while True:
                 has_money_on_table = False 
                 print("Cookies collected!")
                 trigger_message("+45 Cookies collected into wallet!")
+                if tutorial_active and tutorial_step == 2:
+                        advance_tutorial()
 
              elif pharmacy_buttons.get("sell_rad") and pharmacy_buttons["sell_rad"].collidepoint(mouse_pos):
                  clicked_ui = True
@@ -523,27 +683,51 @@ while True:
                      customer_manager.show_message("Hold a medicine from the hotbar first!", is_success=False)
                      trigger_message("Please select an item first.")
                  else:
-                     merged_inventory = {
-                         "ration_pack": progress.get("ration_pack", 0),
-                         "sedative": progress.get("sedative", 0),
-                         "blood_stop": inventory.get("Blood-Stop", 0),
-                         "speed_serum": inventory.get("Speed Serum", 0)
-                     }
-
-                     if customer_manager.active_customers:
-                         current_customer = customer_manager.active_customers[0]
-                         success, msg = current_customer.check_click(mouse_pos, current_selected_item, merged_inventory)
+                     stock_available = False
+                     if current_selected_item == "ration_pack":
+                         stock_available = progress.get("ration_pack", 0) > 0
+                     elif current_selected_item == "sedative":
+                         stock_available = progress.get("sedative", 0) > 0
+                     elif current_selected_item == "blood_stop":
+                         stock_available = inventory.get("Blood-Stop", 0) > 0
+                     elif current_selected_item == "speed_serum":
+                         stock_available = inventory.get("Speed Serum", 0) > 0
                      
-                     if success:
-                         has_money_on_table = True
-                         current_selected_item = None
-                         customer_manager.show_message("Trade successful! Click cookies to collect!", is_success=True)
-                         trigger_message("Buyer left cookies on the counter!")
-                         save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
-                     else:
-                         customer_manager.show_message(msg if msg != "No click" else "Medicine does not match what customer wants!", is_success=False)
-                         trigger_message(msg if msg != "No click" else "Medicine does not match!")
-         
+                     if not stock_available:
+                         item_name = current_selected_item.replace('_', ' ').title()
+                         if current_selected_item in ["ration_pack", "sedative"]:
+                             customer_manager.show_message(f"{item_name} is out of stock! Go to the SHOP to buy more.", is_success=False)
+                         else:
+                             customer_manager.show_message(f"{item_name} is out of stock! Go to the LAB to craft it.", is_success=False)
+                             trigger_message("Out of stock!")
+                             continue
+        
+                     if customer_manager.active_customers:
+                        current_customer = customer_manager.active_customers[0]
+                        if current_selected_item == current_customer.requested_item:
+                            if current_selected_item == "ration_pack":
+                                progress["ration_pack"] -= 1
+                            elif current_selected_item == "sedative":
+                                progress["sedative"] -= 1
+                            elif current_selected_item == "blood_stop":
+                                inventory["Blood-Stop"] -= 1
+                            elif current_selected_item == "speed_serum":
+                                inventory["Speed Serum"] -= 1
+                            
+                            current_customer.is_satisfied = True
+                            has_money_on_table = True
+                            current_selected_item = None
+                            customer_manager.show_message("Trade successful! Click cookies to collect!", is_success=True)
+                            trigger_message("Buyer left cookies on the counter!")
+                            save_game(current_day, has_seen_intro, pure_soil_count,
+                                    has_intact_canopy, has_oxygen_recycler,
+                                    cookies_count, saved_people)
+                            if tutorial_active and tutorial_step == 1:
+                                advance_tutorial()
+                        else:
+                            customer_manager.show_message(msg if msg != "No click" else "Medicine does not match what customer wants!", is_success=False)
+                            trigger_message(msg if msg != "No click" else "Medicine does not match!")
+                    
          elif current_state == "MAP":
             if to_gh_btn.collidepoint(mouse_pos):
                current_state = "GREENHOUSE"
@@ -699,11 +883,6 @@ while True:
              for p in plants:
                 if p.rect.collidepoint(mouse_pos):
                     p.clean()
-
-
-
-         
-
 
     pygame.display.flip()
     clock.tick(60)
