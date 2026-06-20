@@ -47,7 +47,10 @@ class Customer:
         }
         try:
             icon_img = pygame.image.load(icon_paths[self.requested_item]).convert_alpha()
-            self.item_icon = pygame.transform.smoothscale(icon_img, (55, 55))
+            target_icon_h = 55
+            orig_w, orig_h = icon_img.get_size()
+            target_icon_w = int(orig_w * (target_icon_h / orig_h))
+            self.item_icon = pygame.transform.smoothscale(icon_img, (target_icon_w, target_icon_h))
         except Exception as e:
             print(f"ERROR loading icon for {self.requested_item}: {e}")
             self.item_icon = pygame.Surface((55, 55))
@@ -77,7 +80,7 @@ class Customer:
 
             btn_w, btn_h = 70, 25
             btn_x = bubble_x + (self.bubble_image.get_width() - btn_w) // 2
-            btn_y = bubble_y + 145
+            btn_y = bubble_y + 130
             self.sell_btn_rect = pygame.Rect(btn_x, btn_y, btn_w, btn_h)
             pygame.draw.rect(screen, (46, 204, 113), self.sell_btn_rect, border_radius=4)
             btn_font = pygame.font.SysFont("Arial", 13, bold=True)
@@ -108,7 +111,13 @@ class Customer:
                 dict_key = "Speed Serum"
 
             if target_dict.get(dict_key, 0) <= 0:
-                return False, "Out of stock! You don't have enough items to sell."
+                item_name = dict_key.replace('_', ' ').title()
+                if selected_item in ["ration_pack", "sedative"]:
+                    return False, f"{item_name} is out of stock! Go to the SHOP to buy more."
+                elif selected_item in ["blood_stop", "speed_serum"]:
+                    return False, f"{item_name} is out of stock! Go to the LAB to craft it."
+                else:
+                    return False, "Out of stock!"
 
             target_dict[dict_key] -= 1
             self.is_satisfied = True
@@ -128,7 +137,7 @@ class CustomerManager:
         self.active_customers = []
 
         pygame.font.init()
-        self.font = pygame.font.SysFont("Arial", 17, bold=True)
+        self.feedback_font = pygame.font.SysFont("Comic Sans MS", 20, bold=True)
         self.feedback_text = ""
         self.feedback_timer = 0
         self.feedback_color = (255, 50, 50)
@@ -171,7 +180,7 @@ class CustomerManager:
             customer.draw(screen, y_pos)
 
         if self.feedback_timer > 0 and self.feedback_text:
-            text_surf = self.font.render(self.feedback_text, True, self.feedback_color)
+            text_surf = self.feedback_font.render(self.feedback_text, True, self.feedback_color)
             text_surf = text_surf.convert_alpha()
 
             if self.feedback_timer < 60:
@@ -179,9 +188,10 @@ class CustomerManager:
             else:
                 alpha = 255
             text_surf.set_alpha(alpha)
-            x = (screen.get_width() - text_surf.get_width()) // 2
-            y = 695
-            screen.blit(text_surf, (x, y))
+
+            text_rect = text_surf.get_rect(center=(screen.get_width() // 2, 720))
+            screen.blit(text_surf, text_rect)
+
             self.feedback_timer -= 1
 
     def handle_click(self, mouse_pos, current_selected_item, merged_inventory):

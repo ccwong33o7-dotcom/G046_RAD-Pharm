@@ -111,7 +111,7 @@ except Exception as e:
 
 pygame.display.set_caption("Game")
 font = pygame.font.SysFont("Arial",40)
-msg_font = pygame.font.SysFont("Comic Sans MS", 26)
+msg_font = pygame.font.SysFont("Comic Sans MS", 20)
 ui_font = pygame.font.SysFont("Agency FB", 36, bold=True)
 
 SAVE_FILE = "save_data.json"
@@ -330,18 +330,13 @@ while True:
 
     if flash_message_timer > 0:
         flash_message_timer -= 1
+        text_surf = msg_font.render(flash_message, True, (200, 200, 200))
+        text_surf = text_surf.convert_alpha()
 
-        text_surf = msg_font.render(flash_message, True, (160, 160, 160))
-        text_surf = text_surf.convert_alpha()  
-
-        if flash_message_timer < 60:
-            alpha = int((flash_message_timer / 60) * 255)
-        else:
-            alpha = 255
+        alpha = int((flash_message_timer / 60) * 255) if flash_message_timer < 60 else 255
         text_surf.set_alpha(alpha)
 
-        text_rect = text_surf.get_rect(center=(Width // 2, Height - 50))
-        
+        text_rect = text_surf.get_rect(center=(Width // 2, 680))
         screen.blit(text_surf, text_rect)
 
     for event in pygame.event.get():
