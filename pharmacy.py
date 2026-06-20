@@ -1,21 +1,35 @@
 import pygame
-import sys
-import math
-import os
 import random
 from crafting import inventory
 
+ICON_SIZE = (95, 95)
+
+def load_and_scale(path, size, name_for_error):
+    try:
+        image = pygame.image.load(path).convert_alpha()
+        return pygame.transform.smoothscale(image, size)
+    except Exception as e:
+        print(f"ERROR loading {name_for_error}: {e}")
+        return None
+
+gun_icon_img = load_and_scale("image/button/handgun.png", (120, 120), "handgun.png")
+cookie_icon_img = load_and_scale("image/button/CookiesforPharmacy.png", (100, 100), "CookiesforPharmacy.png")
+ration_pack_icon_img = load_and_scale("image/button/rationpack_button.png", ICON_SIZE, "rationpack_button.png")
+sedative_icon_img = load_and_scale("image/button/sedative_button.png", ICON_SIZE, "sedative_button.png")
+bloodstop_icon_img = load_and_scale("image/button/bloodstop_button.png", ICON_SIZE, "bloodstop_button.png")
+speedserum_icon_img = load_and_scale("image/button/speedserum_button.png", ICON_SIZE, "speedserum_button.png")
 
 class Customer:
+    _btn_font = None
+
     def __init__(self, img_path):
         try:
             self.image = pygame.image.load(img_path).convert_alpha()
-
             target_h = 340
             w, h = self.image.get_size()
             target_w = int(w * (target_h / h))
             self.image = pygame.transform.smoothscale(self.image, (target_w, target_h))
-        except pygame.error as e:
+        except Exception as e:
             print(f"ERROR loading customer image {img_path}: {e}")
             self.image = pygame.Surface((120, 300), pygame.SRCALPHA)
             self.image.fill((200, 0, 0, 150))
@@ -26,7 +40,7 @@ class Customer:
             bw, bh = self.bubble_image.get_size()
             bubble_w = int(bw * (bubble_h / bh))
             self.bubble_image = pygame.transform.smoothscale(self.bubble_image, (bubble_w, bubble_h))
-        except pygame.error as e:
+        except Exception as e:
             print(f"ERROR loading bubble image: {e}")
             self.bubble_image = pygame.Surface((100, 150), pygame.SRCALPHA)
             self.bubble_image.fill((255, 255, 255, 200))
@@ -37,29 +51,13 @@ class Customer:
         self.sell_btn_rect = pygame.Rect(0, 0, 0, 0)
 
         self.possible_requests = ["ration_pack", "sedative", "blood_stop", "speed_serum"]
-        self.requested_item = random.choice(self.possible_requests[:4])
-        self.item_icon = None
-        icon_paths = {
-            "ration_pack": "image/Customer/CI_rationpack.png",
-            "sedative": "image/Customer/CI_sedative.png",
-            "blood_stop": "image/Customer/CI_bloodstop.png",
-            "speed_serum": "image/Customer/CI_speedserum.png"
-        }
-        try:
-            icon_img = pygame.image.load(icon_paths[self.requested_item]).convert_alpha()
-            target_icon_h = 55
-            orig_w, orig_h = icon_img.get_size()
-            target_icon_w = int(orig_w * (target_icon_h / orig_h))
-            self.item_icon = pygame.transform.smoothscale(icon_img, (target_icon_w, target_icon_h))
-        except Exception as e:
-            print(f"ERROR loading icon for {self.requested_item}: {e}")
-            self.item_icon = pygame.Surface((55, 55))
-            self.item_icon.fill((0, 200, 200))
+        self.requested_item = random.choice(self.possible_requests)
+        self.item_icon = self._load_item_icon(self.requested_item)
 
         self.is_satisfied = False
+        self._warned_out_of_stock = False
 
-    def set_requested_item(self, item):
-        self.requested_item = item
+    def _load_item_icon(self, item):
         icon_paths = {
             "ration_pack": "image/Customer/CI_rationpack.png",
             "sedative": "image/Customer/CI_sedative.png",
@@ -71,11 +69,16 @@ class Customer:
             target_icon_h = 55
             orig_w, orig_h = icon_img.get_size()
             target_icon_w = int(orig_w * (target_icon_h / orig_h))
-            self.item_icon = pygame.transform.smoothscale(icon_img, (target_icon_w, target_icon_h))
+            return pygame.transform.smoothscale(icon_img, (target_icon_w, target_icon_h))
         except Exception as e:
             print(f"ERROR loading icon for {item}: {e}")
-            self.item_icon = pygame.Surface((55, 55))
-            self.item_icon.fill((0, 200, 200))
+            surf = pygame.Surface((55, 55), pygame.SRCALPHA)
+            surf.fill((0, 200, 200))
+            return surf
+
+    def set_requested_item(self, item):
+        self.requested_item = item
+        self.item_icon = self._load_item_icon(item)
 
     def update(self):
         if self.current_x > self.target_x:
@@ -83,7 +86,7 @@ class Customer:
             if self.current_x < self.target_x:
                 self.current_x = self.target_x
 
-    def draw(self, screen, y_pos, selected_item=None):
+    def draw(self, screen, y_pos, selected_item=None, inventory_dict=None):
         self.rect = pygame.Rect(self.current_x, y_pos, self.image.get_width(), self.image.get_height())
         screen.blit(self.image, (self.current_x, y_pos))
 
@@ -91,7 +94,6 @@ class Customer:
             bubble_x = self.current_x - self.bubble_image.get_width() + 10
             bubble_y = y_pos - 40
             screen.blit(self.bubble_image, (bubble_x, bubble_y))
-
             if self.item_icon:
                 icon_x = bubble_x + (self.bubble_image.get_width() - self.item_icon.get_width()) // 2
                 icon_y = bubble_y + 65
@@ -103,13 +105,14 @@ class Customer:
             self.sell_btn_rect = pygame.Rect(btn_x, btn_y, btn_w, btn_h)
 
             if selected_item is not None and selected_item == self.requested_item:
-                btn_color = (46, 204, 113)  
+                btn_color = (46, 204, 113)
             else:
-                btn_color = (128, 128, 128)  
+                btn_color = (128, 128, 128)
 
             pygame.draw.rect(screen, btn_color, self.sell_btn_rect, border_radius=4)
-            btn_font = pygame.font.SysFont("Arial", 13, bold=True)
-            text_surf = btn_font.render("SELL", True, (255, 255, 255))
+            if Customer._btn_font is None:
+                Customer._btn_font = pygame.font.SysFont("Arial", 13, bold=True)
+            text_surf = Customer._btn_font.render("SELL", True, (255, 255, 255))
             screen.blit(text_surf, (btn_x + (btn_w - text_surf.get_width()) // 2,
                                     btn_y + (btn_h - text_surf.get_height()) // 2))
         else:
@@ -127,7 +130,6 @@ class Customer:
 
             target_dict = progress_dict
             dict_key = selected_item
-
             if selected_item == "blood_stop":
                 target_dict = inventory
                 dict_key = "Blood-Stop"
@@ -150,8 +152,9 @@ class Customer:
 
         return False, "No click"
 
-
 class CustomerManager:
+    _feedback_font = None   
+
     def __init__(self):
         self.image_paths = [
             "image/Customer/buyer1.png",
@@ -161,13 +164,13 @@ class CustomerManager:
         ]
         self.active_customers = []
 
-        pygame.font.init()
-        self.feedback_font = pygame.font.SysFont("Comic Sans MS", 20, bold=True)
+        if CustomerManager._feedback_font is None:
+            CustomerManager._feedback_font = pygame.font.SysFont("Comic Sans MS", 20, bold=True)
         self.feedback_text = ""
         self.feedback_timer = 0
         self.feedback_color = (255, 50, 50)
 
-    def spawn_customers(self, count,force_ration=False):
+    def spawn_customers(self, count, force_ration=False):
         self.active_customers.clear()
 
         available_count = min(count, len(self.image_paths))
@@ -177,8 +180,9 @@ class CustomerManager:
 
         for i, path in enumerate(chosen_paths):
             customer = Customer(path)
-            if force_ration and i == 0: 
+            if force_ration and i == 0:
                 customer.set_requested_item("ration_pack")
+
             spacing = screen_w // (available_count + 1)
             target_x = spacing * (i + 1) - (customer.image.get_width() // 2)
             target_x += -150
@@ -198,73 +202,37 @@ class CustomerManager:
         self.feedback_timer = 120
         self.feedback_color = (50, 255, 50) if is_success else (255, 50, 50)
 
-    def draw_all(self, screen, selected_item=None):
+    def draw_all(self, screen, selected_item=None, inventory_dict=None):
         y_pos = 177
         self.update_all()
 
         for customer in self.active_customers:
-            customer.draw(screen, y_pos,selected_item)
+            customer.draw(screen, y_pos, selected_item, inventory_dict)
 
         if self.feedback_timer > 0 and self.feedback_text:
-            text_surf = self.feedback_font.render(self.feedback_text, True, self.feedback_color)
+            text_surf = CustomerManager._feedback_font.render(self.feedback_text, True, self.feedback_color)
             text_surf = text_surf.convert_alpha()
-
             if self.feedback_timer < 60:
                 alpha = int((self.feedback_timer / 60) * 255)
             else:
                 alpha = 255
             text_surf.set_alpha(alpha)
-
             text_rect = text_surf.get_rect(center=(screen.get_width() // 2, 695))
             screen.blit(text_surf, text_rect)
-
             self.feedback_timer -= 1
 
     def handle_click(self, mouse_pos, current_selected_item, merged_inventory):
         if not self.active_customers:
             return False, "No active customer"
-
         current_customer = self.active_customers[0]
         if current_customer.requested_item == current_selected_item:
             if merged_inventory.get(current_selected_item, 0) > 0:
-                if hasattr(current_customer, 'state'):
-                    current_customer.state = "leaving"
                 self.active_customers.pop(0)
-
                 return True, "Success"
             else:
                 return False, "No stock"
         else:
             return False, "Medicine does not match what customer wants!"
-
-
-gun_icon_img = None
-cookie_icon_img = None
-ration_pack_icon_img = None
-sedative_icon_img = None
-bloodstop_icon_img = None
-speedserum_icon_img = None
-
-def load_and_scale(path, size, name_for_error):
-    if not os.path.exists(path):
-        print(f"ERROR: Image file not found: {path}. Please ensure the 'image/button/' directory and images exist.")
-        return None
-    try:
-        image = pygame.image.load(path).convert_alpha()
-        return pygame.transform.smoothscale(image, size)
-    except Exception as e:
-        print(f"ERROR loading {name_for_error}: {e}")
-        return None
-    
-ICON_SIZE = (95, 95)
-
-gun_icon_img = load_and_scale("image/button/handgun.png", (120, 120), "handgun.png")
-cookie_icon_img = load_and_scale("image/button/CookiesforPharmacy.png", (100, 100), "CookiesforPharmacy.png")
-
-ration_pack_icon_img = load_and_scale("image/button/rationpack_button.png", ICON_SIZE, "rationpack_button.png")
-sedative_icon_img = load_and_scale("image/button/sedative_button.png", ICON_SIZE, "sedative_button.png")
-bloodstop_icon_img = load_and_scale("image/button/bloodstop_button.png", ICON_SIZE, "bloodstop_button.png")
-speedserum_icon_img = load_and_scale("image/button/speedserum_button.png", ICON_SIZE, "speedserum_button.png")
 
 _global_manager_ref = None
 
@@ -272,26 +240,31 @@ def change_customer_count(count):
     if _global_manager_ref:
         _global_manager_ref.spawn_customers(count)
 
-def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progress_dict=None, external_manager=None, selected_item=None):
+def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
+                  progress_dict=None, external_manager=None, selected_item=None):
     global _global_manager_ref
     if external_manager:
         _global_manager_ref = external_manager
-    
+
     if bg_img:
-        screen.blit(bg_img, (0,0))
+        screen.blit(bg_img, (0, 0))
     else:
-        screen.fill((255,250,200))
+        screen.fill((255, 250, 200))
+
+    merged_inventory = {}
+    if progress_dict:
+        merged_inventory.update(progress_dict)
+    merged_inventory["Blood-Stop"] = inventory.get("Blood-Stop", 0)
+    merged_inventory["Speed Serum"] = inventory.get("Speed Serum", 0)
 
     if external_manager:
-        external_manager.draw_all(screen, selected_item)
+        external_manager.draw_all(screen, selected_item, merged_inventory)
 
     if counter_img:
         target_width = 1280
         target_height = 340
         scaled_counter = pygame.transform.smoothscale(counter_img, (target_width, target_height))
-        pos_x = 0
-        pos_y = 380
-        screen.blit(scaled_counter, (pos_x, pos_y))
+        screen.blit(scaled_counter, (0, 380))
 
     gun_rect = pygame.Rect(50, 395, 120, 120)
     if gun_icon_img:
@@ -308,9 +281,8 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     sedative_rect    = pygame.Rect(START_X + 1 * SPACING_X, START_Y, BTN_W, BTN_H)
     bloodstop_rect   = pygame.Rect(START_X + 2 * SPACING_X, START_Y, BTN_W, BTN_H)
     speedserum_rect  = pygame.Rect(START_X + 3 * SPACING_X, START_Y, BTN_W, BTN_H)
-    
-    cookie_rect = pygame.Rect(720, 430, 100, 100)
 
+    cookie_rect = pygame.Rect(720, 430, 100, 100)
     if money_waiting_to_collect:
         if cookie_icon_img:
             screen.blit(cookie_icon_img, (cookie_rect.x, cookie_rect.y))
@@ -318,9 +290,10 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
             pygame.draw.circle(screen, (240, 200, 20), cookie_rect.center, 40)
 
     label_font = pygame.font.SysFont("Arial", 16, bold=True)
-
     ration_val = progress_dict.get("ration_pack", 0) if progress_dict else 0
     sedative_val = progress_dict.get("sedative", 0) if progress_dict else 0
+    blood_val = inventory.get("Blood-Stop", 0)
+    speed_val = inventory.get("Speed Serum", 0)
 
     if ration_pack_icon_img:
         scaled_img = pygame.transform.smoothscale(ration_pack_icon_img, (BTN_W, BTN_H))
@@ -333,7 +306,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     if sedative_icon_img:
         scaled_img = pygame.transform.smoothscale(sedative_icon_img, (BTN_W, BTN_H))
         screen.blit(scaled_img, (sedative_rect.x, sedative_rect.y))
-        qty_text = label_font.render(f"Count: {sedative_val}", True, (255, 255, 255)) 
+        qty_text = label_font.render(f"Count: {sedative_val}", True, (255, 255, 255))
         screen.blit(qty_text, (sedative_rect.x + 12, sedative_rect.y + BTN_H + 5))
     else:
         pygame.draw.rect(screen, (100, 150, 100), sedative_rect, 2)
@@ -341,30 +314,32 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect, progres
     if bloodstop_icon_img:
         scaled_img = pygame.transform.smoothscale(bloodstop_icon_img, (BTN_W, BTN_H))
         screen.blit(scaled_img, (bloodstop_rect.x, bloodstop_rect.y))
-        blood_count = label_font.render(f"Count: {inventory.get('Blood-Stop', 0)}", True, (255, 255, 255))
-        screen.blit(blood_count, (bloodstop_rect.x + 12, bloodstop_rect.y + BTN_H + 5))
+        qty_text = label_font.render(f"Count: {blood_val}", True, (255, 255, 255))
+        screen.blit(qty_text, (bloodstop_rect.x + 12, bloodstop_rect.y + BTN_H + 5))
     else:
         pygame.draw.rect(screen, (180, 60, 60), bloodstop_rect, 2)
 
     if speedserum_icon_img:
         scaled_img = pygame.transform.smoothscale(speedserum_icon_img, (BTN_W, BTN_H))
         screen.blit(scaled_img, (speedserum_rect.x, speedserum_rect.y))
-        speed_count = label_font.render(f"Count: {inventory.get('Speed Serum', 0)}", True, (255, 255, 255))
-        screen.blit(speed_count, (speedserum_rect.x + 12, speedserum_rect.y + BTN_H + 5))
+        qty_text = label_font.render(f"Count: {speed_val}", True, (255, 255, 255))
+        screen.blit(qty_text, (speedserum_rect.x + 12, speedserum_rect.y + BTN_H + 5))
     else:
         pygame.draw.rect(screen, (60, 120, 180), speedserum_rect, 2)
-    
-    font = pygame.font.SysFont("Arial", 28)
+
+    font_big = pygame.font.SysFont("Arial", 28)
     rad_val = inventory.get('Rad-Ointment', 0)
-    rad_text = font.render(f"Rad-Ointment: {rad_val}", True, (255,255,255))
+    rad_text = font_big.render(f"Rad-Ointment: {rad_val}", True, (255, 255, 255))
     screen.blit(rad_text, (960, 220))
-    
-    sell_rad_btn = pygame.Rect(0, 0, 0, 0)
-    if external_manager and external_manager.active_customers:
-        sell_rad_btn = external_manager.active_customers[0].sell_btn_rect
+
+    sell_buttons = []
+    if external_manager:
+        for customer in external_manager.active_customers:
+            sell_buttons.append(customer.sell_btn_rect)
 
     return {
-        "sell_rad": sell_rad_btn,
+        "sell_buttons": sell_buttons,          
+        "sell_rad": sell_buttons[0] if sell_buttons else pygame.Rect(0,0,0,0),
         "gun": gun_rect,
         "money": cookie_rect,
         "ration_pack": ration_pack_rect,
