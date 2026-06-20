@@ -33,7 +33,7 @@ class WeatherSystem:
         weather_files = {
             SUNNY: "Sunny_icon.png",    
             CLOUDY: "Cloudy_icon.png", 
-            STORMY: "stormy_icon.png"  
+            STORMY: "storm_icon.png"  
         }
         
         for w_type, filename in weather_files.items():
