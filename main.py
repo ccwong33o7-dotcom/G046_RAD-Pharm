@@ -273,9 +273,6 @@ def draw_tutorial(screen, pharmacy_buttons):
         else:
             return
     
-    overlay = pygame.Surface((Width, Height), pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 40))
-    screen.blit(overlay, (0, 0))
     hint_text = ""
 
     if tutorial_step == 0:
