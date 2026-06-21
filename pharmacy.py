@@ -12,7 +12,6 @@ def load_and_scale(path, size, name_for_error):
         print(f"ERROR loading {name_for_error}: {e}")
         return None
 
-gun_icon_img = load_and_scale("image/button/handgun.png", (120, 120), "handgun.png")
 cookie_icon_img = load_and_scale("image/button/CookiesforPharmacy.png", (100, 100), "CookiesforPharmacy.png")
 ration_pack_icon_img = load_and_scale("image/button/rationpack_button.png", ICON_SIZE, "rationpack_button.png")
 sedative_icon_img = load_and_scale("image/button/sedative_button.png", ICON_SIZE, "sedative_button.png")
@@ -266,12 +265,6 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
         scaled_counter = pygame.transform.smoothscale(counter_img, (target_width, target_height))
         screen.blit(scaled_counter, (0, 380))
 
-    gun_rect = pygame.Rect(50, 395, 120, 120)
-    if gun_icon_img:
-        screen.blit(gun_icon_img, (gun_rect.x, gun_rect.y))
-    else:
-        pygame.draw.rect(screen, (150, 50, 50), gun_rect, 2)
-
     BTN_W, BTN_H = 90, 90
     START_X = 25
     START_Y = 532
@@ -282,7 +275,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
     bloodstop_rect   = pygame.Rect(START_X + 2 * SPACING_X, START_Y, BTN_W, BTN_H)
     speedserum_rect  = pygame.Rect(START_X + 3 * SPACING_X, START_Y, BTN_W, BTN_H)
 
-    cookie_rect = pygame.Rect(720, 430, 100, 100)
+    cookie_rect = pygame.Rect(705, 470, 100, 100)
     if money_waiting_to_collect:
         if cookie_icon_img:
             screen.blit(cookie_icon_img, (cookie_rect.x, cookie_rect.y))
@@ -340,7 +333,6 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
     return {
         "sell_buttons": sell_buttons,          
         "sell_rad": sell_buttons[0] if sell_buttons else pygame.Rect(0,0,0,0),
-        "gun": gun_rect,
         "money": cookie_rect,
         "ration_pack": ration_pack_rect,
         "sedative": sedative_rect,

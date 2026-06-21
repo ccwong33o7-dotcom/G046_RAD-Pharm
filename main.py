@@ -231,7 +231,6 @@ has_money_on_table = False
 current_selected_item = None
 
 pharmacy_buttons = {
-    "gun": pygame.Rect(180, 480, 120, 120),
     "money": pygame.Rect(720, 430, 100, 100),
     "ration_pack": pygame.Rect(25, 532, 90, 90),
     "sedative": pygame.Rect(131, 532, 90, 90),
@@ -550,6 +549,10 @@ while True:
               pharmacy.change_customer_count(1)
               print("Test Key: Switched to 1 customer")
 
+          if event.key == pygame.K_2:  
+              pharmacy.change_customer_count(2)
+              print("Test Key: Switched to 2 customers")
+
       if event.type == pygame.MOUSEBUTTONDOWN: 
          if tutorial_active:
                 if handle_tutorial_click(mouse_pos):
@@ -654,13 +657,8 @@ while True:
                          if tutorial_active and tutorial_step == 0 and ui_key == "ration_pack":
                              advance_tutorial()
                      break  
-             else:
-                 if pharmacy_buttons.get("gun") and pharmacy_buttons["gun"].collidepoint(mouse_pos):
-                     clicked_ui = True
-                     print("Gun clicked!")
-                     trigger_message("You grabbed the Gun! Ready to shoot.")
-                         
-                 elif has_money_on_table and pharmacy_buttons.get("money") and pharmacy_buttons["money"].collidepoint(mouse_pos):
+             else:       
+                 if has_money_on_table and pharmacy_buttons.get("money") and pharmacy_buttons["money"].collidepoint(mouse_pos):
                      clicked_ui = True
                      cookies_count += 45
                      saved_people += 1
