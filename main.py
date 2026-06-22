@@ -8,7 +8,7 @@ from menu import draw_menu
 from setting import run_setting
 import pharmacy
 from shop import draw_shop
-from greenhouse import draw_greenhouse, Plant, draw_plant_menu
+from greenhouse import draw_greenhouse, Plant
 from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
 from intro import show_intro
 from taskbar import TaskBar
@@ -187,7 +187,7 @@ current_state="MENU"
 last_state = "MENU"
 
 plant_a = Plant(990, 380, "Glowing Aloe", 0.05)
-plant_b = Plant(710, 380, "Rusty Thorn", 0.4)
+plant_b = Plant(710, 380, "Rusty Thorn", 0.02)
 plants = [plant_a, plant_b]
 
 locked_plots = [
@@ -423,7 +423,7 @@ while True:
        screen.fill((0, 0, 0))
        ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
        any_dead = any(p.is_dead for p in plants)
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, plant_seed_btn, harvest_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, has_oxygen_recycler, ready_to_craft, locked_plots=locked_plots)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, has_oxygen_recycler, ready_to_craft, locked_plots=locked_plots)
 
        if ready_to_craft:
             msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
@@ -431,8 +431,6 @@ while True:
        elif any_dead:
             msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
             screen.blit(msg, (Width//2 - 200, 50))
-       if show_plant_menu:
-           plant_menu_rect, aloe_btn_rect, thorn_btn_rect = draw_plant_menu(screen)
            
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
@@ -591,8 +589,6 @@ while True:
                       elif not plant_menu_rect.collidepoint(mouse_pos):
                           show_plant_menu = False
 
-                  if plant_seed_btn.collidepoint(mouse_pos):
-                      show_plant_menu = True 
                   elif harvest_btn.collidepoint(mouse_pos):
                       pass
                   elif gh_upgrade_btn.collidepoint(mouse_pos):
@@ -797,31 +793,16 @@ while True:
                       trigger_message("Not enough Cookies for Blood Stop!")
  
          elif current_state == "GREENHOUSE":
-            if show_plant_menu:
-                if aloe_btn_rect.collidepoint(mouse_pos):
-                    print("Clicked Aloe Vera! Planting Aloe Vera seed...")
+            if aloe_btn.collidepoint(mouse_pos):
+                plant_a.growth = 0
+                plant_a.is_dead = False
+                trigger_message("Aloe Vera planted!")
+            
+            elif thorn_btn.collidepoint(mouse_pos):
+                plant_b.growth = 0
+                plant_b.is_dead = False
+                trigger_message("Rusty Thorn planted!")
 
-                    plant_a.growth = 0
-                    plant_a.dust = 0
-                    plant_a.is_dead = False
-                    show_plant_menu = False
-                    trigger_message("Aloe Vera planted!")
-                    
-                elif thorn_btn_rect.collidepoint(mouse_pos):
-                    print("Clicked Rusty Thorn! Planting Rusty Thorn seed...")
-                    plant_b.growth = 0
-                    plant_b.dust = 0
-                    plant_b.is_dead = False
-                    show_plant_menu = False 
-                    trigger_message("Rusty Thorn planted!")
-                    
-                elif not plant_menu_rect.collidepoint(mouse_pos):
-                    show_plant_menu = False
-                    print("Closed Plant Menu")
-                continue
-            if plant_seed_btn.collidepoint(mouse_pos):
-               print("Opening Plant Seed Menu...")
-               show_plant_menu = True  
             elif harvest_btn.collidepoint(mouse_pos):
                 harvested_something = False
                 for p in plants:
