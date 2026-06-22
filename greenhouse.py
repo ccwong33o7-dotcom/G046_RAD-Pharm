@@ -124,7 +124,8 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
     global img_tire, img_drum1, img_drum2, img_drum3, img_tire2, img_drum4
     small_font = pygame.font.SysFont("Arial", 20)
 
-    plant_seed_btn_rect = pygame.Rect(25, 630, 215, 65)
+    aloe_btn_rect = pygame.Rect(25, 630, 120, 65)
+    thorn_btn_rect = pygame.Rect(160, 630, 120, 65)
     harvest_btn_rect = pygame.Rect(315, 630, 260, 65)
 
     if img_pure_soil is None:
@@ -163,18 +164,6 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
                     print(f"Error loading oxygen recycler image: {e}")
                     img_oxygen_recycler = None
     
-    if img_plant_seed is None:
-        for ext in [".jpg", ".png", ".JPG", ".PNG"]:
-            possible_path = f"image/button/Plant Seed button{ext}"
-            if os.path.exists(possible_path):
-                try:
-                    img_plant_seed = pygame.image.load(possible_path).convert_alpha()
-                    img_plant_seed = pygame.transform.scale(img_plant_seed, (240, 65))
-                    break
-                except pygame.error as e:
-                    print(f"Error loading plant seed image: {e}")
-                    img_plant_seed = None
-
 
     if img_harvest is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
@@ -222,12 +211,12 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
         p.update()
         p.draw(screen)
     
-    if img_plant_seed:
-        screen.blit(img_plant_seed, (plant_seed_btn_rect.x, plant_seed_btn_rect.y))
-    else:
-        pygame.draw.rect(screen, (0, 255, 0), plant_seed_btn_rect, 2)
-        txt = small_font.render("Plant Seed", True, (0, 255, 0))
-        screen.blit(txt, (plant_seed_btn_rect.x + 50, plant_seed_btn_rect.y + 20))
+    small_font = pygame.font.SysFont("Arial", 16)
+    pygame.draw.rect(screen, (0, 100, 0), aloe_btn_rect, border_radius=10)
+    screen.blit(small_font.render("Plant Aloe", True, (255, 255, 255)), (aloe_btn_rect.x + 20, aloe_btn_rect.y + 20))
+    
+    pygame.draw.rect(screen, (100, 0, 0), thorn_btn_rect, border_radius=10)
+    screen.blit(small_font.render("Plant Thorn", True, (255, 255, 255)), (thorn_btn_rect.x + 20, thorn_btn_rect.y + 20))
 
     any_plant_ready = any(p.growth >= 100 and not p.harvested and not p.is_dead for p in plant_list)
 
@@ -286,73 +275,5 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
         txt_rect = count_txt.get_rect(center=circle_center)
         screen.blit(count_txt, txt_rect)
 
-    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, plant_seed_btn_rect, harvest_btn_rect
+    return canopy_btn_rect, pure_soil_btn_rect, oxygen_btn_rect, harvest_btn_rect, aloe_btn_rect, thorn_btn_rect
 
-def draw_plant_menu(screen):
-    global img_plant_menu_bg, img_aloe_btn, img_thorn_btn
-    
-    menu_w, menu_h = 550, 425
-    rect = pygame.Rect((1280 - menu_w) // 2, (720 - menu_h) // 2, menu_w, menu_h)
-    
-    if img_plant_menu_bg is None:
-        possible_path = "image/background/PlantSeed_bg.png"
-        
-        if os.path.exists(possible_path):
-            try:
-                img_plant_menu_bg = pygame.image.load(possible_path).convert_alpha()
-                img_plant_menu_bg = pygame.transform.smoothscale(img_plant_menu_bg, (menu_w, menu_h))
-                print("[SUCCESS] PlantSeed_bg.jpg loaded successfully into memory!")
-            except Exception as e:
-                print(f"[ERROR] File exists, but Pygame failed to read it: {e}")
-        else:
-            print(f"[ERROR] Cannot find image file! Expected absolute path: {os.path.abspath(possible_path)}")
-
-    
-    if img_plant_menu_bg:
-        screen.blit(img_plant_menu_bg, rect)
-    else:
-        overlay = pygame.Surface((menu_w, menu_h), pygame.SRCALPHA)
-        overlay.fill((0, 255, 0, 200)) # Green with 200 alpha transparency
-        screen.blit(overlay, rect)
-        
-        debug_font = pygame.font.SysFont("Arial", 24)
-        error_txt = debug_font.render("ERROR: PlantSeed_bg.jpg missing!", True, (255, 0, 0))
-        screen.blit(error_txt, (rect.x + 50, rect.y + 50))
-    
-    if img_aloe_btn is None:
-        for ext in [".png", ".jpg", ".PNG", ".JPG"]:
-            possible_path = f"image/button/AloeVera_button{ext}"
-            if os.path.exists(possible_path):
-                try:
-                    img_aloe_btn = pygame.image.load(possible_path).convert_alpha()
-                    img_aloe_btn = pygame.transform.smoothscale(img_aloe_btn, (150, 200)) # 缩放到合适大小
-                    break
-                except pygame.error as e:
-                    print(f"Error loading AloeVera button: {e}")
-
-    if img_thorn_btn is None:
-        for ext in [".png", ".jpg", ".PNG", ".JPG"]:
-            possible_path = f"image/button/Thorn_button{ext}"
-            if os.path.exists(possible_path):
-                try:
-                    img_thorn_btn = pygame.image.load(possible_path).convert_alpha()
-                    img_thorn_btn = pygame.transform.smoothscale(img_thorn_btn, (150, 200))
-                    break
-                except pygame.error as e:
-                    print(f"Error loading Thorn button: {e}")
-
-    aloe_btn_rect = pygame.Rect(rect.x + 70, rect.y + 110, 150, 200)
-    thorn_btn_rect = pygame.Rect(rect.x + 330, rect.y + 110, 150, 200)
-
-    if img_aloe_btn:
-        screen.blit(img_aloe_btn, (aloe_btn_rect.x, aloe_btn_rect.y))
-    else:
-        pygame.draw.rect(screen, (0, 255, 0), aloe_btn_rect, 2) 
-
-    if img_thorn_btn:
-        screen.blit(img_thorn_btn, (thorn_btn_rect.x, thorn_btn_rect.y))
-    else:
-        pygame.draw.rect(screen, (255, 0, 0), thorn_btn_rect, 2) 
-        
-   
-    return rect, aloe_btn_rect, thorn_btn_rect
