@@ -140,14 +140,14 @@ def load_game():
         "tutorial_done": False 
     }
 
-def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_amt, saved_people_count):
+def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_amt, saved_people_count):
     """Writes active day progression and intro milestones to disk."""
     data = {
        "current_day": day_num, 
        "has_seen_intro": seen_intro, 
        "pure_soil": pure_soil_count, 
        "has_intact_canopy": has_intact_canopy, 
-       "has_oxygen_recycler": has_oxygen_recycler,
+       "oxygen_recycler_count": oxygen_recycler_count,
        "cookies": cookies_amt,
        "saved_people": saved_people_count,
        "sedative": progress.get("sedative", 0),
@@ -167,10 +167,10 @@ pure_soil_count = progress.get("pure_soil", 0)
 pure_soil_count = int(pure_soil_count) if isinstance(pure_soil_count, (int, float)) else 0
 
 has_intact_canopy = progress.get("has_intact_canopy", False)
-has_oxygen_recycler = progress.get("has_oxygen_recycler", False)
+oxygen_recycler_count = progress.get("oxygen_recycler_count", 0)
 
 intact_canopy_count = 1 if has_intact_canopy else 0
-oxygen_recycler_count = 1 if has_oxygen_recycler else 0
+oxygen_recycler_count = 1 if oxygen_recycler_count > 0 else 0
 
 cookies_count = progress.get("cookies", 35)
 saved_people = progress.get("saved_people", 0)
@@ -178,7 +178,7 @@ tutorial_done = progress.get("tutorial_done", False)
 
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
-oxygen_recycler_active = 1 if has_oxygen_recycler else 0
+oxygen_recycler_active = 1 if oxygen_recycler_count > 0 else 0
 intact_canopy_active = 1 if has_intact_canopy else 0
 
 has_seen_intro = False
@@ -186,18 +186,51 @@ has_seen_intro = False
 current_state="MENU"
 last_state = "MENU"
 
-plant_a = Plant(990, 380, "Glowing Aloe", 0.05)
-plant_b = Plant(710, 380, "Rusty Thorn", 0.02)
-plants = [plant_a, plant_b]
+plants = []
+
+plot_positions = [
+    {'x': 990, 'y': 380, 'unlock_day': 1}, 
+    {'x': 710, 'y': 380, 'unlock_day': 1},  
+    {'x': 450, 'y': 380, 'unlock_day': 3},  
+    {'x': 200, 'y': 380, 'unlock_day': 3},  
+
+    {'x': 290, 'y': 230, 'unlock_day': 6},
+    {'x': 490, 'y': 230, 'unlock_day': 6},
+    {'x': 685, 'y': 230, 'unlock_day': 8},
+    {'x': 870, 'y': 230, 'unlock_day': 8}
+]
 
 locked_plots = [
-    {'type': 'tire', 'x': 440, 'y': 420},
-    {'type': 'drum1', 'x': 200, 'y':380},
-    {'type': 'drum2', 'x': 290, 'y': 250},
-    {'type': 'drum3', 'x': 500, 'y': 250},
-    {'type': 'tire2', 'x': 690, 'y': 290},
-    {'type': 'drum4', 'x': 870, 'y': 250}
+    {'type': 'tire', 'x': 440, 'y': 420, 'unlock_day': 3},
+    {'type': 'drum1', 'x': 200, 'y': 380, 'unlock_day': 3},
+    {'type': 'drum2', 'x': 290, 'y': 250, 'unlock_day': 6},
+    {'type': 'drum3', 'x': 500, 'y': 250, 'unlock_day': 6},
+    {'type': 'tire2', 'x': 690, 'y': 290, 'unlock_day': 8},
+    {'type': 'drum4', 'x': 870, 'y': 250, 'unlock_day': 8}
 ]
+
+
+
+def get_free_plot():
+    for plot in plot_positions:
+
+        if current_day < plot['unlock_day']:
+            continue
+
+        x = plot['x']
+        y = plot['y']
+
+        occupied = False
+
+        for p in plants:
+            if p.planted and p.rect.x == x and p.rect.y == y:
+                occupied = True
+                break
+
+        if not occupied:
+            return x, y
+
+    return None
 
 pygame.event.pump()
 pygame.event.clear()
@@ -290,7 +323,7 @@ def draw_tutorial(screen, pharmacy_buttons):
             tutorial_active = False
             tutorial_done = True
             save_game(current_day, has_seen_intro, pure_soil_count,
-                     has_intact_canopy, has_oxygen_recycler,
+                     has_intact_canopy, oxygen_recycler_count,
                      cookies_count, saved_people)
             print("[Tutorial] Finished and saved.")
         return
@@ -367,7 +400,7 @@ while True:
         next_day_customers = random.randint(1, 2)
         customer_manager.spawn_customers(next_day_customers, force_ration=False)
         print(f"New Day! Spawned {next_day_customers} customers.")
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
 
     if current_state == "MENU":
        screen.fill((0, 0, 0))
@@ -378,7 +411,7 @@ while True:
     elif current_state == "INTRO":
         show_intro(screen, clock)
         has_seen_intro = True
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
         current_state = "WEATHER_EXPLAIN" 
 
     elif current_state == "WEATHER_EXPLAIN":
@@ -421,9 +454,17 @@ while True:
 
     elif current_state == "GREENHOUSE":
        screen.fill((0, 0, 0))
-       ready_to_craft = all(p.growth >= 100 and not p.is_dead for p in plants)
+       ready_to_craft = len(plants) > 0 and all(
+           p.growth >= 100 and not p.is_dead for p in plants
+       )
        any_dead = any(p.is_dead for p in plants)
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, has_oxygen_recycler, ready_to_craft, locked_plots=locked_plots)
+
+       active_locked_plots = [
+          plot for plot in locked_plots
+          if current_day < plot['unlock_day']
+       ]
+       
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
 
        if ready_to_craft:
             msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
@@ -516,13 +557,13 @@ while True:
               show_day_transition = False
               continue 
           if event.type == pygame.QUIT:
-              save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+              save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
               pygame.quit()
               sys.exit()
           continue
       
       if event.type == pygame.QUIT:
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
         pygame.quit()
         sys.exit()
         
@@ -570,14 +611,14 @@ while True:
               clicked_clear = False
               for p in plants:
 
-                  if p.is_dead and hasattr(p, 'delete_btn_rect') and p.delete_btn_rect and p.delete_btn_rect.collidepoint(mouse_pos):
-                      p.is_dead = False 
-                      p.growth = 0
-                      p.dust = 0
-                      p.death_timer = 0
-                      trigger_message("Plant discarded into bin!") 
-                      clicked_clear = True
-                      break 
+                if p.is_dead and p.delete_btn_rect and p.delete_btn_rect.collidepoint(mouse_pos):
+
+                    plants.remove(p)
+
+                    trigger_message("Plant discarded into bin!")
+
+                    clicked_clear = True
+                    break
 
               if not clicked_clear:
                   if show_plant_menu:
@@ -598,10 +639,7 @@ while True:
                   elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos):
                       pass
                   else:
-                      for p in plants:
-                          if p.rect.collidepoint(mouse_pos) and not p.is_dead:
-                              p.clean()
-              continue
+                      pass
 
          if current_state == "MENU":
              if s_btn.collidepoint(mouse_pos):
@@ -613,7 +651,7 @@ while True:
                   last_state = "MENU"
                   current_state = "SETTING"
              elif e_btn.collidepoint(mouse_pos):
-                   save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, has_oxygen_recycler, cookies_count, saved_people)
+                   save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
                    pygame.quit()
                    sys.exit()
                    
@@ -705,7 +743,7 @@ while True:
                                      customer_manager.show_message("Trade successful! Click cookies to collect!", is_success=True)
                                      trigger_message("Buyer left cookies on the counter!")
                                      save_game(current_day, has_seen_intro, pure_soil_count,
-                                             has_intact_canopy, has_oxygen_recycler,
+                                             has_intact_canopy, oxygen_recycler_count,
                                              cookies_count, saved_people)
                                      if tutorial_active and tutorial_step == 1:
                                          advance_tutorial()
@@ -765,13 +803,10 @@ while True:
                      trigger_message("Not enough Cookies for Intact Canopy!")
 
              elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
-                 print(f"DEBUG: Clicked Oxygen Button! Current status: {has_oxygen_recycler}")
-                 if has_oxygen_recycler:
-                     trigger_message("You already own Oxygen Recycler!")
-                 elif cookies_count >= 200:
+                 print(f"DEBUG: Clicked Oxygen Button! Current status: {oxygen_recycler_count}")
+                 if cookies_count >= 200:
                      cookies_count -= 200
-                     has_oxygen_recycler = True
-                     oxygen_recycler_count = 1
+                     oxygen_recycler_count += 1
                      trigger_message("Oxygen Recycler purchased!")
                  else:
                      trigger_message("Not enough Cookies for Oxygen Recycler!")
@@ -794,14 +829,29 @@ while True:
  
          elif current_state == "GREENHOUSE":
             if aloe_btn.collidepoint(mouse_pos):
-                plant_a.growth = 0
-                plant_a.is_dead = False
-                trigger_message("Aloe Vera planted!")
+                pos = get_free_plot()
+
+                if pos:
+                   x, y = pos
+                   new_plant = Plant(x, y, "Glowing Aloe", 0.02)
+                   new_plant.planted = True
+                   plants.append(new_plant)
+                   trigger_message("Aloe planted!")
+                else:
+                   trigger_message("No empty plot!")
             
             elif thorn_btn.collidepoint(mouse_pos):
-                plant_b.growth = 0
-                plant_b.is_dead = False
-                trigger_message("Rusty Thorn planted!")
+                pos = get_free_plot()
+
+                if pos:
+                   x, y = pos
+                   new_plant = Plant(x, y, "Rusty Thorn", 0.02)
+                   new_plant.planted = True
+                   plants.append(new_plant)
+                   trigger_message("Rusty Thorn planted!")
+                else:
+                   trigger_message("No empty plot!")
+
 
             elif harvest_btn.collidepoint(mouse_pos):
                 harvested_something = False
@@ -813,12 +863,14 @@ while True:
                            else:
                                inventory[p.name] = 1
                            
+                           p.planted = False
                            p.growth = 0
                            p.dust = 0
+                           p.is_dead = False
                            p.harvested = False
+
                            harvested_something = True
                            print(f"Harvested {p.name} added to lab!")
-                           print(f"Current amount: {inventory[p.name]}")
 
                 if harvested_something:
                     print("Harvest successful!")
@@ -840,9 +892,8 @@ while True:
                       p.growth += 20
                       if p.growth > 100: p.growth = 100
             
-            elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos) and has_oxygen_recycler:
-               has_oxygen_recycler = False
-               oxygen_recycler_count = 0
+            elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos) and oxygen_recycler_count > 0:
+               oxygen_recycler_count -= 1
 
                for p in plants:
                      if not p.is_dead:
@@ -850,9 +901,7 @@ while True:
                         if p.growth >100: p.growth = 100
             
             else:
-             for p in plants:
-                if p.rect.collidepoint(mouse_pos):
-                    p.clean()
+               pass
 
     pygame.display.flip()
     clock.tick(60)
