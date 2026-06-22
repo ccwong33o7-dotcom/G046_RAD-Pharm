@@ -29,6 +29,7 @@ class Plant:
         self.is_dead = False
         self.death_timer = 0
         self.harvested = False
+        self.planted = False
 
         self.img_growth = []
         self.img_dead = []
@@ -39,35 +40,81 @@ class Plant:
 
 
         try:
-            self.img_seedling = pygame.image.load("image/plant/Seedling aloe.png").convert_alpha()
-            self.img_bud = pygame.image.load("image/plant/Growing aloe.png").convert_alpha()
-            self.img_flower = pygame.image.load("image/plant/Aloe.png").convert_alpha()
+            if self.name == "Glowing Aloe":
 
-            self.img_wilt_1 = pygame.image.load("image/plant/Aloe.png").convert_alpha()
-            self.img_wilt_2 = pygame.image.load("image/plant/Aloe wilt1.png").convert_alpha()
-            self.img_wilt_3 = pygame.image.load("image/plant/Aloe wilt2.png").convert_alpha()
-        
+              self.img_seedling = pygame.image.load(
+                "image/plant/Seedling aloe.png"
+              ).convert_alpha()
+
+              self.img_bud = pygame.image.load(
+                "image/plant/Growing aloe.png"
+              ).convert_alpha()
+
+              self.img_flower = pygame.image.load(
+                 "image/plant/Aloe.png"
+              ).convert_alpha()
+
+              self.img_wilt_1 = pygame.image.load(
+                  "image/plant/Aloe.png"
+              ).convert_alpha()
+
+              self.img_wilt_2 = pygame.image.load(
+                  "image/plant/Aloe wilt1.png"
+              ).convert_alpha()
+
+              self.img_wilt_3 = pygame.image.load(
+                 "image/plant/Aloe wilt2.png"
+              ).convert_alpha()
+
+
+            elif self.name == "Rusty Thorn":
+
+              self.img_seedling = pygame.image.load(
+                 "image/plant/seedling thorn.png"
+              ).convert_alpha()
+
+              self.img_bud = pygame.image.load(
+                 "image/plant/Growing thorn.png"
+              ).convert_alpha()
+
+              self.img_flower = pygame.image.load(
+                 "image/plant/Mature thorn.png"
+              ).convert_alpha()
+
+              self.img_wilt_1 = pygame.image.load(
+                 "image/plant/Mature thorn.png"
+              ).convert_alpha()
+
+              self.img_wilt_2 = pygame.image.load(
+                 "image/plant/Thorn wilt1.png"
+              ).convert_alpha()
+
+              self.img_wilt_3 = pygame.image.load(
+                "image/plant/Thorn wilt2.png"
+              ).convert_alpha()
+
         except pygame.error as e:
-            print(f"Error loading images: {e}")
-            pygame.quit()
-            import sys
-            sys.exit()
-        
+            print(f"Error loading images for {self.name}: {e}")
+
     def update(self):
-        self.dust += self.dust_speed
-        if self.dust > 100: 
-            self.dust = 100
-            if not self.is_dead and self.growth < 100:
-                self.is_dead = True
-                self.death_timer = 0
+     if not self.planted:
+        return
 
-        if not self.is_dead and self.dust < 70:
-            self.growth += 0.03
-            if self.growth > 100:
-                self.growth = 100
+     self.dust += self.dust_speed
+     if self.dust >= 100:
+        self.dust = 100
+        if not self.is_dead:
+            self.is_dead = True
+            self.death_timer = 0
 
-        if self.is_dead:
-            self.death_timer += 1
+     if not self.is_dead and self.dust < 70:
+        self.growth += 0.03
+
+        if self.growth > 100:
+            self.growth = 100
+
+     if self.is_dead:
+        self.death_timer += 1
 
     def clean(self):
      if not self.is_dead:
@@ -77,6 +124,9 @@ class Plant:
 
     
     def draw(self, surface):
+
+        if not self.planted:
+          return
 
         if self.growth >= 100:
             current_image = self.img_flower
