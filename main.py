@@ -108,6 +108,17 @@ except Exception as e:
     img_pharmacy = img_lab = img_shop = img_greenhouse = None
     print(f"Warning: Failed to load map building buttons: {e}")
 
+try:
+    acid_buy_img = pygame.image.load("image/button/buy.png").convert_alpha()
+    acid_buy_img = pygame.transform.smoothscale(acid_buy_img, (300, 105))
+
+    acid_cancel_img = pygame.image.load("image/button/cancel.png").convert_alpha()
+    acid_cancel_img = pygame.transform.smoothscale(acid_cancel_img, (300, 105))
+except Exception as e:
+    acid_buy_img = None
+    acid_cancel_img = None
+    print(f"Warning: Acid rain buttons not found: {e}")
+
 
 
 pygame.display.set_caption("Game")
@@ -243,6 +254,19 @@ weather_sys.update_weather(current_day)
 
 flash_message = ""
 flash_message_timer = 0
+
+acid_rain_days = [3, 7]
+shown_acid_rain_days = []
+show_acid_rain_popup = False
+acid_buy_rect = pygame.Rect(0, 0, 0, 0)
+acid_cancel_rect = pygame.Rect(0, 0, 0, 0)
+
+try:
+    acid_rain_popup_img = pygame.image.load("image/background/acid rain.png").convert_alpha()
+    acid_rain_popup_img = pygame.transform.smoothscale(acid_rain_popup_img, (760, 530))
+except:
+    acid_rain_popup_img = None
+    print("Warning: Acid rain popup image not found")
 
 def trigger_message(text):
     global flash_message, flash_message_timer
@@ -466,6 +490,12 @@ while True:
        
        gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
 
+       if current_day in acid_rain_days:
+           acid_overlay = pygame.Surface((Width, Height))
+           acid_overlay.fill((40, 70, 35))
+           acid_overlay.set_alpha(90)
+           screen.blit(acid_overlay, (0, 0))
+
        if ready_to_craft:
             msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
             screen.blit(msg, (Width//2 - 150, 50))
@@ -495,6 +525,27 @@ while True:
 
         text_rect = text_surf.get_rect(center=(Width // 2, 695))
         screen.blit(text_surf, text_rect)
+    
+    if show_acid_rain_popup:
+      overlay = pygame.Surface((Width, Height))
+      overlay.fill((0, 0, 0))
+      overlay.set_alpha(170)
+      screen.blit(overlay, (0, 0))
+
+      if acid_rain_popup_img:
+          popup_rect = acid_rain_popup_img.get_rect(center=(Width // 2, Height // 2 - 35))
+          screen.blit(acid_rain_popup_img, popup_rect)
+
+      acid_buy_rect = pygame.Rect(330, 540, 260, 90)
+      acid_cancel_rect = pygame.Rect(690, 540, 260, 90)
+
+      if acid_buy_img:
+         buy_scaled = pygame.transform.smoothscale(acid_buy_img, (260, 90))
+         screen.blit(buy_scaled, acid_buy_rect)
+
+      if acid_cancel_img:
+         cancel_scaled = pygame.transform.smoothscale(acid_cancel_img, (260, 90))
+         screen.blit(cancel_scaled, acid_cancel_rect)
 
     if show_day_transition:
         transition_anim_timer += 1
@@ -552,6 +603,17 @@ while True:
         screen.blit(date_surf, date_rect)
 
     for event in pygame.event.get():
+      if show_acid_rain_popup:
+         if event.type == pygame.MOUSEBUTTONDOWN:
+            if acid_buy_rect.collidepoint(event.pos):
+              show_acid_rain_popup = False
+              current_state = "SHOP"
+
+            elif acid_cancel_rect.collidepoint(event.pos):
+              show_acid_rain_popup = False
+
+         continue
+      
       if show_day_transition:
           if event.type == pygame.KEYDOWN:
               show_day_transition = False
@@ -633,7 +695,19 @@ while True:
                   elif harvest_btn.collidepoint(mouse_pos):
                       pass
                   elif gh_upgrade_btn.collidepoint(mouse_pos):
-                      pass
+                    if intact_canopy_count > 0:
+                       intact_canopy_count -= 1
+                       has_intact_canopy = False
+
+                       for p in plants:
+                          if not p.is_dead:
+                              p.dust = 0
+                              p.dust_speed = 0.005
+
+                       trigger_message("Intact Canopy used! Plants protected!")
+                    else:
+                       trigger_message("No Intact Canopy available!")
+
                   elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos):
                       pass
                   elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos):
@@ -755,6 +829,10 @@ while True:
             if to_gh_btn.collidepoint(mouse_pos):
                current_state = "GREENHOUSE"
                print("Entering to Greenhouse...")
+
+               if current_day in acid_rain_days and current_day not in shown_acid_rain_days:
+                 show_acid_rain_popup = True
+                 shown_acid_rain_days.append(current_day)
             elif to_shop_btn.collidepoint(mouse_pos):
                current_state = "SHOP"
                print("Entering to Shop...")
@@ -878,11 +956,6 @@ while True:
                 else:
                      print("No plants ready to harvest!")
                      trigger_message("No plants ready to harvest!")
-                
-
-            elif gh_upgrade_btn.collidepoint(mouse_pos):
-               if has_intact_canopy:
-                  print("You clicked the Intact Canopy! Now you can implement its effect.")
 
             elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos) and pure_soil_count > 0:
                pure_soil_count -= 1
