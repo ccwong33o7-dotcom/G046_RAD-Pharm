@@ -28,7 +28,7 @@ def draw_shop(screen, font, bg_img=None,
         screen.blit(btn_soil, (buy_soil_btn.x, buy_soil_btn.y))
     else:
         pygame.draw.rect(screen, (139, 69, 19), buy_soil_btn)
-        buy_text = force_small_font.render("195", True, (255, 255, 255))
+        buy_text = force_small_font.render("60", True, (255, 255, 255))
         screen.blit(buy_text, (buy_soil_btn.x + 55, buy_soil_btn.y + 12))
 
     buy_canopy_btn = pygame.Rect(718, 555, 96, 52)
@@ -36,7 +36,7 @@ def draw_shop(screen, font, bg_img=None,
         screen.blit(btn_canopy, (buy_canopy_btn.x, buy_canopy_btn.y))
     else:
         pygame.draw.rect(screen, (50, 150, 50), buy_canopy_btn)
-        canopy_text = force_small_font.render("225", True, (255, 255, 255))
+        canopy_text = force_small_font.render("150", True, (255, 255, 255))
         screen.blit(canopy_text, (buy_canopy_btn.x + 55, buy_canopy_btn.y + 12))
 
     buy_oxygen_btn = pygame.Rect(718, 387, 96, 52)
@@ -44,7 +44,7 @@ def draw_shop(screen, font, bg_img=None,
         screen.blit(btn_oxygen, (buy_oxygen_btn.x, buy_oxygen_btn.y))
     else:
         pygame.draw.rect(screen, (70, 70, 150), buy_oxygen_btn)
-        oxygen_text = force_small_font.render("200", True, (255, 255, 255))
+        oxygen_text = force_small_font.render("65", True, (255, 255, 255))
         screen.blit(oxygen_text, (buy_oxygen_btn.x + 55, buy_oxygen_btn.y + 12))
 
     buy_speed_serum_btn = pygame.Rect(1020, 230, 96, 52)
