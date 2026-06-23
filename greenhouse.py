@@ -171,12 +171,13 @@ class Plant:
 
 def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, oxygen_count=0, canopy_count=0, has_intact_canopy=False, has_oxygen_recycler=False, ready_to_craft=False, locked_plots=None):
     global img_pure_soil, img_intact_canopy, img_oxygen_recycler, img_plant_seed, img_harvest
+    global img_thorn_btn, img_aloe_btn 
     global img_tire, img_drum1, img_drum2, img_drum3, img_tire2, img_drum4
     small_font = pygame.font.SysFont("Arial", 20)
 
-    aloe_btn_rect = pygame.Rect(25, 630, 120, 65)
-    thorn_btn_rect = pygame.Rect(160, 630, 120, 65)
-    harvest_btn_rect = pygame.Rect(315, 630, 260, 65)
+    aloe_btn_rect = pygame.Rect(25, 635, 155, 50)
+    thorn_btn_rect = pygame.Rect(195, 635, 155, 50)
+    harvest_btn_rect = pygame.Rect(380, 630, 260, 65)
 
     if img_pure_soil is None:
         for ext in [".jpg", ".png", ".JPG", ".PNG"]:
@@ -239,6 +240,43 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
         img_tire2 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Tires 2.png").convert_alpha(), (120, 110))
     if img_drum4 is None and os.path.exists("image/Obstacles/Drum 4.png"):
         img_drum4 = pygame.transform.smoothscale(pygame.image.load("image/Obstacles/Drum 4.png").convert_alpha(), (100, 140))
+    
+    if img_aloe_btn is None:
+        for possible_path in [
+            "image/button/PlantAloeButton.png",
+            "image/button/plant aloe.png",
+            "image/button/Plant Aloe.png",
+        ]:
+            if os.path.exists(possible_path):
+                try:
+                    img_aloe_btn = pygame.image.load(possible_path).convert_alpha()
+                    img_aloe_btn = pygame.transform.smoothscale(
+                        img_aloe_btn,
+                        (aloe_btn_rect.width, aloe_btn_rect.height)
+                    )
+                    break
+                except pygame.error as e:
+                    print(f"Error loading Plant Aloe button image: {e}")
+                    img_aloe_btn = None
+
+
+    if img_thorn_btn is None:
+        for possible_path in [
+            "image/button/PlantThornButton.png",
+            "image/button/Plant thorn.png",
+            "image/button/plant thorn.png",
+        ]:
+            if os.path.exists(possible_path):
+                try:
+                    img_thorn_btn = pygame.image.load(possible_path).convert_alpha()
+                    img_thorn_btn = pygame.transform.smoothscale(
+                        img_thorn_btn,
+                        (thorn_btn_rect.width, thorn_btn_rect.height)
+                    )
+                    break
+                except pygame.error as e:
+                    print(f"Error loading Plant Thorn button image: {e}")
+                    img_thorn_btn = None
 
 
     if bg_image:
@@ -262,11 +300,24 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
         p.draw(screen)
     
     small_font = pygame.font.SysFont("Arial", 16)
-    pygame.draw.rect(screen, (0, 100, 0), aloe_btn_rect, border_radius=10)
-    screen.blit(small_font.render("Plant Aloe", True, (255, 255, 255)), (aloe_btn_rect.x + 20, aloe_btn_rect.y + 20))
-    
-    pygame.draw.rect(screen, (100, 0, 0), thorn_btn_rect, border_radius=10)
-    screen.blit(small_font.render("Plant Thorn", True, (255, 255, 255)), (thorn_btn_rect.x + 20, thorn_btn_rect.y + 20))
+
+    if img_aloe_btn:
+        screen.blit(img_aloe_btn, aloe_btn_rect)
+    else:
+        pygame.draw.rect(screen, (0, 100, 0), aloe_btn_rect, border_radius=10)
+        screen.blit(
+            small_font.render("Plant Aloe", True, (255, 255, 255)),
+            (aloe_btn_rect.x + 20, aloe_btn_rect.y + 15)
+        )
+
+    if img_thorn_btn:
+        screen.blit(img_thorn_btn, thorn_btn_rect)
+    else:
+        pygame.draw.rect(screen, (100, 0, 0), thorn_btn_rect, border_radius=10)
+        screen.blit(
+            small_font.render("Plant Thorn", True, (255, 255, 255)),
+            (thorn_btn_rect.x + 18, thorn_btn_rect.y + 15)
+        )
 
     any_plant_ready = any(p.growth >= 100 and not p.harvested and not p.is_dead for p in plant_list)
 
