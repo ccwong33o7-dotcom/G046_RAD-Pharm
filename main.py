@@ -33,6 +33,12 @@ except:
    gh_bg_img = None
    print("Warning: Greenhouse background image not fount")
 try:
+    gh_fixed_bg_img = pygame.image.load("image/background/Greenhouse2.png").convert()
+    gh_fixed_bg_img = pygame.transform.smoothscale(gh_fixed_bg_img, (Width, Height))
+except:
+    gh_fixed_bg_img = None
+    print("Warning: Fixed greenhouse background not found")
+try:
    menu_bg_img = pygame.image.load("image/background/mainmenu.png").convert()
    menu_bg_img = pygame.transform.smoothscale(menu_bg_img, (Width, Height))
 except:
@@ -148,7 +154,9 @@ def load_game():
         "ration_pack": 0,
         "speed_serum": 0,
         "blood_stop": 0,
-        "tutorial_done": False 
+        "tutorial_done": False,
+        "greenhouse_fixed": False,
+        "canopy_fixed_day": 0,
     }
 
 def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_amt, saved_people_count):
@@ -165,7 +173,9 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_re
        "ration_pack": progress.get("ration_pack", 0),
        "speed_serum": inventory.get("Speed Serum", 0), 
        "blood_stop": inventory.get("Blood-Stop", 0),
-       "tutorial_done": tutorial_done 
+       "tutorial_done": tutorial_done,
+       "greenhouse_fixed": greenhouse_fixed,
+       "canopy_fixed_day": canopy_fixed_day
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -255,9 +265,19 @@ weather_sys.update_weather(current_day)
 flash_message = ""
 flash_message_timer = 0
 
-acid_rain_days = [3, 7]
+acid_rain_days = [3, 8]
 shown_acid_rain_days = []
 show_acid_rain_popup = False
+greenhouse_fixed = progress.get("greenhouse_fixed", False)
+canopy_fixed_day = progress.get("canopy_fixed_day", 0)
+if current_day in [6, 7]:
+    greenhouse_fixed = False
+    canopy_fixed_day = 0
+
+if current_day in [3, 8] and intact_canopy_count > 0:
+    greenhouse_fixed = False
+    canopy_fixed_day = 0
+
 acid_buy_rect = pygame.Rect(0, 0, 0, 0)
 acid_cancel_rect = pygame.Rect(0, 0, 0, 0)
 
@@ -405,9 +425,19 @@ def advance_tutorial():
 while True:
     mouse_pos = pygame.mouse.get_pos()
 
+    if greenhouse_fixed:
+      if current_day - canopy_fixed_day >= 3:
+        greenhouse_fixed = False
+        canopy_fixed_day = 0
+        trigger_message("The canopy has broken down!")
+
     if saved_people >= 25:
         current_day += 1
         saved_people = 0 
+        if current_day in [6, 8]:
+           greenhouse_fixed = False
+           canopy_fixed_day = 0
+           trigger_message("The canopy has broken down!")
 
         show_day_transition = True
         transition_day = current_day
@@ -487,10 +517,34 @@ while True:
           plot for plot in locked_plots
           if current_day < plot['unlock_day']
        ]
-       
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,gh_bg_img, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
 
-       if current_day in acid_rain_days:
+       print(
+          "DAY =", current_day,
+          "FIXED =", greenhouse_fixed,
+          "FIX DAY =", canopy_fixed_day
+       ) 
+
+       roof_fixed_today = (
+          (current_day == 3 and greenhouse_fixed and canopy_fixed_day == 3)
+          or (current_day in [4, 5] and canopy_fixed_day == 3)
+          or (current_day == 8 and greenhouse_fixed and canopy_fixed_day == 8)
+          or (current_day in [9, 10] and canopy_fixed_day == 8)
+       )
+
+       if roof_fixed_today and gh_fixed_bg_img:
+          current_gh_bg = gh_fixed_bg_img
+       else:
+          current_gh_bg = gh_bg_img
+
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,current_gh_bg, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
+
+       acid_rain_protected_now = (
+           current_day in [3, 8]
+           and greenhouse_fixed
+           and canopy_fixed_day == current_day
+       )
+
+       if current_day in acid_rain_days and not acid_rain_protected_now:
            acid_overlay = pygame.Surface((Width, Height))
            acid_overlay.fill((40, 70, 35))
            acid_overlay.set_alpha(90)
@@ -695,18 +749,29 @@ while True:
                   elif harvest_btn.collidepoint(mouse_pos):
                       pass
                   elif gh_upgrade_btn.collidepoint(mouse_pos):
-                    if intact_canopy_count > 0:
-                       intact_canopy_count -= 1
-                       has_intact_canopy = False
 
-                       for p in plants:
-                          if not p.is_dead:
-                              p.dust = 0
-                              p.dust_speed = 0.005
+                       print("CANOPY BUTTON CLICKED")
 
-                       trigger_message("Intact Canopy used! Plants protected!")
-                    else:
-                       trigger_message("No Intact Canopy available!")
+                       if intact_canopy_count > 0:
+
+                         print("CANOPY AVAILABLE")
+
+                         intact_canopy_count -= 1
+                         has_intact_canopy = False
+
+                         greenhouse_fixed = True
+                         canopy_fixed_day = current_day
+                         save_game(
+                           current_day,
+                           has_seen_intro,
+                           pure_soil_count,
+                           has_intact_canopy,
+                           oxygen_recycler_count,
+                           cookies_count,
+                           saved_people
+                         )
+
+                         trigger_message("Greenhouse repaired!")
 
                   elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos):
                       pass
