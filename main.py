@@ -77,13 +77,13 @@ except Exception as e:
     survivor_icon_img = None
     print(f"Warning: Failed to load survivor kit icon: {e}")
 try:
-    btn_soil = pygame.image.load("image/button/195_button.png").convert_alpha()
+    btn_soil = pygame.image.load("image/button/60_button2.png").convert_alpha()
     btn_soil = pygame.transform.smoothscale(btn_soil, (96, 52))
     
-    btn_oxygen = pygame.image.load("image/button/200_button.png").convert_alpha()
+    btn_oxygen = pygame.image.load("image/button/65_button.png").convert_alpha()
     btn_oxygen = pygame.transform.smoothscale(btn_oxygen, (96, 52))
     
-    btn_canopy = pygame.image.load("image/button/225_button.png").convert_alpha()
+    btn_canopy = pygame.image.load("image/button/150_button.png").convert_alpha()
     btn_canopy = pygame.transform.smoothscale(btn_canopy, (96, 52))
     
     btn_30 = pygame.image.load("image/button/30_button.png").convert_alpha()
@@ -926,8 +926,8 @@ while True:
                      trigger_message("Not enough Cookies for Ration Pack!")
 
              elif shop_buy_soil_btn and shop_buy_soil_btn.collidepoint(mouse_pos):
-                 if cookies_count >= 195:
-                     cookies_count -= 195
+                 if cookies_count >= 60:
+                     cookies_count -= 60
                      pure_soil_count += 1
                      trigger_message("Pure Soil purchased!")
                  else:
@@ -937,8 +937,8 @@ while True:
                  print(f"DEBUG: Clicked Canopy Button! Current status: {has_intact_canopy}")
                  if has_intact_canopy:
                      trigger_message("You already own Intact Canopy!")
-                 elif cookies_count >= 225:
-                     cookies_count -= 225
+                 elif cookies_count >= 150:
+                     cookies_count -= 150
                      has_intact_canopy = True
                      intact_canopy_count = 1
                      trigger_message("Intact Canopy purchased!")
@@ -947,8 +947,8 @@ while True:
 
              elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
                  print(f"DEBUG: Clicked Oxygen Button! Current status: {oxygen_recycler_count}")
-                 if cookies_count >= 200:
-                     cookies_count -= 200
+                 if cookies_count >= 65:
+                     cookies_count -= 65
                      oxygen_recycler_count += 1
                      trigger_message("Oxygen Recycler purchased!")
                  else:
