@@ -120,7 +120,6 @@ class Customer:
     def check_click(self, mouse_pos, selected_item, progress_dict):
         if self.current_x > self.target_x or self.is_satisfied:
             return False, "Not ready"
-
         if self.sell_btn_rect.collidepoint(mouse_pos):
             if selected_item is None:
                 return False, "Please select an item from your hotbar first!"
@@ -148,7 +147,6 @@ class Customer:
             target_dict[dict_key] -= 1
             self.is_satisfied = True
             return True, "Trade successful!"
-
         return False, "No click"
 
 class CustomerManager:
@@ -171,24 +169,19 @@ class CustomerManager:
 
     def spawn_customers(self, count, force_ration=False):
         self.active_customers.clear()
-
         available_count = min(count, len(self.image_paths))
         chosen_paths = random.sample(self.image_paths, available_count)
-
         screen_w = pygame.display.get_surface().get_width() if pygame.display.get_surface() else 1280
 
         for i, path in enumerate(chosen_paths):
             customer = Customer(path)
             if force_ration and i == 0:
                 customer.set_requested_item("ration_pack")
-
             spacing = screen_w // (available_count + 1)
             target_x = spacing * (i + 1) - (customer.image.get_width() // 2)
             target_x += -150
-
             customer.target_x = target_x
             customer.current_x = screen_w + (i * 80)
-
             self.active_customers.append(customer)
 
     def update_all(self):
@@ -204,7 +197,6 @@ class CustomerManager:
     def draw_all(self, screen, selected_item=None, inventory_dict=None):
         y_pos = 177
         self.update_all()
-
         for customer in self.active_customers:
             customer.draw(screen, y_pos, selected_item, inventory_dict)
 
@@ -220,18 +212,53 @@ class CustomerManager:
             screen.blit(text_surf, text_rect)
             self.feedback_timer -= 1
 
-    def handle_click(self, mouse_pos, current_selected_item, merged_inventory):
+    def handle_click(self, mouse_pos, current_selected_item, progress_dict):
         if not self.active_customers:
+            self.show_message("No active customer", False)
             return False, "No active customer"
-        current_customer = self.active_customers[0]
-        if current_customer.requested_item == current_selected_item:
-            if merged_inventory.get(current_selected_item, 0) > 0:
-                self.active_customers.pop(0)
-                return True, "Success"
-            else:
-                return False, "No stock"
-        else:
-            return False, "Medicine does not match what customer wants!"
+
+        for customer in self.active_customers:
+            if customer.is_satisfied:
+                continue
+            if customer.sell_btn_rect.collidepoint(mouse_pos):
+                if current_selected_item is None:
+                    msg = "Please select an item from your hotbar first!"
+                    self.show_message(msg, False)
+                    return False, msg
+                
+                if current_selected_item != customer.requested_item:
+                    msg = f"Wrong item! This customer requested {customer.requested_item.replace('_', ' ').title()}."
+                    self.show_message(msg, False)
+                    return False, msg
+
+                if current_selected_item == "ration_pack" or current_selected_item == "sedative":
+                    if progress_dict.get(current_selected_item, 0) <= 0:
+                        msg = "Out of stock! Go to SHOP."
+                        self.show_message(msg, False)
+                        return False, msg
+                    progress_dict[current_selected_item] -= 1
+                elif current_selected_item == "blood_stop":
+                    if inventory.get("Blood-Stop", 0) <= 0:
+                        msg = "Out of stock! Go to LAB."
+                        self.show_message(msg, False)
+                        return False, msg
+                    inventory["Blood-Stop"] -= 1
+                elif current_selected_item == "speed_serum":
+                    if inventory.get("Speed Serum", 0) <= 0:
+                        msg = "Out of stock! Go to LAB."
+                        self.show_message(msg, False)
+                        return False, msg
+                    inventory["Speed Serum"] -= 1
+                else:
+                    msg = "Unknown item"
+                    self.show_message(msg, False)
+                    return False, msg
+
+                customer.is_satisfied = True
+                self.show_message("Trade successful!", True)
+                return True, "Trade successful!"
+            
+        return False, "No click on sell button"
 
 _global_manager_ref = None
 
