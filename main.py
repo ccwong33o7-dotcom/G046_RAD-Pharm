@@ -154,6 +154,8 @@ def load_game():
         "ration_pack": 0,
         "speed_serum": 0,
         "blood_stop": 0,
+        "rad_ointment": 0,
+        "lung_clear": 0,
         "tutorial_done": False,
         "greenhouse_fixed": False,
         "canopy_fixed_day": 0,
@@ -182,6 +184,8 @@ def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_
        "ration_pack": progress.get("ration_pack", 0),
        "speed_serum": inventory.get("Speed Serum", 0), 
        "blood_stop": inventory.get("Blood-Stop", 0),
+       "rad_ointment": inventory.get("Rad-Ointment", 0),
+       "lung_clear": inventory.get("Lung-Clear", 0),
        "tutorial_done": tutorial_done,
        "greenhouse_fixed": greenhouse_fixed,
        "canopy_fixed_day": canopy_fixed_day,
@@ -214,6 +218,8 @@ tutorial_done = progress.get("tutorial_done", False)
 
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
+inventory["Rad-Ointment"] = int(progress.get("rad_ointment", 0))
+inventory["Lung-Clear"] = int(progress.get("lung_clear", 0))
 inventory["Glowing Aloe"] = int(
     progress.get("glowing_aloe", 2)
 )
@@ -332,7 +338,9 @@ pharmacy_buttons = {
     "sedative": pygame.Rect(131, 532, 90, 90),
     "blood_stop": pygame.Rect(237, 532, 90, 90),
     "speed_serum": pygame.Rect(343, 532, 90, 90),
-    "sell_rad": pygame.Rect(850, 450, 200, 50)
+    "sell_rad": pygame.Rect(850, 450, 200, 50),
+    "rad_ointment": pygame.Rect(449, 532, 90, 90),
+    "lung_clear": pygame.Rect(555, 532, 90, 90)
 }
 
 show_day_transition = False
@@ -785,11 +793,13 @@ while True:
              clicked_ui = False
 
              item_configs = [
-                 ("ration_pack", "progress", "ration_pack", "Ration Pack"),
-                 ("sedative", "progress", "sedative", "Sedative"),
-                 ("blood_stop", "inventory", "Blood-Stop", "Blood Stop"),
-                 ("speed_serum", "inventory", "Speed Serum", "Speed Serum")
-             ]
+                ("ration_pack", "progress", "ration_pack", "Ration Pack"),
+                ("sedative", "progress", "sedative", "Sedative"),
+                ("blood_stop", "inventory", "Blood-Stop", "Blood Stop"),
+                ("speed_serum", "inventory", "Speed Serum", "Speed Serum"),
+                ("rad_ointment", "inventory", "Rad-Ointment", "Rad-Ointment"),
+                ("lung_clear", "inventory", "Lung-Clear", "Lung-Clear")
+                ]
              
              for ui_key, source, stock_key, display_name in item_configs:
                  rect = pharmacy_buttons.get(ui_key)

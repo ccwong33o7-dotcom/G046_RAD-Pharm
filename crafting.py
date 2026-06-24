@@ -17,6 +17,14 @@ def get_title_font():
         pygame.font.init()
     return pygame.font.SysFont("Arial", 32, bold=True)
 
+bloodstop_icon = pygame.image.load("image/icon/bloodstop_button.png").convert_alpha()
+bloodstop_icon = pygame.transform.smoothscale(bloodstop_icon, (70, 70))
+lungclear_icon = pygame.image.load("image/icon/lung-clear_button.png").convert_alpha()
+lungclear_icon = pygame.transform.smoothscale(lungclear_icon, (92, 70))
+speedserum_icon = pygame.image.load("image/icon/speedserum_button.png").convert_alpha()
+speedserum_icon = pygame.transform.smoothscale(speedserum_icon, (70, 70))
+radointment_icon = pygame.image.load("image/icon/rad-ointment_button.png").convert_alpha()
+radointment_icon = pygame.transform.smoothscale(radointment_icon, (70, 70))
 
 
 try:
@@ -39,13 +47,6 @@ RECIPES = {
 inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber": "Infinite", "Glowing Aloe": 2, "Rusty Thorn":2 
              ,"Rad-Ointment": 0 , "Speed Serum": 0, "Lung-Clear": 0, "Blood-Stop": 0}
 
-hidden_items = [
-    "Rad-Ointment",
-    "Speed Serum",
-    "Lung-Clear",
-    "Blood-Stop",
-    
-]
 
 game_state = "MENU"
 pending_item = ""
@@ -376,15 +377,16 @@ def draw_crafting(screen, bg_image, font):
     )
 
     screen.blit(msg, (500, 40))
+    screen.blit(bloodstop_icon, (33, 510))
+    screen.blit(lungclear_icon, (33, 397))
+    screen.blit(speedserum_icon, (33, 290))
+    screen.blit(radointment_icon, (33, 185))
 
-
-    small_font = pygame.font.SysFont("Arial", 16, bold=True)
+    small_font = pygame.font.SysFont("Arial", 12, bold=True)
 
     visible_items = []
 
     for item, count in inventory.items():
-
-        if item not in hidden_items:
             visible_items.append((item, count))
 
     positions = {
@@ -392,8 +394,16 @@ def draw_crafting(screen, bg_image, font):
         "Bio-Fuel": (450, 645),
         "Scrap Fiber": (650, 645),
         "Glowing Aloe": (845, 645),
-        "Rusty Thorn": (1020, 645)
+        "Rusty Thorn": (1020, 645),
+
+        "Rad-Ointment": (29, 260),
+        "Speed Serum": (29, 370),
+        "Lung-Clear": (32, 480),
+        "Blood-Stop": (31, 590)
     }
+
+        
+    
 
     for item, count in visible_items:
 

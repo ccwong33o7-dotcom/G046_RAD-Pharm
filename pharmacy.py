@@ -17,6 +17,8 @@ ration_pack_icon_img = load_and_scale("image/button/rationpack_button.png", ICON
 sedative_icon_img = load_and_scale("image/button/sedative_button.png", ICON_SIZE, "sedative_button.png")
 bloodstop_icon_img = load_and_scale("image/button/bloodstop_button.png", ICON_SIZE, "bloodstop_button.png")
 speedserum_icon_img = load_and_scale("image/button/speedserum_button.png", ICON_SIZE, "speedserum_button.png")
+radointment_icon_img = load_and_scale("image/button/rad-ointment_button.png", ICON_SIZE, "rad-ointment_button.png")
+lungclear_icon_img = load_and_scale("image/button/lung-clear_button.png", ICON_SIZE, "lung-clear_button.png")
 
 class Customer:
     _btn_font = None
@@ -49,7 +51,7 @@ class Customer:
         self.speed = 8
         self.sell_btn_rect = pygame.Rect(0, 0, 0, 0)
 
-        self.possible_requests = ["ration_pack", "sedative", "blood_stop", "speed_serum"]
+        self.possible_requests = ["ration_pack", "sedative", "blood_stop", "speed_serum", "rad_ointment", "lung_clear"]
         self.requested_item = random.choice(self.possible_requests)
         self.item_icon = self._load_item_icon(self.requested_item)
 
@@ -61,7 +63,9 @@ class Customer:
             "ration_pack": "image/Customer/CI_rationpack.png",
             "sedative": "image/Customer/CI_sedative.png",
             "blood_stop": "image/Customer/CI_bloodstop.png",
-            "speed_serum": "image/Customer/CI_speedserum.png"
+            "speed_serum": "image/Customer/CI_speedserum.png",
+            "rad_ointment": "image/Customer/CI_radointment.jpeg",
+            "lung_clear": "image/Customer/CI_lungclear.jpeg"
         }
         try:
             icon_img = pygame.image.load(icon_paths[item]).convert_alpha()
@@ -134,12 +138,18 @@ class Customer:
             elif selected_item == "speed_serum":
                 target_dict = inventory
                 dict_key = "Speed Serum"
+            elif selected_item == "rad_ointment":
+                target_dict = inventory
+                dict_key = "Rad-Ointment"
+            elif selected_item == "lung_clear":
+                target_dict = inventory
+                dict_key = "Lung-Clear"
 
             if target_dict.get(dict_key, 0) <= 0:
                 item_name = dict_key.replace('_', ' ').title()
                 if selected_item in ["ration_pack", "sedative"]:
                     return False, f"{item_name} is out of stock! Go to the SHOP to buy more."
-                elif selected_item in ["blood_stop", "speed_serum"]:
+                elif selected_item in ["blood_stop", "speed_serum", "rad_ointment", "lung_clear"]:
                     return False, f"{item_name} is out of stock! Go to the LAB to craft it."
                 else:
                     return False, "Out of stock!"
@@ -238,32 +248,54 @@ class CustomerManager:
                     self.show_message(msg, False)
                     return False, msg
 
-                if current_selected_item == "ration_pack" or current_selected_item == "sedative":
-                    if progress_dict.get(current_selected_item, 0) <= 0:
-                        msg = "Out of stock! Go to SHOP."
-                        self.show_message(msg, False)
-                        return False, msg
-                    progress_dict[current_selected_item] -= 1
-                elif current_selected_item == "blood_stop":
-                    if inventory.get("Blood-Stop", 0) <= 0:
-                        msg = "Out of stock! Go to LAB."
-                        self.show_message(msg, False)
-                        return False, msg
-                    inventory["Blood-Stop"] -= 1
-                elif current_selected_item == "speed_serum":
-                    if inventory.get("Speed Serum", 0) <= 0:
-                        msg = "Out of stock! Go to LAB."
-                        self.show_message(msg, False)
-                        return False, msg
-                    inventory["Speed Serum"] -= 1
-                else:
-                    msg = "Unknown item"
-                    self.show_message(msg, False)
-                    return False, msg
+            if current_selected_item in ["ration_pack", "sedative"]:
 
-                customer.is_satisfied = True
-                self.show_message("Trade successful!", True)
-                return True, "Trade successful!"
+                if progress_dict.get(current_selected_item, 0) <= 0:
+                    self.show_message("Out of stock! Go to SHOP.", False)
+                    return False, "Out of stock!"
+
+                progress_dict[current_selected_item] -= 1
+
+            elif current_selected_item == "blood_stop":
+
+                if inventory.get("Blood-Stop", 0) <= 0:
+                    self.show_message("Out of stock! Go to LAB.", False)
+                    return False, "Out of stock!"
+
+                inventory["Blood-Stop"] -= 1
+
+            elif current_selected_item == "speed_serum":
+
+                if inventory.get("Speed Serum", 0) <= 0:
+                    self.show_message("Out of stock! Go to LAB.", False)
+                    return False, "Out of stock!"
+
+                inventory["Speed Serum"] -= 1
+
+            elif current_selected_item == "rad_ointment":
+
+                if inventory.get("Rad-Ointment", 0) <= 0:
+                    self.show_message("Out of stock! Go to LAB.", False)
+                    return False, "Out of stock!"
+
+                inventory["Rad-Ointment"] -= 1
+
+            elif current_selected_item == "lung_clear":
+
+                if inventory.get("Lung-Clear", 0) <= 0:
+                    self.show_message("Out of stock! Go to LAB.", False)
+                    return False, "Out of stock!"
+
+                inventory["Lung-Clear"] -= 1
+
+            else:
+
+                self.show_message("Unknown item", False)
+                return False, "Unknown item"
+
+            customer.is_satisfied = True
+            self.show_message("Trade successful!", True)
+            return True, "Trade successful!"
             
         return False, "No click on sell button"
 
@@ -290,6 +322,9 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
         merged_inventory.update(progress_dict)
     merged_inventory["Blood-Stop"] = inventory.get("Blood-Stop", 0)
     merged_inventory["Speed Serum"] = inventory.get("Speed Serum", 0)
+    merged_inventory["Rad-Ointment"] = inventory.get("Rad-Ointment", 0)
+    merged_inventory["Lung-Clear"] = inventory.get("Lung-Clear", 0)
+
 
     if external_manager:
         external_manager.draw_all(screen, selected_item, merged_inventory)
@@ -309,6 +344,8 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
     sedative_rect    = pygame.Rect(START_X + 1 * SPACING_X, START_Y, BTN_W, BTN_H)
     bloodstop_rect   = pygame.Rect(START_X + 2 * SPACING_X, START_Y, BTN_W, BTN_H)
     speedserum_rect  = pygame.Rect(START_X + 3 * SPACING_X, START_Y, BTN_W, BTN_H)
+    radointment_rect = pygame.Rect(START_X + 4 * SPACING_X, START_Y, BTN_W, BTN_H)
+    lungclear_rect   = pygame.Rect(START_X + 5 * SPACING_X, START_Y, BTN_W, BTN_H)
 
     cookie_rect = pygame.Rect(705, 470, 100, 100)
     if money_waiting_to_collect:
@@ -322,6 +359,8 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
     sedative_val = progress_dict.get("sedative", 0) if progress_dict else 0
     blood_val = inventory.get("Blood-Stop", 0)
     speed_val = inventory.get("Speed Serum", 0)
+    rad_val = inventory.get("Rad-Ointment", 0)
+    lung_val = inventory.get("Lung-Clear", 0)
 
     if ration_pack_icon_img:
         scaled_img = pygame.transform.smoothscale(ration_pack_icon_img, (BTN_W, BTN_H))
@@ -355,10 +394,22 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
     else:
         pygame.draw.rect(screen, (60, 120, 180), speedserum_rect, 2)
 
-    font_big = pygame.font.SysFont("Arial", 28)
-    rad_val = inventory.get('Rad-Ointment', 0)
-    rad_text = font_big.render(f"Rad-Ointment: {rad_val}", True, (255, 255, 255))
-    screen.blit(rad_text, (960, 220))
+    if radointment_icon_img:
+        scaled_img = pygame.transform.smoothscale(radointment_icon_img, (BTN_W, BTN_H))
+        screen.blit(scaled_img, (450, 532))
+        qty_text = label_font.render(f"Count: {rad_val}", True, (255, 255, 255))
+        screen.blit(qty_text, (450 + 12, 532 + BTN_H + 5))
+    else:
+        pygame.draw.rect(screen, (180, 180, 60), radointment_rect, 2)
+
+    if lungclear_icon_img:
+        scaled_img = pygame.transform.smoothscale(lungclear_icon_img, (118, BTN_H))
+        screen.blit(scaled_img, (560, 532))
+        qty_text = label_font.render(f"Count: {lung_val}", True, (255, 255, 255))
+        screen.blit(qty_text, (560 + 12, 532 + BTN_H + 5))
+    else:
+        pygame.draw.rect(screen, (60, 180, 120), lungclear_rect, 2)
+
 
     sell_buttons = []
     if external_manager:
@@ -372,5 +423,8 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
         "ration_pack": ration_pack_rect,
         "sedative": sedative_rect,
         "blood_stop": bloodstop_rect,
-        "speed_serum": speedserum_rect
+        "speed_serum": speedserum_rect,
+        "rad_ointment": radointment_rect,
+        "lung_clear": lungclear_rect
+
     }
