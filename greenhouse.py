@@ -157,11 +157,69 @@ class Plant:
         scaled_image = pygame.transform.scale(current_image, (self.rect.width, self.rect.height))
         surface.blit(scaled_image, (self.rect.x, self.rect.y))
 
-        font_small = pygame.font.SysFont("Arial", 18)
-        name_txt = font_small.render(f"{self.name}", True, COLOR_TEXT)
-        stats_txt = font_small.render(f"D:{int(self.dust)}% G:{int(self.growth)}%", True, COLOR_TEXT)
-        surface.blit(name_txt, (self.rect.x, self.rect.y - 30))
-        surface.blit(stats_txt, (self.rect.x, self.rect.y - 10))
+        font_small = pygame.font.SysFont("Arial", 13, bold=True)
+
+        def draw_segment_bar(x, y, percent, fill_color, label):
+            bar_w = 95
+            bar_h = 9
+            segments = 6
+            gap = 3
+            seg_w = (bar_w - gap * (segments - 1)) // segments
+
+            label_txt = font_small.render(label, True, (220, 210, 170))
+            surface.blit(label_txt, (x - 18, y - 4))
+
+            pygame.draw.rect(surface, (20, 18, 15), (x, y, bar_w, bar_h), border_radius=5)
+
+            filled = int((percent / 100) * segments)
+
+            for i in range(segments):
+                sx = x + i * (seg_w + gap)
+
+                if i < filled:
+                    color = fill_color
+                else:
+                    color = (55, 55, 50)
+
+                pygame.draw.rect(
+                    surface,
+                    color,
+                    (sx, y + 2, seg_w, bar_h - 4),
+                    border_radius=3
+                )
+
+            pygame.draw.rect(surface, (170, 130, 70), (x, y, bar_w, bar_h), 2, border_radius=5)
+
+        bar_x = self.rect.x + 25
+        growth_y = self.rect.y + self.rect.height - 20
+        dust_y = self.rect.y + self.rect.height - 7
+
+        if self.growth >= 100:
+            growth_color = (80, 255, 120)
+        else:
+            growth_color = (90, 210, 80)
+
+        if self.dust >= 100:
+            dust_color = (220, 45, 45)
+        elif self.dust >= 70:
+            dust_color = (230, 80, 40)
+        else:
+            dust_color = (230, 190, 50)
+
+        draw_segment_bar(bar_x, growth_y, self.growth, growth_color, "G")
+        draw_segment_bar(bar_x, dust_y, self.dust, dust_color, "D")
+
+        if self.growth >= 100 and not self.is_dead:
+            ready_txt = font_small.render("READY", True, (80, 255, 120))
+            surface.blit(ready_txt, (bar_x + 30, growth_y - 18))
+
+        if self.dust >= 70 and not self.is_dead:
+            danger_txt = font_small.render("DANGER", True, (230, 80, 40))
+            surface.blit(danger_txt, (bar_x + 25, dust_y + 8))
+
+        if self.is_dead:
+            dead_txt = font_small.render("DEAD", True, (230, 60, 60))
+            surface.blit(dead_txt, (bar_x + 32, dust_y + 8))
 
         if self.is_dead:
             self.delete_btn_rect = pygame.Rect(self.rect.x + 35, self.rect.y - 60, 50, 30)
