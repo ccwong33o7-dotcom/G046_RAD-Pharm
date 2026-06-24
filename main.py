@@ -124,6 +124,37 @@ except Exception as e:
     acid_buy_img = None
     acid_cancel_img = None
     print(f"Warning: Acid rain buttons not found: {e}")
+try:
+    ending1_img = pygame.image.load("image/background/Ending1.png").convert()
+    ending2_img = pygame.image.load("image/background/Ending2.png").convert()
+    ending3_img = pygame.image.load("image/background/Ending3.png").convert()
+    ending4_img = pygame.image.load("image/background/Ending4.png").convert()
+
+    ending1_img = pygame.transform.scale(
+        ending1_img,
+        (Width, Height)
+    )
+
+    ending2_img = pygame.transform.scale(
+        ending2_img,
+        (Width, Height)
+    )
+
+    ending3_img = pygame.transform.scale(
+        ending3_img,
+        (Width, Height)
+    )
+
+    ending4_img = pygame.transform.scale(
+        ending4_img,
+        (Width, Height)
+    )
+
+except:
+    Ending1_img = None
+    Ending2_img = None
+    Ending3_img = None
+    Ending4_img = None
 
 
 
@@ -238,6 +269,7 @@ intact_canopy_active = 1 if intact_canopy_count > 0 else 0
 
 current_state="MENU"
 last_state = "MENU"
+ending_step = 0
 
 plants = []
 
@@ -467,9 +499,55 @@ while True:
         canopy_fixed_day = 0
         trigger_message("The canopy has broken down!")
 
-    if saved_people >= 25:
+    if saved_people >= 25 and current_state != "ENDING":
+
+      if current_day >= 10:
+        saved_people = 25
+        current_state = "ENDING"
+        ending_step = 0
+        show_day_transition = False
+        show_acid_rain_popup = False
+
+        save_game(
+            current_day,
+            has_seen_intro,
+            pure_soil_count,
+            intact_canopy_count,
+            oxygen_recycler_count,
+            cookies_count,
+            saved_people
+        )
+
+      else:
         current_day += 1
-        saved_people = 0 
+        saved_people = 0
+
+        if current_day in [6, 8]:
+           greenhouse_fixed = False
+           canopy_fixed_day = 0
+           trigger_message("The canopy has broken down!")
+
+        show_day_transition = True
+        transition_day = current_day
+        transition_anim_timer = 0
+
+        print(f"Day Cleared! Welcome to Day {current_day}!")
+
+        weather_sys.update_weather(current_day)
+        next_day_customers = random.randint(1, 2)
+        customer_manager.spawn_customers(next_day_customers, force_ration=False)
+        print(f"New Day! Spawned {next_day_customers} customers.")
+
+        save_game(
+            current_day,
+            has_seen_intro,
+            pure_soil_count,
+            intact_canopy_count,
+            oxygen_recycler_count,
+            cookies_count,
+            saved_people
+        )
+
         if current_day in [6, 8]:
            greenhouse_fixed = False
            canopy_fixed_day = 0
@@ -482,9 +560,8 @@ while True:
         print(f"Day Cleared! Welcome to Day {current_day}!")
         
         if current_day > 10:
-            print("Victory! You survived all 10 days!")
-            trigger_message("You survived all 10 days! Victory!")
-            current_day = 1
+           current_state = "ENDING"
+           ending_step = 0
             
         weather_sys.update_weather(current_day) 
         next_day_customers = random.randint(1, 2)
@@ -599,12 +676,26 @@ while True:
             draw_lab_tutorial(screen)
         else:
             animate_crafting()
+    
+    elif current_state == "ENDING":
+
+         if ending_step == 0:
+             screen.blit(ending1_img,(0,0))
+
+         elif ending_step == 1:
+             screen.blit(ending2_img,(0,0))
+
+         elif ending_step == 2:
+             screen.blit(ending3_img,(0,0))
+
+         elif ending_step == 3:
+             screen.blit(ending4_img,(0,0))
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
        pygame.event.clear()
 
-    if current_state not in ["MENU", "SETTING", "INTRO", "WEATHER_EXPLAIN"]:
+    if current_state not in ["MENU", "SETTING", "INTRO", "WEATHER_EXPLAIN", "ENDING"]:
         task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys)
 
     if flash_message_timer > 0:
@@ -671,6 +762,22 @@ while True:
         screen.blit(date_surf, date_rect)
 
     for event in pygame.event.get():
+      if current_state == "ENDING":
+
+          if event.type == pygame.QUIT:
+              pygame.quit()
+              sys.exit()
+
+          if event.type == pygame.KEYDOWN:
+              if event.key == pygame.K_SPACE:
+                  ending_step += 1
+
+                  if ending_step > 3:
+                      pygame.quit()
+                      sys.exit()
+
+          continue
+      
       if show_acid_rain_popup:
          if event.type == pygame.MOUSEBUTTONDOWN:
             if acid_buy_rect.collidepoint(event.pos):
