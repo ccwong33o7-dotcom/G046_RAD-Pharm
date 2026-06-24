@@ -190,6 +190,7 @@ def load_game():
         "tutorial_done": False,
         "tutorial_done": False,
         "lab_tutorial_done": False,
+        "greenhouse_tutorial_done": False,
         "greenhouse_fixed": False,
         "canopy_fixed_day": 0,
         "shown_acid_rain_days": [],
@@ -221,6 +222,7 @@ def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_
        "lung_clear": inventory.get("Lung-Clear", 0),
        "tutorial_done": tutorial_done,
        "lab_tutorial_done": lab_tutorial_done,
+       "greenhouse_tutorial_done": greenhouse_tutorial_done,
        "greenhouse_fixed": greenhouse_fixed,
        "canopy_fixed_day": canopy_fixed_day,
        "shown_acid_rain_days": shown_acid_rain_days,
@@ -252,6 +254,14 @@ tutorial_done = progress.get("tutorial_done", False)
 lab_tutorial_done = progress.get("lab_tutorial_done",False)
 
 show_lab_tutorial = False
+
+greenhouse_tutorial_done = progress.get(
+    "greenhouse_tutorial_done",
+    False
+)
+
+show_greenhouse_tutorial = False
+greenhouse_tutorial_step = 0
 
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
@@ -355,6 +365,132 @@ def trigger_message(text):
     global flash_message, flash_message_timer
     flash_message = text
     flash_message_timer = 180
+
+def draw_upgrade_tooltip(screen, mouse_pos, pure_soil_btn, oxygen_btn, canopy_btn):
+    tooltip_text = None
+    target_btn = None
+
+    if pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos):
+        tooltip_text = [
+            "Pure Soil",
+            "Clears dust and boosts growth."
+        ]
+        target_btn = pure_soil_btn
+
+    elif oxygen_btn and oxygen_btn.collidepoint(mouse_pos):
+        tooltip_text = [
+            "Oxygen Recycler",
+            "Boosts plant growth."
+        ]
+        target_btn = oxygen_btn
+
+    elif canopy_btn and canopy_btn.collidepoint(mouse_pos):
+        tooltip_text = [
+            "Intact Canopy",
+            "Protects plants from Acid Rain."
+        ]
+        target_btn = canopy_btn
+
+    if tooltip_text is None:
+        return
+
+    title_font = pygame.font.SysFont("Georgia", 14, bold=True)
+    desc_font = pygame.font.SysFont("Georgia", 11, bold=True)
+
+    box_w = 235
+    box_h = 58
+    cut = 12
+
+    box_x = target_btn.centerx - box_w // 2
+    box_y = target_btn.y - 95
+
+    if box_x < 10:
+        box_x = 10
+
+    if box_x + box_w > Width - 10:
+        box_x = Width - box_w - 10
+
+    if box_y < 80:
+        box_y = 80
+
+    x = box_x
+    y = box_y
+    w = box_w
+    h = box_h
+
+    points = [
+        (x + cut, y),
+        (x + w - cut, y),
+        (x + w, y + cut),
+        (x + w, y + h - cut),
+        (x + w - cut, y + h),
+        (x + cut, y + h),
+        (x, y + h - cut),
+        (x, y + cut)
+    ]
+
+    shadow_points = [
+        (px + 5, py + 5)
+        for px, py in points
+    ]
+
+    pygame.draw.polygon(screen, (25, 18, 12), shadow_points)
+
+    pygame.draw.polygon(screen, (74, 45, 25), points)
+
+    inner = 8
+    inner_points = [
+        (x + cut + inner, y + inner),
+        (x + w - cut - inner, y + inner),
+        (x + w - inner, y + cut + inner),
+        (x + w - inner, y + h - cut - inner),
+        (x + w - cut - inner, y + h - inner),
+        (x + cut + inner, y + h - inner),
+        (x + inner, y + h - cut - inner),
+        (x + inner, y + cut + inner)
+    ]
+
+    pygame.draw.polygon(screen, (188, 153, 98), inner_points)
+
+    pygame.draw.lines(screen, (35, 24, 15), True, points, 3)
+    pygame.draw.lines(screen, (225, 195, 130), True, inner_points, 1)
+
+    rivets = [
+        (x + 18, y + 18),
+        (x + w - 18, y + 18),
+        (x + 18, y + h - 18),
+        (x + w - 18, y + h - 18)
+    ]
+
+    for rx, ry in rivets:
+        pygame.draw.circle(screen, (86, 50, 25), (rx, ry), 5)
+        pygame.draw.circle(screen, (210, 165, 90), (rx - 1, ry - 1), 2)
+
+    arrow_x = target_btn.centerx
+    arrow_y = target_btn.y - 8
+
+    arrow_points = [
+        (arrow_x - 12, y + h - 2),
+        (arrow_x + 12, y + h - 2),
+        (arrow_x, arrow_y)
+    ]
+
+    pygame.draw.polygon(screen, (74, 45, 25), arrow_points)
+    pygame.draw.polygon(
+        screen,
+        (188, 153, 98),
+        [
+            (arrow_x - 7, y + h - 2),
+            (arrow_x + 7, y + h - 2),
+            (arrow_x, arrow_y - 2)
+        ]
+    )
+
+    title = title_font.render(tooltip_text[0], True, (65, 35, 18))
+    desc = desc_font.render(tooltip_text[1], True, (55, 42, 30))
+
+    screen.blit(title, (x + 24, y + 12))
+    screen.blit(desc, (x + 24, y + 34))
 
 show_plant_menu = False
 plant_menu_rect = pygame.Rect(0, 0, 0, 0)
@@ -489,6 +625,46 @@ def advance_tutorial():
         trigger_message("Tutorial complete! Buy medicines at the Shop or craft in the Lab. Start saving survivors!")
 
         print("[Tutorial] All steps completed!")
+
+def draw_greenhouse_tutorial(screen, step, aloe_btn, thorn_btn, harvest_btn):
+    hints = [
+        "Step 1: Click Plant Aloe or Plant Thorn to grow your first plant.",
+        "Step 2: Watch the G bar for growth and the D bar for dust.",
+        "Step 3: When READY appears, click Harvest to send plants to the Lab.",
+        "Step 4: Move your mouse over upgrade buttons to see their effects."
+    ]
+
+    overlay = pygame.Surface((Width, Height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 70))
+    screen.blit(overlay, (0, 0))
+
+    if step == 0:
+        pygame.draw.rect(screen, (255, 230, 90), aloe_btn.inflate(10, 10), 4, border_radius=8)
+        pygame.draw.rect(screen, (255, 230, 90), thorn_btn.inflate(10, 10), 4, border_radius=8)
+
+    elif step == 2:
+        pygame.draw.rect(screen, (255, 230, 90), harvest_btn.inflate(10, 10), 4, border_radius=8)
+
+    box_width = 650
+    box_height = 70
+    box_x = (Width - box_width) // 2
+    box_y = 85
+
+    box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+
+    pygame.draw.rect(screen, (15, 25, 55), box_rect, border_radius=14)
+    pygame.draw.rect(screen, (240, 230, 200), box_rect, 2, border_radius=14)
+
+    tut_font = pygame.font.SysFont("Segoe UI", 18, bold=True)
+
+    text = tut_font.render(hints[step], True, (255, 245, 210))
+    text_rect = text.get_rect(center=(Width // 2, box_y + 28))
+    screen.blit(text, text_rect)
+
+    small_font = pygame.font.SysFont("Segoe UI", 13, bold=True)
+    skip_text = small_font.render("Press SPACE to continue / skip", True, (190, 200, 220))
+    skip_rect = skip_text.get_rect(center=(Width // 2, box_y + 52))
+    screen.blit(skip_text, skip_rect)
 
 while True:
     mouse_pos = pygame.mouse.get_pos()
@@ -698,6 +874,33 @@ while True:
     if current_state not in ["MENU", "SETTING", "INTRO", "WEATHER_EXPLAIN", "ENDING"]:
         task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys)
 
+    if current_state == "GREENHOUSE" and show_greenhouse_tutorial:
+          draw_greenhouse_tutorial(
+              screen,
+              greenhouse_tutorial_step,
+              aloe_btn,
+              thorn_btn,
+              harvest_btn
+          )
+
+          if greenhouse_tutorial_step == 3:
+              draw_upgrade_tooltip(
+                  screen,
+                  mouse_pos,
+                  pure_soil_btn,
+                  oxygen_btn,
+                  gh_upgrade_btn
+              )
+
+    elif current_state == "GREENHOUSE":
+          draw_upgrade_tooltip(
+            screen,
+            mouse_pos,
+            pure_soil_btn,
+            oxygen_btn,
+            gh_upgrade_btn
+          )
+
     if flash_message_timer > 0:
         flash_message_timer -= 1
         text_surf = msg_font.render(flash_message, True, (200, 200, 200))
@@ -847,9 +1050,30 @@ while True:
                         )
 
       if event.type == pygame.KEYDOWN:
+          if current_state == "GREENHOUSE" and show_greenhouse_tutorial:
+             if event.key == pygame.K_SPACE:
+                 greenhouse_tutorial_step += 1
+
+                 if greenhouse_tutorial_step > 3:
+                     show_greenhouse_tutorial = False
+                     greenhouse_tutorial_done = True
+
+                     save_game(
+                         current_day,
+                         has_seen_intro,
+                         pure_soil_count,
+                         intact_canopy_count,
+                         oxygen_recycler_count,
+                         cookies_count,
+                         saved_people
+                     )
+
+                 continue
+      
           if event.key == pygame.K_k:
               saved_people += 1
               print(f"Test: Saved 1 person. Progress: {saved_people}/25") 
+
           if event.key == pygame.K_h:
               for p in plants:
                   p.growth = 100
@@ -1014,8 +1238,11 @@ while True:
             if to_gh_btn.collidepoint(mouse_pos):
                current_state = "GREENHOUSE"
                print("Entering to Greenhouse...")
+            if current_day == 1 and not greenhouse_tutorial_done:
+                show_greenhouse_tutorial = True
+                greenhouse_tutorial_step = 0
 
-               if (
+            if (
                  current_day in acid_rain_days
                  and current_day not in shown_acid_rain_days
                  and not greenhouse_fixed
@@ -1116,6 +1343,8 @@ while True:
                    new_plant.planted = True
                    plants.append(new_plant)
                    trigger_message("Aloe planted!")
+                   if show_greenhouse_tutorial and greenhouse_tutorial_step == 0:
+                      greenhouse_tutorial_step = 1
                 else:
                    trigger_message("No empty plot!")
             
@@ -1128,6 +1357,8 @@ while True:
                    new_plant.planted = True
                    plants.append(new_plant)
                    trigger_message("Rusty Thorn planted!")
+                   if show_greenhouse_tutorial and greenhouse_tutorial_step == 0:
+                       greenhouse_tutorial_step = 1
                 else:
                    trigger_message("No empty plot!")
 
@@ -1153,6 +1384,9 @@ while True:
 
                 if harvested_something:
                    print("Harvest successful!")
+                   if show_greenhouse_tutorial:
+                      show_greenhouse_tutorial = False
+                      greenhouse_tutorial_done = True
                    save_game(
                     current_day,
                     has_seen_intro,
