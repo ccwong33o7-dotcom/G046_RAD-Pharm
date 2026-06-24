@@ -25,6 +25,27 @@ speedserum_icon = pygame.image.load("image/icon/speedserum_button.png").convert_
 speedserum_icon = pygame.transform.smoothscale(speedserum_icon, (70, 70))
 radointment_icon = pygame.image.load("image/icon/rad-ointment_button.png").convert_alpha()
 radointment_icon = pygame.transform.smoothscale(radointment_icon, (70, 70))
+Beaker_icon = pygame.image.load("image/icon/Beaker_icon.jpeg").convert_alpha()
+Beaker_icon = pygame.transform.smoothscale(Beaker_icon, (70, 70))
+A_icon = pygame.image.load("image/icon/A.png").convert_alpha()
+A_icon = pygame.transform.smoothscale(A_icon, (70, 70))
+D_icon = pygame.image.load("image/icon/D.png").convert_alpha()
+D_icon = pygame.transform.smoothscale(D_icon, (70, 70))
+S_icon = pygame.image.load("image/icon/S.png").convert_alpha()
+S_icon = pygame.transform.smoothscale(S_icon, (70, 70))
+W_icon = pygame.image.load("image/icon/W.png").convert_alpha()
+W_icon = pygame.transform.smoothscale(W_icon, (70, 70))
+BioFuel_icon = pygame.image.load("image/icon/Bio_Fuel_icon.png").convert_alpha()
+BioFuel_icon = pygame.transform.smoothscale(BioFuel_icon, (70, 70))
+FilteredWater_icon = pygame.image.load("image/icon/Filtered_water_icon.png").convert_alpha()
+FilteredWater_icon = pygame.transform.smoothscale(FilteredWater_icon, (70, 70))
+GlowingAloe_icon = pygame.image.load("image/icon/Glowing_Aloe_icon.png").convert_alpha()
+GlowingAloe_icon = pygame.transform.smoothscale(GlowingAloe_icon, (70, 70))
+RustyThorn_icon = pygame.image.load("image/icon/Rusty_ Thorn_icon.png").convert_alpha()
+RustyThorn_icon = pygame.transform.smoothscale(RustyThorn_icon, (70, 70))
+ScrapFiber_icon = pygame.image.load("image/icon/Scrap_Fiber_icon.png").convert_alpha()
+ScrapFiber_icon = pygame.transform.smoothscale(ScrapFiber_icon, (70, 70))
+
 
 
 try:
@@ -124,6 +145,14 @@ WRONG_ITEMS = [
     "Poison Mushroom"
 ]
 
+ITEM_ICONS = {
+    "Filtered water": FilteredWater_icon,
+    "Bio-Fuel": BioFuel_icon,
+    "Scrap Fiber": ScrapFiber_icon,
+    "Glowing Aloe": GlowingAloe_icon,
+    "Rusty Thorn": RustyThorn_icon,
+
+}
 def spawn_falling_item():
 
     global falling_items
@@ -365,7 +394,7 @@ def draw_lab_tutorial(screen):
 
     global show_lab_tutorial
     global lab_tutorial_done
-    
+
     overlay = pygame.Surface((1280,720))
     overlay.set_alpha(180)
     overlay.fill((0,0,0))
@@ -466,11 +495,7 @@ def draw_crafting(screen, bg_image, font):
     
     if game_state == "CATCH":
 
-        pygame.draw.rect(
-            screen,
-            (30,30,30),
-            basket
-        )
+        screen.blit(Beaker_icon, (600, 620))
 
         font = pygame.font.SysFont("Arial",20)
 
@@ -504,33 +529,21 @@ def draw_crafting(screen, bg_image, font):
 
             color = (0,200,0) if item["good"] else (220,50,50)
 
-            pygame.draw.rect(
+            icon = ITEM_ICONS.get(item["name"])
 
-                screen,
-
-                color,
-
-                item["rect"]
-
-            )
+            if icon is not None:
+                screen.blit(icon, item["rect"])
 
             label = font.render(
-
                 item["name"],
-
                 True,
-
-                (255,255,255)
-
+                color
             )
 
             screen.blit(
-
                 label,
-
-                (item["rect"].x,item["rect"].y)
-
-            )
+                (item["rect"].x, item["rect"].y)
+        )
     if game_state == "MIX":
 
         title = pygame.font.SysFont("Arial",32,True)

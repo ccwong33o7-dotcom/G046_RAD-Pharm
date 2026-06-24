@@ -64,8 +64,8 @@ class Customer:
             "sedative": "image/Customer/CI_sedative.png",
             "blood_stop": "image/Customer/CI_bloodstop.png",
             "speed_serum": "image/Customer/CI_speedserum.png",
-            "rad_ointment": "image/Customer/CI_radointment.jpeg",
-            "lung_clear": "image/Customer/CI_lungclear.jpeg"
+            "rad_ointment": "image/Customer/CI_radointment.png",
+            "lung_clear": "image/Customer/CI_lungclear.png"
         }
         try:
             icon_img = pygame.image.load(icon_paths[item]).convert_alpha()
