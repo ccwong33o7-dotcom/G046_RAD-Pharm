@@ -59,7 +59,7 @@ except:
    shop_bg_img = None
    print("Warning: Shop scene image not found")
 try:
-    crafting_bg_img = pygame.image.load("image/background/Final_Lab_Background.jpeg").convert()
+    crafting_bg_img = pygame.image.load("image/background/Final_Lab_ Background.jpeg").convert()
     crafting_bg_img = pygame.transform.smoothscale(crafting_bg_img, (Width, Height))
 except:
     crafting_bg_img = None
@@ -157,8 +157,13 @@ def load_game():
         "tutorial_done": False,
         "greenhouse_fixed": False,
         "canopy_fixed_day": 0,
-    }
 
+    }
+progress = load_game()
+
+progress.setdefault("speed_serum_recipe", False)
+progress.setdefault("blood_stop_recipe", False)
+    
 def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_amt, saved_people_count):
     """Writes active day progression and intro milestones to disk."""
     data = {
@@ -175,7 +180,9 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_re
        "blood_stop": inventory.get("Blood-Stop", 0),
        "tutorial_done": tutorial_done,
        "greenhouse_fixed": greenhouse_fixed,
-       "canopy_fixed_day": canopy_fixed_day
+       "canopy_fixed_day": canopy_fixed_day,
+       "speed_serum_recipe": progress.get("speed_serum_recipe", False),
+       "blood_stop_recipe": progress.get("blood_stop_recipe", False),
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -658,7 +665,7 @@ while True:
         sys.exit()
         
       if current_state == "CRAFTING":
-         update_crafting(event)
+         update_crafting(event,progress)
 
       if event.type == pygame.KEYDOWN:
           if event.key == pygame.K_k:
@@ -888,20 +895,30 @@ while True:
                      trigger_message("Not enough Cookies for Oxygen Recycler!")
 
              elif shop_buy_speed_serum_btn and shop_buy_speed_serum_btn.collidepoint(mouse_pos):
-                  if cookies_count >= 50:
-                      cookies_count -= 50
-                      inventory["Speed Serum"] += 1 
-                      trigger_message("Speed Serum purchased!")
-                  else:
-                      trigger_message("Not enough Cookies for Speed Serum!")
+
+                if progress["speed_serum_recipe"]:
+                    trigger_message("Speed Serum recipe already unlocked!")
+
+                elif cookies_count >= 50:
+                    cookies_count -= 50
+                    progress["speed_serum_recipe"] = True
+                    trigger_message("Speed Serum recipe unlocked! Craft it in the Lab.")
+
+                else:
+                    trigger_message("Not enough Cookies!")
 
              elif shop_buy_blood_stop_btn and shop_buy_blood_stop_btn.collidepoint(mouse_pos):
-                  if cookies_count >= 60:
-                      cookies_count -= 60
-                      inventory["Blood-Stop"] += 1 
-                      trigger_message("Blood Stop purchased!")
-                  else:
-                      trigger_message("Not enough Cookies for Blood Stop!")
+
+                if progress["blood_stop_recipe"]:
+                    trigger_message("Blood Stop recipe already unlocked!")
+
+                elif cookies_count >= 60:
+                    cookies_count -= 60
+                    progress["blood_stop_recipe"] = True
+                    trigger_message("Blood Stop recipe unlocked! Craft it in the Lab.")
+
+                else:
+                    trigger_message("Not enough Cookies!")
  
          elif current_state == "GREENHOUSE":
             if aloe_btn.collidepoint(mouse_pos):

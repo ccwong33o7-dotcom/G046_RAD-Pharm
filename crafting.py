@@ -33,18 +33,18 @@ RECIPES = {
     "Speed Serum": {"Bio-Fuel": 1, "Rusty Thorn": 1, "Filtered water": 1},
     "Lung-Clear": {"Filtered water":1, "Glowing Aloe": 1},
     "Blood-Stop":{"Scrap Fiber":1, "Rusty Thorn": 1},
-    "Pain Killer":{"Bio_Fuel":1, "Glowing Aloe": 1, "Rusty Thorn": 1}
+
 }
 
 inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber": "Infinite", "Glowing Aloe": 2, "Rusty Thorn":2 
-             ,"Rad-Ointment": 0 , "Speed Serum": 0, "Lung-Clear": 0, "Blood-Stop": 0, "Pain Killer": 0}
+             ,"Rad-Ointment": 0 , "Speed Serum": 0, "Lung-Clear": 0, "Blood-Stop": 0}
 
 hidden_items = [
     "Rad-Ointment",
     "Speed Serum",
     "Lung-Clear",
     "Blood-Stop",
-    "Pain Killer"
+    
 ]
 
 game_state = "MENU"
@@ -76,7 +76,7 @@ def craft_success(item_name):
     inventory[item_name] += 1
         
 
-def update_crafting(event):
+def update_crafting(event, progress): 
 
     global game_state
     global pending_item
@@ -94,16 +94,20 @@ def update_crafting(event):
                 selection = "Rad-Ointment"
 
             elif event.key == pygame.K_2:
-                selection = "Speed Serum"
+                if progress.get("speed_serum_recipe", False):
+                    selection = "Speed Serum"
+                else:
+                    print("Recipe not unlocked!")
 
             elif event.key == pygame.K_3:
                 selection = "Lung-Clear"
 
             elif event.key == pygame.K_4:
-                selection = "Blood-Stop"
+                if progress.get("blood_stop_recipe", False):
+                    selection = "Blood-Stop"
+                else:
+                    print("Recipe not unlocked!")
 
-            elif event.key == pygame.K_5:
-                selection = "Pain Killer"
 
             if selection:
 
