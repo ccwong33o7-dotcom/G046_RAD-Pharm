@@ -116,6 +116,126 @@ def start_catch_game(item):
     for ingredient in RECIPES[item]:
         caught[ingredient] = 0
 
+WRONG_ITEMS = [
+    "Toxic Waste",
+    "Rock",
+    "Metal Scrap",
+    "Poison Mushroom"
+]
+
+def spawn_falling_item():
+
+    global falling_items
+
+    recipe = list(RECIPES[pending_item].keys())
+
+    if random.random() < 0.7:
+        name = random.choice(recipe)
+        good = True
+
+    else:
+        name = random.choice(WRONG_ITEMS)
+        good = False
+
+    falling_items.append({
+
+        "name": name,
+
+        "good": good,
+
+        "rect": pygame.Rect(
+            random.randint(50,1150),
+            -40,
+            70,
+            35
+        ),
+
+        "speed": random.randint(4,7)
+
+    })
+
+def update_catch_game():
+
+    global spawn_timer
+    global catch_timer
+    global game_state
+
+    keys = pygame.key.get_pressed()
+
+    if keys[pygame.K_LEFT] or keys[pygame.K_a]:
+
+        basket.x -= basket_speed
+
+    if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+
+        basket.x += basket_speed
+
+    basket.x = max(0,min(1120,basket.x))
+
+    spawn_timer += 1
+
+    if spawn_timer >= 30:
+
+        spawn_timer = 0
+
+        spawn_falling_item()
+
+    catch_timer -= 1
+
+    for item in falling_items[:]:
+
+        item["rect"].y += item["speed"]
+
+        if item["rect"].colliderect(basket):
+
+            if item["good"]:
+
+                caught[item["name"]] += 1
+
+            else:
+
+                print("Wrong ingredient!")
+
+                game_state = "MENU"
+
+                falling_items.clear()
+
+                return
+
+            falling_items.remove(item)
+
+        elif item["rect"].y > 720:
+
+            falling_items.remove(item)
+
+    success = True
+
+    for ingredient, amount in RECIPES[pending_item].items():
+
+        if caught[ingredient] < amount:
+
+            success = False
+
+    if success:
+
+        craft_success(pending_item)
+
+        print("Medicine Crafted!")
+
+        game_state = "MENU"
+
+        falling_items.clear()
+
+        return
+
+    if catch_timer <= 0:
+
+        print("Time Up!")
+
+        game_state = "MENU"
+
+        falling_items.clear()
+
 def start_mix_game(item):
 
     global mix_started
@@ -173,36 +293,39 @@ def update_crafting(event, progress):
                 else:
                     print("Recipe not unlocked!")
 
-    if selection:
+            if selection:
 
-        if check_resources(selection):
+                if check_resources(selection):
 
-            pending_item = selection
+                    pending_item = selection
 
-            if selection in ["Rad-Ointment", "Blood-Stop"]:
+                    if selection in ["Rad-Ointment", "Blood-Stop"]:
 
-                game_state = "CATCH"
+                        game_state = "CATCH"
 
-                start_catch_game(selection)
+                        start_catch_game(selection)
 
-            else:
+                    else:
 
-                game_state = "MIX"
+                        game_state = "MIX"
 
-                start_mix_game(selection)
+                        start_mix_game(selection)
 
-            print(f"Crafting {selection}")
+                    print(f"Crafting {selection}")
 
-        else:
+                else:
 
-            print("Missing ingredients!")
+                    print("Missing ingredients!")
 
     
 
 
 
 def animate_crafting():
-    pass
+
+    if game_state == "CATCH":
+
+        update_catch_game()
 
 
 def draw_crafting(screen, bg_image, font):
@@ -248,8 +371,74 @@ def draw_crafting(screen, bg_image, font):
 
         if item in positions:
             screen.blit(txt, positions[item])
+    
+    if game_state == "CATCH":
 
-   
+        pygame.draw.rect(
+            screen,
+            (30,30,30),
+            basket
+        )
+
+        font = pygame.font.SysFont("Arial",20)
+
+        timer = font.render(
+            f"Time: {catch_timer//30}",
+            True,
+            (255,255,255)
+        )
+
+        screen.blit(timer,(20,20))
+
+        y = 60
+
+        for ingredient, amount in RECIPES[pending_item].items():
+
+            txt = font.render(
+
+                f"{ingredient}: {caught[ingredient]}/{amount}",
+
+                True,
+
+                (255,255,255)
+
+            )
+
+            screen.blit(txt,(20,y))
+
+            y += 25
+
+        for item in falling_items:
+
+            color = (0,200,0) if item["good"] else (220,50,50)
+
+            pygame.draw.rect(
+
+                screen,
+
+                color,
+
+                item["rect"]
+
+            )
+
+            label = font.render(
+
+                item["name"],
+
+                True,
+
+                (255,255,255)
+
+            )
+
+            screen.blit(
+
+                label,
+
+                (item["rect"].x,item["rect"].y)
+
+            )
 
 
     return play_btn_rect
