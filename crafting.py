@@ -361,7 +361,55 @@ def animate_crafting():
             print("Time Up!")
 
             game_state = "MENU"
+def draw_lab_tutorial(screen):
 
+    global show_lab_tutorial
+    global lab_tutorial_done
+    
+    overlay = pygame.Surface((1280,720))
+    overlay.set_alpha(180)
+    overlay.fill((0,0,0))
+    screen.blit(overlay,(0,0))
+
+    title_font = pygame.font.SysFont(
+        "Arial",
+        40,
+        True
+    )
+
+    font = pygame.font.SysFont(
+        "Arial",
+        24
+    )
+
+    title = title_font.render(
+        "LAB INSTRUCTIONS",
+        True,
+        (255,255,255)
+    )
+
+    screen.blit(title, (430,120))
+
+    lines = [
+        "Press 1-4 to select medicine.",
+        "Rad-Ointment and Blood-Stop use Catch Game.",
+        "Speed Serum and Lung-Clear use Mixing Game.",
+        "Catch wrong ingredients and you lose.",
+        "Complete the minigame to craft medicine.",
+        "",
+        "Press SPACE to continue."
+    ]
+
+    y = 220
+
+    for text in lines:
+        txt = font.render(
+            text,
+            True,
+            (255,255,255)
+        )
+        screen.blit(txt, (280, y))
+        y += 50
 
 def draw_crafting(screen, bg_image, font):
 

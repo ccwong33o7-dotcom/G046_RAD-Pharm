@@ -9,7 +9,7 @@ from setting import run_setting
 import pharmacy
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant
-from crafting import draw_crafting, update_crafting, animate_crafting, inventory 
+from crafting import draw_crafting, update_crafting, animate_crafting, draw_lab_tutorial, inventory 
 from intro import show_intro
 from taskbar import TaskBar
 from map import draw_map
@@ -157,6 +157,8 @@ def load_game():
         "rad_ointment": 0,
         "lung_clear": 0,
         "tutorial_done": False,
+        "tutorial_done": False,
+        "lab_tutorial_done": False,
         "greenhouse_fixed": False,
         "canopy_fixed_day": 0,
         "shown_acid_rain_days": [],
@@ -187,6 +189,7 @@ def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_
        "rad_ointment": inventory.get("Rad-Ointment", 0),
        "lung_clear": inventory.get("Lung-Clear", 0),
        "tutorial_done": tutorial_done,
+       "lab_tutorial_done": lab_tutorial_done,
        "greenhouse_fixed": greenhouse_fixed,
        "canopy_fixed_day": canopy_fixed_day,
        "shown_acid_rain_days": shown_acid_rain_days,
@@ -215,6 +218,9 @@ oxygen_recycler_count = int(oxygen_recycler_count)
 cookies_count = progress.get("cookies", 35)
 saved_people = progress.get("saved_people", 0)
 tutorial_done = progress.get("tutorial_done", False)
+lab_tutorial_done = progress.get("lab_tutorial_done",False)
+
+show_lab_tutorial = False
 
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
@@ -352,6 +358,7 @@ tutorial_step = 0
 tutorial_skip_rect = pygame.Rect(0, 0, 0, 0)
 tutorial_done_timer = 0
 tutorial_show_skip = True
+show_lab_tutorial = False
 
 def start_tutorial():
     global tutorial_active, tutorial_step, tutorial_done_timer
@@ -397,6 +404,8 @@ def draw_tutorial(screen, pharmacy_buttons):
                      intact_canopy_count, oxygen_recycler_count,
                      cookies_count, saved_people)
             print("[Tutorial] Finished and saved.")
+
+            
         return
     
     box_width = 480
@@ -578,9 +587,18 @@ while True:
            screen.blit(acid_overlay, (0, 0))
            
     elif current_state == "CRAFTING":
-      screen.fill((0, 0, 0))
-      draw_crafting(screen, crafting_bg_img, font)
-      animate_crafting()
+        screen.fill((0, 0, 0))
+
+        draw_crafting(
+            screen,
+            crafting_bg_img,
+            font
+        )
+
+        if show_lab_tutorial:
+            draw_lab_tutorial(screen)
+        else:
+            animate_crafting()
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
@@ -663,7 +681,29 @@ while True:
               show_acid_rain_popup = False
 
          continue
-      
+      if show_lab_tutorial:
+
+        if event.type == pygame.KEYDOWN:
+            print(event.key)
+
+            if event.key == pygame.K_SPACE:
+
+                print("SPACE PRESSED")
+
+                show_lab_tutorial = False
+                lab_tutorial_done = True
+
+                save_game(
+                    current_day,
+                    has_seen_intro,
+                    pure_soil_count,
+                    intact_canopy_count,
+                    oxygen_recycler_count,
+                    cookies_count,
+                    saved_people
+                )
+
+        continue
       if show_day_transition:
           if event.type == pygame.KEYDOWN:
               show_day_transition = False
@@ -679,8 +719,25 @@ while True:
         pygame.quit()
         sys.exit()
         
-      if current_state == "CRAFTING":
-         update_crafting(event,progress)
+        if current_state == "CRAFTING":
+            if show_lab_tutorial:
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+
+                        print("SPACE!")
+
+                        show_lab_tutorial = False
+                        lab_tutorial_done = True
+
+                        save_game(
+                            current_day,
+                            has_seen_intro,
+                            pure_soil_count,
+                            intact_canopy_count,
+                            oxygen_recycler_count,
+                            cookies_count,
+                            saved_people
+                        )
 
       if event.type == pygame.KEYDOWN:
           if event.key == pygame.K_k:
@@ -862,8 +919,13 @@ while True:
                current_state = "SHOP"
                print("Entering to Shop...")
             elif to_craft_btn.collidepoint(mouse_pos):
-               current_state = "CRAFTING"
-               print("Entering to Crafting...")
+
+                current_state = "CRAFTING"
+
+                if not lab_tutorial_done:
+                    show_lab_tutorial = True
+
+                print("Entering to Crafting...")
             elif to_pharmacy_btn.collidepoint(mouse_pos):
                current_state = "PHARMACY"
                print("Entering to Pharmacy...")
