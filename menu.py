@@ -7,11 +7,11 @@ def draw_menu(screen, font, mouse_pos):
     exit_rect = pygame.Rect(180,540,200,60)
 
     
-    start_clr = (255,255,255) if start_rect.collidepoint(mouse_pos) else (128, 0, 32)
-    setting_clr = (255,255,255) if setting_rect.collidepoint(mouse_pos) else (128, 0, 32)
-    exit_clr = (255,255,255) if exit_rect.collidepoint(mouse_pos) else (128, 0, 32)
+    start_clr = (255,255,255) if start_rect.collidepoint(mouse_pos) else (181, 101, 29)
+    setting_clr = (255,255,255) if setting_rect.collidepoint(mouse_pos) else (181, 101, 29)
+    exit_clr = (255,255,255) if exit_rect.collidepoint(mouse_pos) else (181, 101, 29)
 
-    shadow_clr = (220, 220, 200)
+    shadow_clr = (80, 80, 80)
 
     offset_x = 2
     offset_y = 2

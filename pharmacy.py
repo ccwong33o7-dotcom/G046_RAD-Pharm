@@ -161,6 +161,8 @@ class CustomerManager:
         ]
         self.active_customers = []
 
+        self.money_pending = False
+
         if CustomerManager._feedback_font is None:
             CustomerManager._feedback_font = pygame.font.SysFont("Comic Sans MS", 20, bold=True)
         self.feedback_text = ""
@@ -213,6 +215,11 @@ class CustomerManager:
             self.feedback_timer -= 1
 
     def handle_click(self, mouse_pos, current_selected_item, progress_dict):
+        if self.money_pending:
+            msg = "Please collect your money first!"
+            self.show_message(msg, False)
+            return False, msg
+
         if not self.active_customers:
             self.show_message("No active customer", False)
             return False, "No active customer"
@@ -271,6 +278,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
     global _global_manager_ref
     if external_manager:
         _global_manager_ref = external_manager
+        external_manager.money_pending = money_waiting_to_collect
 
     if bg_img:
         screen.blit(bg_img, (0, 0))

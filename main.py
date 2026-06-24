@@ -202,8 +202,6 @@ inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
 oxygen_recycler_active = 1 if oxygen_recycler_count > 0 else 0
 intact_canopy_active = 1 if has_intact_canopy else 0
 
-has_seen_intro = False
-
 current_state="MENU"
 last_state = "MENU"
 
@@ -607,16 +605,6 @@ while True:
         overlay.fill((0, 0, 0, 180))
         screen.blit(overlay, (0, 0))
 
-        box_width = 700
-        box_height = 240
-        box_rect = pygame.Rect(
-            (Width - box_width) // 2,
-            (Height - box_height) // 2 - 20,
-            box_width, box_height
-        )
-        pygame.draw.rect(screen, (20, 20, 40, 220), box_rect, border_radius=24)
-        pygame.draw.rect(screen, (100, 200, 255, 120), box_rect, width=3, border_radius=24)
-        
         font_title = pygame.font.SysFont("Arial", 52, bold=True)
         title_text = f"Welcome to Day {transition_day}!"
         
@@ -628,28 +616,14 @@ while True:
         main_rect = main_surf.get_rect(center=(Width//2, Height//2 - 25))
         screen.blit(main_surf, main_rect)
         
-        line_y = Height // 2 + 20
-        for i in range(300):
-            alpha = int(200 * (1 - abs(i - 150) / 150))
-            pygame.draw.rect(screen, (100, 200, 255, alpha),
-                           (Width//2 - 150 + i, line_y, 1, 2))
-        
         breath = int(150 + 105 * (0.5 + 0.5 * math.sin(transition_anim_timer * 0.04)))
-        font_sub = pygame.font.SysFont("Arial", 26)
-        sub_text = "Press any key to continue your journey."
+        font_sub = pygame.font.SysFont("Arial", 18)
+        sub_text = "Click the SPACE key to continue your journey."
         sub_surf = font_sub.render(sub_text, True, (220, 220, 220))
         sub_surf.set_alpha(breath)
         sub_rect = sub_surf.get_rect(center=(Width//2, Height//2 + 65))
         screen.blit(sub_surf, sub_rect)
-        
-        arrow_color = (100, 200, 255, breath)
-        arrow_points = [
-            (Width//2 + 160, Height//2 + 65 - 8),
-            (Width//2 + 160, Height//2 + 65 + 8),
-            (Width//2 + 160 + 16, Height//2 + 65)
-        ]
-        pygame.draw.polygon(screen, arrow_color, arrow_points)
-        
+    
         date_font = pygame.font.SysFont("Arial", 16)
         date_text = f"Day {transition_day}  •  RAD-Pharm"
         date_surf = date_font.render(date_text, True, (150, 150, 150))
