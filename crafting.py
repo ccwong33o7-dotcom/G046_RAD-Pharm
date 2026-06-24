@@ -1,5 +1,5 @@
 import pygame 
-
+import random
 
 screen_width = 1280
 screen_height = 720
@@ -49,15 +49,35 @@ hidden_items = [
 
 game_state = "MENU"
 pending_item = ""
-marker_pos = 0
-marker_speed = 3
-minigame_started = False
-bar_width = 400
-bar_x = (screen_width // 2) - (bar_width // 2)
-target_zone = (100, 300)
 
+catch_started = False
+falling_items = []
+basket = pygame.Rect(560, 620, 160, 35)
+basket_speed = 8
+spawn_timer = 0
+caught = {}
+catch_timer = 0
 
-       
+mix_started = False
+mix_sequence = []
+player_sequence = []
+mix_index = 0
+mix_timer = 0
+
+ARROWS = [
+    pygame.K_UP,
+    pygame.K_DOWN,
+    pygame.K_LEFT,
+    pygame.K_RIGHT
+]
+
+ARROW_TEXT = {
+    pygame.K_UP: "↑",
+    pygame.K_DOWN: "↓",
+    pygame.K_LEFT: "←",
+    pygame.K_RIGHT: "→"
+}
+
 def check_resources(item_name):
     recipe = RECIPES[item_name]
     infinite_resources = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
@@ -74,15 +94,60 @@ def craft_success(item_name):
         if ingredient not in infinites:
             inventory[ingredient] -= amount
     inventory[item_name] += 1
+
+def start_catch_game(item):
+
+    global catch_started
+    global falling_items
+    global basket
+    global caught
+    global catch_timer
+
+    catch_started = True
+
+    basket.x = 560
+
+    falling_items.clear()
+
+    catch_timer = 30 * 15  
+
+    caught = {}
+
+    for ingredient in RECIPES[item]:
+        caught[ingredient] = 0
+
+def start_mix_game(item):
+
+    global mix_started
+    global mix_sequence
+    global player_sequence
+    global mix_index
+    global mix_timer
+
+    mix_started = True
+
+    player_sequence.clear()
+
+    mix_index = 0
+
+    if item == "Lung-Clear":
+        length = random.randint(3,4)
+
+    else:
+        length = random.randint(5,7)
+
+    mix_sequence = [
+        random.choice(ARROWS)
+        for i in range(length)
+    ]
+
+    mix_timer = 30 * (length + 2)
         
 
 def update_crafting(event, progress): 
 
     global game_state
     global pending_item
-    global marker_pos
-    global marker_speed
-    global minigame_started
 
     if game_state == "MENU":
         minigame_started = False
@@ -108,72 +173,36 @@ def update_crafting(event, progress):
                 else:
                     print("Recipe not unlocked!")
 
+    if selection:
 
-            if selection:
+        if check_resources(selection):
 
-                if check_resources(selection):
+            pending_item = selection
 
-                    pending_item = selection
+            if selection in ["Rad-Ointment", "Blood-Stop"]:
 
-                    game_state = "MINIGAME"
+                game_state = "CATCH"
 
-                    minigame_started = False
+                start_catch_game(selection)
 
-                    marker_pos = 0
-                    marker_speed = 3
+            else:
 
-                    print(f"Crafting {selection}")
+                game_state = "MIX"
 
-                else:
-                    print("Missing ingredients!")
+                start_mix_game(selection)
 
-    elif game_state == "MINIGAME":
+            print(f"Crafting {selection}")
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        else:
 
-            if not minigame_started:
+            print("Missing ingredients!")
 
-                if play_btn_rect.collidepoint(event.pos):
-
-                    minigame_started = True
-
-                    marker_pos = 0
-
-                    print("Minigame Started!")
-
-    if minigame_started:
-
-        if event.type == pygame.KEYDOWN:
-
-            if event.key == pygame.K_SPACE:
-
-                if target_zone[0] <= marker_pos <= target_zone[1]:
-
-                    craft_success(pending_item)
-
-                    print("SUCCESS!")
-
-                else:
-                    print("FAILED!")
-
-                game_state = "MENU"
-
-                minigame_started = False
-                
-
-    return game_state
+    
 
 
 
 def animate_crafting():
-    global marker_pos, marker_speed
-
-    if game_state == "MINIGAME" and minigame_started:
-
-        marker_pos += marker_speed
-
-        if marker_pos >= bar_width or marker_pos <= 0:
-            marker_speed *= -1
+    pass
 
 
 def draw_crafting(screen, bg_image, font):
@@ -192,7 +221,7 @@ def draw_crafting(screen, bg_image, font):
     screen.blit(msg, (500, 40))
 
 
-    small_font = pygame.font.SysFont("Arial", 22, bold=True)
+    small_font = pygame.font.SysFont("Arial", 16, bold=True)
 
     visible_items = []
 
@@ -202,11 +231,11 @@ def draw_crafting(screen, bg_image, font):
             visible_items.append((item, count))
 
     positions = {
-        "Filtered water": (70, 665),
-        "Bio-Fuel": (350, 665),
-        "Scrap Fiber": (620, 665),
-        "Glowing Aloe": (900, 665),
-        "Rusty Thorn": (1080, 665)
+        "Filtered water": (255, 645),
+        "Bio-Fuel": (450, 645),
+        "Scrap Fiber": (650, 645),
+        "Glowing Aloe": (845, 645),
+        "Rusty Thorn": (1020, 645)
     }
 
     for item, count in visible_items:
@@ -220,55 +249,7 @@ def draw_crafting(screen, bg_image, font):
         if item in positions:
             screen.blit(txt, positions[item])
 
-    if game_state == "MINIGAME":
-
-        bar_x = (screen.get_width() // 2) - (bar_width // 2)
-
-        pygame.draw.rect(
-            screen,
-            (80, 80, 80),
-            (bar_x, 350, bar_width, 50)
-        )
-
-        pygame.draw.rect(
-            screen,
-            (0, 255, 0),
-            (
-                bar_x + target_zone[0],
-                350,
-                target_zone[1] - target_zone[0],
-                50
-            )
-        )
-
-        pygame.draw.rect(
-            screen,
-            (255, 255, 255),
-            (bar_x + marker_pos, 340, 10, 70)
-        )
-
-        # DRAW PLAY BUTTON HERE
-        if not minigame_started:
-
-            if play_btn_img:
-                screen.blit(play_btn_img, play_btn_rect)
-
-            else:
-                pygame.draw.rect(
-                    screen,
-                    (0, 180, 0),
-                    play_btn_rect,
-                    border_radius=12
-                )
-
-                txt = small_font.render(
-                    "PLAY",
-                    True,
-                    (255, 255, 255)
-                )
-
-                screen.blit(txt, (565, 585))
-
+   
 
 
     return play_btn_rect
