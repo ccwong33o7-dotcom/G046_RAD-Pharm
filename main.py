@@ -188,6 +188,8 @@ def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_
        "shown_acid_rain_days": shown_acid_rain_days,
        "speed_serum_recipe": progress.get("speed_serum_recipe", False),
        "blood_stop_recipe": progress.get("blood_stop_recipe", False),
+       "glowing_aloe": inventory.get("Glowing Aloe", 2),
+       "rusty_thorn": inventory.get("Rusty Thorn", 2),
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -212,6 +214,13 @@ tutorial_done = progress.get("tutorial_done", False)
 
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
+inventory["Glowing Aloe"] = int(
+    progress.get("glowing_aloe", 2)
+)
+
+inventory["Rusty Thorn"] = int(
+    progress.get("rusty_thorn", 2)
+)
 oxygen_recycler_active = 1 if oxygen_recycler_count > 0 else 0
 intact_canopy_active = 1 if intact_canopy_count > 0 else 0
 
@@ -528,12 +537,6 @@ while True:
           if current_day < plot['unlock_day']
        ]
 
-       print(
-          "DAY =", current_day,
-          "FIXED =", greenhouse_fixed,
-          "FIX DAY =", canopy_fixed_day
-       ) 
-
        roof_fixed_today = (
           (current_day == 3 and greenhouse_fixed and canopy_fixed_day == 3)
           or (current_day in [4, 5] and canopy_fixed_day == 3)
@@ -565,13 +568,6 @@ while True:
            acid_overlay.fill((40, 70, 35))
            acid_overlay.set_alpha(90)
            screen.blit(acid_overlay, (0, 0))
-
-       if ready_to_craft:
-            msg = font.render("HARVEST AVAILABLE!", True, (0, 255, 0))
-            screen.blit(msg, (Width//2 - 150, 50))
-       elif any_dead:
-            msg = font.render("CRAFTING FAILED (Plant Died)", True, (255, 0, 0))
-            screen.blit(msg, (Width//2 - 200, 50))
            
     elif current_state == "CRAFTING":
       screen.fill((0, 0, 0))
@@ -959,22 +955,44 @@ while True:
 
             elif harvest_btn.collidepoint(mouse_pos):
                 harvested_something = False
+                harvested_plants = []
+
                 for p in plants:
-                     if p.growth >= 100 and not p.harvested and not p.is_dead:
+                     if p.growth >= 100 and not p.is_dead:
                            
                            if p.name in inventory:
                                inventory[p.name] += 1
                            else:
                                inventory[p.name] = 1
                            
-                           p.planted = False
-                           p.growth = 0
-                           p.dust = 0
-                           p.is_dead = False
-                           p.harvested = False
+                           harvested_plants.append(p)
 
                            harvested_something = True
                            print(f"Harvested {p.name} added to lab!")
+                for p in harvested_plants:
+                    plants.remove(p)
+
+                if harvested_something:
+                   print("Harvest successful!")
+                   save_game(
+                    current_day,
+                    has_seen_intro,
+                    pure_soil_count,
+                    intact_canopy_count,
+                    oxygen_recycler_count,
+                    cookies_count,
+                    saved_people
+                   )
+                   print(
+                      "LAB NOW:",
+                      "Aloe =", inventory["Glowing Aloe"],
+                      "Thorn =", inventory["Rusty Thorn"]
+                   )
+                   trigger_message("Harvest successful!")
+
+                else:
+                   print("No plants ready to harvest!")
+                   trigger_message("No plants ready to harvest!")
 
                 if harvested_something:
                     print("Harvest successful!")
