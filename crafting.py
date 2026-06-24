@@ -65,17 +65,17 @@ mix_index = 0
 mix_timer = 0
 
 ARROWS = [
-    pygame.K_UP,
-    pygame.K_DOWN,
-    pygame.K_LEFT,
-    pygame.K_RIGHT
+    pygame.K_w,
+    pygame.K_s,
+    pygame.K_a,
+    pygame.K_d
 ]
 
 ARROW_TEXT = {
-    pygame.K_UP: "↑",
-    pygame.K_DOWN: "↓",
-    pygame.K_LEFT: "←",
-    pygame.K_RIGHT: "→"
+    pygame.K_w: "w",
+    pygame.K_s: "s",
+    pygame.K_a: "a",
+    pygame.K_d: "d"
 }
 
 def check_resources(item_name):
@@ -262,15 +262,44 @@ def start_mix_game(item):
     ]
 
     mix_timer = 30 * (length + 2)
-        
 
-def update_crafting(event, progress): 
+def update_mix_game(event):
+
+    global mix_index
+    global mix_timer
+    global game_state
+
+    if event.type != pygame.KEYDOWN:
+        return
+
+    if event.key not in ARROWS:
+        return
+
+    if event.key == mix_sequence[mix_index]:
+
+        mix_index += 1
+
+        if mix_index >= len(mix_sequence):
+
+            craft_success(pending_item)
+
+            print("Medicine Crafted!")
+
+            game_state = "MENU"
+
+    else:
+
+        print("Wrong Formula!")
+
+        game_state = "MENU"      
+
+def update_crafting(event, progress):
 
     global game_state
     global pending_item
 
     if game_state == "MENU":
-        minigame_started = False
+
         if event.type == pygame.KEYDOWN:
 
             selection = None
@@ -293,39 +322,44 @@ def update_crafting(event, progress):
                 else:
                     print("Recipe not unlocked!")
 
-            if selection:
+            if selection and check_resources(selection):
 
-                if check_resources(selection):
+                pending_item = selection
 
-                    pending_item = selection
-
-                    if selection in ["Rad-Ointment", "Blood-Stop"]:
-
-                        game_state = "CATCH"
-
-                        start_catch_game(selection)
-
-                    else:
-
-                        game_state = "MIX"
-
-                        start_mix_game(selection)
-
-                    print(f"Crafting {selection}")
+                if selection in ["Rad-Ointment", "Blood-Stop"]:
+                    game_state = "CATCH"
+                    start_catch_game(selection)
 
                 else:
+                    game_state = "MIX"
+                    start_mix_game(selection)
 
-                    print("Missing ingredients!")
+                print(f"Crafting {selection}")
 
-    
+            elif selection:
+                print("Missing ingredients!")
 
+    elif game_state == "MIX":
 
-
+        update_mix_game(event)
 def animate_crafting():
+
+    global mix_timer
+    global game_state
 
     if game_state == "CATCH":
 
         update_catch_game()
+    
+    elif game_state == "MIX":
+
+        mix_timer -= 1
+
+        if mix_timer <= 0:
+
+            print("Time Up!")
+
+            game_state = "MENU"
 
 
 def draw_crafting(screen, bg_image, font):
@@ -439,7 +473,53 @@ def draw_crafting(screen, bg_image, font):
                 (item["rect"].x,item["rect"].y)
 
             )
+    if game_state == "MIX":
 
+        title = pygame.font.SysFont("Arial",32,True)
+
+        text = title.render(
+
+            "Enter Formula",
+
+            True,
+
+            (255,255,255)
+
+        )
+
+        screen.blit(text,(470,120))
+
+        arrow_font = pygame.font.SysFont("Arial",60)
+
+        x = 280
+
+        y = 260
+
+        next_arrow = arrow_font.render(
+
+            ARROW_TEXT[mix_sequence[mix_index]],
+
+            True,
+
+            (255,255,255)
+
+        )
+
+        screen.blit(next_arrow,(600,260))
+
+        small = pygame.font.SysFont("Arial",24)
+
+        progress = small.render(
+
+            f"{mix_index+1}/{len(mix_sequence)}",
+
+            True,
+
+            (255,255,255)
+
+        )
+
+        screen.blit(progress,(600,340))
 
     return play_btn_rect
 
