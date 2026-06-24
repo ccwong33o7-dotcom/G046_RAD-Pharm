@@ -4,6 +4,7 @@ import os
 COLOR_BG = (30, 30, 30)
 COLOR_TEXT = ( 0, 255, 0)
 
+ACID_RAIN_ACTIVE = False
 img_pure_soil = None
 img_intact_canopy = None
 img_oxygen_recycler = None
@@ -108,7 +109,11 @@ class Plant:
             self.death_timer = 0
 
      if not self.is_dead and self.dust < 70:
-        self.growth += 0.03
+        growth_speed = 0.03
+
+        if ACID_RAIN_ACTIVE:
+            growth_speed = 0.01
+        self.growth += growth_speed
 
         if self.growth > 100:
             self.growth = 100
