@@ -146,7 +146,7 @@ def load_game():
         "current_day": 1, 
         "has_seen_intro": False, 
         "pure_soil": 0, 
-        "has_intact_canopy": False, 
+        "intact_canopy_count": 0, 
         "has_oxygen_recycler": False,
         "cookies": 35,
         "saved_people": 0,
@@ -157,20 +157,24 @@ def load_game():
         "tutorial_done": False,
         "greenhouse_fixed": False,
         "canopy_fixed_day": 0,
-
+        "shown_acid_rain_days": [],
     }
 progress = load_game()
+shown_acid_rain_days = progress.get(
+    "shown_acid_rain_days",
+    []
+)
 
 progress.setdefault("speed_serum_recipe", False)
 progress.setdefault("blood_stop_recipe", False)
     
-def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_amt, saved_people_count):
+def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_amt, saved_people_count):
     """Writes active day progression and intro milestones to disk."""
     data = {
        "current_day": day_num, 
        "has_seen_intro": seen_intro, 
        "pure_soil": pure_soil_count, 
-       "has_intact_canopy": has_intact_canopy, 
+       "intact_canopy_count": intact_canopy_count, 
        "oxygen_recycler_count": oxygen_recycler_count,
        "cookies": cookies_amt,
        "saved_people": saved_people_count,
@@ -181,6 +185,7 @@ def save_game(day_num, seen_intro, pure_soil_count, has_intact_canopy, oxygen_re
        "tutorial_done": tutorial_done,
        "greenhouse_fixed": greenhouse_fixed,
        "canopy_fixed_day": canopy_fixed_day,
+       "shown_acid_rain_days": shown_acid_rain_days,
        "speed_serum_recipe": progress.get("speed_serum_recipe", False),
        "blood_stop_recipe": progress.get("blood_stop_recipe", False),
        }
@@ -194,11 +199,12 @@ has_seen_intro = progress["has_seen_intro"]
 pure_soil_count = progress.get("pure_soil", 0)
 pure_soil_count = int(pure_soil_count) if isinstance(pure_soil_count, (int, float)) else 0
 
-has_intact_canopy = progress.get("has_intact_canopy", False)
+intact_canopy_count = progress.get(
+    "intact_canopy_count",
+    0
+)
 oxygen_recycler_count = progress.get("oxygen_recycler_count", 0)
-
-intact_canopy_count = 1 if has_intact_canopy else 0
-oxygen_recycler_count = 1 if oxygen_recycler_count > 0 else 0
+oxygen_recycler_count = int(oxygen_recycler_count)
 
 cookies_count = progress.get("cookies", 35)
 saved_people = progress.get("saved_people", 0)
@@ -207,7 +213,7 @@ tutorial_done = progress.get("tutorial_done", False)
 inventory["Speed Serum"] = int(progress.get("speed_serum", 0))
 inventory["Blood-Stop"] = int(progress.get("blood_stop", 0))
 oxygen_recycler_active = 1 if oxygen_recycler_count > 0 else 0
-intact_canopy_active = 1 if has_intact_canopy else 0
+intact_canopy_active = 1 if intact_canopy_count > 0 else 0
 
 current_state="MENU"
 last_state = "MENU"
@@ -271,7 +277,6 @@ flash_message = ""
 flash_message_timer = 0
 
 acid_rain_days = [3, 8]
-shown_acid_rain_days = []
 show_acid_rain_popup = False
 greenhouse_fixed = progress.get("greenhouse_fixed", False)
 canopy_fixed_day = progress.get("canopy_fixed_day", 0)
@@ -288,7 +293,7 @@ acid_cancel_rect = pygame.Rect(0, 0, 0, 0)
 
 try:
     acid_rain_popup_img = pygame.image.load("image/background/acid rain.png").convert_alpha()
-    acid_rain_popup_img = pygame.transform.smoothscale(acid_rain_popup_img, (760, 530))
+    acid_rain_popup_img = pygame.transform.smoothscale(acid_rain_popup_img, (580, 400))
 except:
     acid_rain_popup_img = None
     print("Warning: Acid rain popup image not found")
@@ -372,7 +377,7 @@ def draw_tutorial(screen, pharmacy_buttons):
             tutorial_active = False
             tutorial_done = True
             save_game(current_day, has_seen_intro, pure_soil_count,
-                     has_intact_canopy, oxygen_recycler_count,
+                     intact_canopy_count, oxygen_recycler_count,
                      cookies_count, saved_people)
             print("[Tutorial] Finished and saved.")
         return
@@ -459,7 +464,7 @@ while True:
         next_day_customers = random.randint(1, 2)
         customer_manager.spawn_customers(next_day_customers, force_ration=False)
         print(f"New Day! Spawned {next_day_customers} customers.")
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
+        save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
 
     if current_state == "MENU":
        screen.fill((0, 0, 0))
@@ -470,7 +475,7 @@ while True:
     elif current_state == "INTRO":
         show_intro(screen, clock)
         has_seen_intro = True
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
+        save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
         current_state = "WEATHER_EXPLAIN" 
 
     elif current_state == "WEATHER_EXPLAIN":
@@ -541,7 +546,13 @@ while True:
        else:
           current_gh_bg = gh_bg_img
 
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,current_gh_bg, pure_soil_count, oxygen_recycler_count, intact_canopy_count, has_intact_canopy, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,current_gh_bg, pure_soil_count, oxygen_recycler_count, intact_canopy_count, intact_canopy_count > 0, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
+
+       import greenhouse
+       greenhouse.ACID_RAIN_ACTIVE = (
+           current_day in [3, 8]
+           and not greenhouse_fixed
+       )
 
        acid_rain_protected_now = (
            current_day in [3, 8]
@@ -592,18 +603,18 @@ while True:
       screen.blit(overlay, (0, 0))
 
       if acid_rain_popup_img:
-          popup_rect = acid_rain_popup_img.get_rect(center=(Width // 2, Height // 2 - 35))
+          popup_rect = acid_rain_popup_img.get_rect(center=(Width // 2, Height // 2))
           screen.blit(acid_rain_popup_img, popup_rect)
 
-      acid_buy_rect = pygame.Rect(330, 540, 260, 90)
-      acid_cancel_rect = pygame.Rect(690, 540, 260, 90)
+      acid_buy_rect = pygame.Rect(450, 520, 180, 65)
+      acid_cancel_rect = pygame.Rect(650, 520, 180, 65)
 
       if acid_buy_img:
-         buy_scaled = pygame.transform.smoothscale(acid_buy_img, (260, 90))
+         buy_scaled = pygame.transform.smoothscale(acid_buy_img, (180, 65))
          screen.blit(buy_scaled, acid_buy_rect)
 
       if acid_cancel_img:
-         cancel_scaled = pygame.transform.smoothscale(acid_cancel_img, (260, 90))
+         cancel_scaled = pygame.transform.smoothscale(acid_cancel_img, (180, 65))
          screen.blit(cancel_scaled, acid_cancel_rect)
 
     if show_day_transition:
@@ -654,13 +665,13 @@ while True:
               show_day_transition = False
               continue 
           if event.type == pygame.QUIT:
-              save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
+              save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
               pygame.quit()
               sys.exit()
           continue
       
       if event.type == pygame.QUIT:
-        save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
+        save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
         pygame.quit()
         sys.exit()
         
@@ -738,7 +749,6 @@ while True:
                          print("CANOPY AVAILABLE")
 
                          intact_canopy_count -= 1
-                         has_intact_canopy = False
 
                          greenhouse_fixed = True
                          canopy_fixed_day = current_day
@@ -746,7 +756,7 @@ while True:
                            current_day,
                            has_seen_intro,
                            pure_soil_count,
-                           has_intact_canopy,
+                           intact_canopy_count,
                            oxygen_recycler_count,
                            cookies_count,
                            saved_people
@@ -771,7 +781,7 @@ while True:
                   last_state = "MENU"
                   current_state = "SETTING"
              elif e_btn.collidepoint(mouse_pos):
-                   save_game(current_day, has_seen_intro, pure_soil_count, has_intact_canopy, oxygen_recycler_count, cookies_count, saved_people)
+                   save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
                    pygame.quit()
                    sys.exit()
                    
@@ -827,7 +837,7 @@ while True:
                         current_selected_item = None
 
                         save_game(current_day, has_seen_intro, pure_soil_count,
-                                 has_intact_canopy, oxygen_recycler_count,
+                                 intact_canopy_count, oxygen_recycler_count,
                                  cookies_count, saved_people)
 
          elif current_state == "MAP":
@@ -835,7 +845,11 @@ while True:
                current_state = "GREENHOUSE"
                print("Entering to Greenhouse...")
 
-               if current_day in acid_rain_days and current_day not in shown_acid_rain_days:
+               if (
+                 current_day in acid_rain_days
+                 and current_day not in shown_acid_rain_days
+                 and not greenhouse_fixed
+               ):
                  show_acid_rain_popup = True
                  shown_acid_rain_days.append(current_day)
             elif to_shop_btn.collidepoint(mouse_pos):
@@ -874,16 +888,13 @@ while True:
                      trigger_message("Not enough Cookies for Pure Soil!")
 
              elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
-                 print(f"DEBUG: Clicked Canopy Button! Current status: {has_intact_canopy}")
-                 if has_intact_canopy:
-                     trigger_message("You already own Intact Canopy!")
-                 elif cookies_count >= 150:
-                     cookies_count -= 150
-                     has_intact_canopy = True
-                     intact_canopy_count = 1
-                     trigger_message("Intact Canopy purchased!")
+                 print(f"DEBUG: Clicked Canopy Button! Current status: {intact_canopy_count}")
+                 if cookies_count >= 150:
+                    cookies_count -= 150
+                    intact_canopy_count += 1
+                    trigger_message("Intact Canopy purchased!")
                  else:
-                     trigger_message("Not enough Cookies for Intact Canopy!")
+                    trigger_message("Not enough Cookies for Intact Canopy!")
 
              elif shop_buy_oxygen_btn and shop_buy_oxygen_btn.collidepoint(mouse_pos):
                  print(f"DEBUG: Clicked Oxygen Button! Current status: {oxygen_recycler_count}")
