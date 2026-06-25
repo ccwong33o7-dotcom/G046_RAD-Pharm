@@ -19,6 +19,7 @@ img_drum2 = None
 img_drum3 = None
 img_tire2 = None
 img_drum4 = None
+img_clear_btn = None
     
 class Plant:
     def __init__(self, x_pos, y_pos, name, dust_speed, width=120, height=160):
@@ -56,11 +57,11 @@ class Plant:
               ).convert_alpha()
 
               self.img_wilt_1 = pygame.image.load(
-                  "image/plant/Aloe.png"
+                 "image/plant/Aloe wilt1.png"
               ).convert_alpha()
 
               self.img_wilt_2 = pygame.image.load(
-                  "image/plant/Aloe wilt1.png"
+                 "image/plant/Aloe wilt2.png"
               ).convert_alpha()
 
               self.img_wilt_3 = pygame.image.load(
@@ -83,17 +84,16 @@ class Plant:
               ).convert_alpha()
 
               self.img_wilt_1 = pygame.image.load(
-                 "image/plant/Mature thorn.png"
-              ).convert_alpha()
-
-              self.img_wilt_2 = pygame.image.load(
                  "image/plant/Thorn wilt1.png"
               ).convert_alpha()
 
-              self.img_wilt_3 = pygame.image.load(
-                "image/plant/Thorn wilt2.png"
+              self.img_wilt_2 = pygame.image.load(
+                 "image/plant/Thorn wilt2.png"
               ).convert_alpha()
 
+              self.img_wilt_3 = pygame.image.load(
+                 "image/plant/Thorn wilt2.png"
+              ).convert_alpha()
         except pygame.error as e:
             print(f"Error loading images for {self.name}: {e}")
 
@@ -129,21 +129,22 @@ class Plant:
 
     
     def draw(self, surface):
+        global img_clear_btn
 
         if not self.planted:
           return
 
-        if self.growth >= 100:
-            current_image = self.img_flower
-        
-        elif self.is_dead:
-            if self.death_timer < 400:
-                current_image = self.img_wilt_1
-            elif self.death_timer < 800:
-                current_image = self.img_wilt_2
-            else:
-                current_image = self.img_wilt_3
-        
+        if self.is_dead:
+           if self.death_timer < 400:
+               current_image = self.img_wilt_1
+           elif self.death_timer < 800:
+               current_image = self.img_wilt_2
+           else:
+               current_image = self.img_wilt_3
+
+        elif self.growth >= 100:
+           current_image = self.img_flower
+
         else:
             if self.growth < 33:
                 current_image = self.img_seedling
@@ -151,11 +152,37 @@ class Plant:
                 current_image = self.img_bud
         
         orig_w, orig_h = current_image.get_size()
-        scale_factor = 160 / orig_h
-        new_w = int(orig_w * scale_factor)
-        new_h = int(orig_h * scale_factor)
-        scaled_image = pygame.transform.scale(current_image, (self.rect.width, self.rect.height))
-        surface.blit(scaled_image, (self.rect.x, self.rect.y))
+
+        draw_w = self.rect.width
+        draw_h = self.rect.height
+        draw_x = self.rect.x
+        draw_y = self.rect.y
+
+        if self.name == "Rusty Thorn" and self.is_dead:
+            draw_w = 95
+            draw_h = 95
+
+            draw_x = self.rect.centerx - draw_w // 2
+            draw_y = self.rect.bottom - draw_h - 25
+
+            if self.rect.y < 300:
+                draw_y += 30
+                
+        elif self.name == "Glowing Aloe" and self.is_dead:
+            draw_w = 105
+            draw_h = 95
+
+            draw_x = self.rect.centerx - draw_w // 2
+            draw_y = self.rect.bottom - draw_h - 25
+            if self.rect.y < 300:
+                draw_y += 20
+
+        scaled_image = pygame.transform.smoothscale(
+            current_image,
+            (draw_w, draw_h)
+        )
+
+        surface.blit(scaled_image, (draw_x, draw_y))
 
         font_small = pygame.font.SysFont("Arial", 13, bold=True)
 
@@ -209,25 +236,54 @@ class Plant:
         draw_segment_bar(bar_x, growth_y, self.growth, growth_color, "G")
         draw_segment_bar(bar_x, dust_y, self.dust, dust_color, "D")
 
-        if self.growth >= 100 and not self.is_dead:
-            ready_txt = font_small.render("READY", True, (80, 255, 120))
-            surface.blit(ready_txt, (bar_x + 30, growth_y - 18))
-
-        if self.dust >= 70 and not self.is_dead:
-            danger_txt = font_small.render("DANGER", True, (230, 80, 40))
-            surface.blit(danger_txt, (bar_x + 25, dust_y + 8))
-
         if self.is_dead:
             dead_txt = font_small.render("DEAD", True, (230, 60, 60))
             surface.blit(dead_txt, (bar_x + 32, dust_y + 8))
 
         if self.is_dead:
-            self.delete_btn_rect = pygame.Rect(self.rect.x + 35, self.rect.y - 60, 50, 30)
-            pygame.draw.rect(surface, (139, 69, 19), self.delete_btn_rect) 
-            
-            small_font = pygame.font.SysFont("Arial", 12, bold=True)
-            txt = small_font.render("Clear", True, (255, 255, 255))
-            surface.blit(txt, (self.delete_btn_rect.x + 10, self.delete_btn_rect.y + 8))
+            btn_w = 85
+            btn_h = 28
+
+            button_gap = -18
+
+            btn_x = self.rect.right + button_gap
+            btn_y = self.rect.y + self.rect.height - btn_h - 35
+
+            if btn_x + btn_w > surface.get_width() - 8:
+                 btn_x = self.rect.left - btn_w - button_gap
+
+            btn_x = max(8, min(btn_x, surface.get_width() - btn_w - 8))
+            btn_y = max(80, min(btn_y, surface.get_height() - btn_h - 8))
+
+            self.delete_btn_rect = pygame.Rect(btn_x, btn_y, btn_w, btn_h)
+
+            if img_clear_btn is None:
+                for possible_path in [
+                    "image/button/Clear_button.png",
+                    "image/button/clearbutton.png",
+                    "Clear_button.png"
+                ]:
+                    if os.path.exists(possible_path):
+                        try:
+                            img_clear_btn = pygame.image.load(possible_path).convert_alpha()
+                            img_clear_btn = pygame.transform.smoothscale(
+                                img_clear_btn,
+                                (btn_w, btn_h)
+                            )
+                            break
+                        except pygame.error as e:
+                            print(f"Error loading clear button image: {e}")
+                            img_clear_btn = None
+
+            if img_clear_btn:
+                surface.blit(img_clear_btn, self.delete_btn_rect)
+            else:
+                pygame.draw.rect(surface, (90, 60, 35), self.delete_btn_rect, border_radius=8)
+                small_font = pygame.font.SysFont("Arial", 12, bold=True)
+                txt = small_font.render("Clear", True, (255, 255, 255))
+                txt_rect = txt.get_rect(center=self.delete_btn_rect.center)
+                surface.blit(txt, txt_rect)
+
         else:
             self.delete_btn_rect = None
      
