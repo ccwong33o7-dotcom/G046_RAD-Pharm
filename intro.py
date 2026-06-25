@@ -20,30 +20,29 @@ def show_intro(screen, clock):
         intro_bg.fill((20, 18, 18))
 
     story_scenes = [
-        [
-            "The world has ended.",
-            "A terrible virus turned people into zombies, and hospitals are gone.",
-            "The rich hoarded all the medicine, leaving regular people to die in the ruins."
-        ],
-        [
-            "But you are a pharmacist who cares.",
-            "You said no to the safe zones and came back to your family's old pharmacy.",
-            "Here, you reopen the shop to help the survivors."
-        ],
-        [
-            "You must search the ruins for supplies, mix wild herbs,",
-            "and make medicine for everyone who knocks on your door.",
-            "",
-            "But WATCH OUT! The smell of living humans will attract hungry zombies."
-        ],
-        [
-            "When they attack, drop your medicine, grab your gun, and shoot them down!",
-            "You cannot save the whole world...",
-            "But you can save the living with your medicine—and destroy the dead with your bullets.",
-            "",
-            "[ ARE YOU READY TO SURVIVE DAY 1? ]"
-        ]
+    [
+        "The world ended in a flash of fire.",
+        "Radiation dust covers the sky, water sources are poisoned, and crops are dead.",
+        "Few survivors hide underground, but radiation sickness is slowly killing them."
+    ],
+    [
+        "You were a pharmacist who knows how to compound anti radiation drugs.",
+        "You returned to that abandoned pharmacy, where some raw materials and recipes remain.",
+        "You decide to set up a clinic here, offering hope to the irradiated."
+    ],
+    [
+        "Every day you put on your protective suit and scavenge the ruins for herbs and purifiers.",
+        "Dosage must be precise – one mistake can kill instead of cure.",
+        "Your pharmacy is the only light in the wasteland."
+    ],
+    [
+        "You cannot clear all the radiation...",
+        "But you can give each person who comes to you a chance to survive.",
+        "With your hands, you brew the antidote against death.",
+        "",
+        "[ ARE YOU READY TO BEGIN YOUR FIRST DAY? ]"
     ]
+]
 
     current_scene = 0         
     char_index = 0            
