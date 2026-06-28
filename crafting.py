@@ -67,15 +67,19 @@ RECIPES = {
 
 inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber": "Infinite", "Glowing Aloe": 2, "Rusty Thorn":2 
              ,"Rad-Ointment": 0 , "Speed Serum": 0, "Lung-Clear": 0, "Blood-Stop": 0}
+save_callback = None
 
+def set_save_callback(callback):
+    global save_callback
+    save_callback = callback
 
 game_state = "MENU"
 pending_item = ""
 
 catch_started = False
 falling_items = []
-basket = pygame.Rect(560, 620, 160, 35)
-basket_speed = 8
+basket = pygame.Rect(605, 615, 70, 70)
+basket_speed = 12
 spawn_timer = 0
 caught = {}
 catch_timer = 0
@@ -93,11 +97,32 @@ ARROWS = [
     pygame.K_d
 ]
 
+KEY_TO_ARROW = {
+    pygame.K_w: pygame.K_w,
+    pygame.K_UP: pygame.K_w,
+
+    pygame.K_s: pygame.K_s,
+    pygame.K_DOWN: pygame.K_s,
+
+    pygame.K_a: pygame.K_a,
+    pygame.K_LEFT: pygame.K_a,
+
+    pygame.K_d: pygame.K_d,
+    pygame.K_RIGHT: pygame.K_d,
+}
+
 ARROW_TEXT = {
-    pygame.K_w: "w",
-    pygame.K_s: "s",
-    pygame.K_a: "a",
-    pygame.K_d: "d"
+    pygame.K_w: "W / ↑",
+    pygame.K_s: "S / ↓",
+    pygame.K_a: "A / ←",
+    pygame.K_d: "D / →"
+}
+
+KEY_ICONS = {
+    pygame.K_w: W_icon,
+    pygame.K_a: A_icon,
+    pygame.K_s: S_icon,
+    pygame.K_d: D_icon
 }
 
 def check_resources(item_name):
@@ -112,10 +137,15 @@ def check_resources(item_name):
 def craft_success(item_name):
     recipe = RECIPES[item_name]
     infinites = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
+
     for ingredient, amount in recipe.items():
         if ingredient not in infinites:
             inventory[ingredient] -= amount
+
     inventory[item_name] += 1
+
+    if save_callback:
+        save_callback()
 
 def start_catch_game(item):
 
@@ -127,7 +157,8 @@ def start_catch_game(item):
 
     catch_started = True
 
-    basket.x = 560
+    basket.centerx = screen_width // 2
+    basket.y = 535
 
     falling_items.clear()
 
@@ -193,21 +224,17 @@ def update_catch_game():
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-
         basket.x -= basket_speed
 
     if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-
         basket.x += basket_speed
 
-    basket.x = max(0,min(1120,basket.x))
+    basket.x = max(0, min(screen_width - basket.width, basket.x))
 
     spawn_timer += 1
 
     if spawn_timer >= 30:
-
         spawn_timer = 0
-
         spawn_falling_item()
 
     catch_timer -= 1
@@ -219,51 +246,34 @@ def update_catch_game():
         if item["rect"].colliderect(basket):
 
             if item["good"]:
-
                 caught[item["name"]] += 1
-
             else:
-
                 print("Wrong ingredient!")
-
                 game_state = "MENU"
-
                 falling_items.clear()
-
                 return
 
             falling_items.remove(item)
 
         elif item["rect"].y > 720:
-
             falling_items.remove(item)
 
     success = True
 
     for ingredient, amount in RECIPES[pending_item].items():
-
         if caught[ingredient] < amount:
-
             success = False
 
     if success:
-
         craft_success(pending_item)
-
         print("Medicine Crafted!")
-
         game_state = "MENU"
-
         falling_items.clear()
-
         return
 
     if catch_timer <= 0:
-
         print("Time Up!")
-
         game_state = "MENU"
-
         falling_items.clear()
 
 def start_mix_game(item):
@@ -302,10 +312,12 @@ def update_mix_game(event):
     if event.type != pygame.KEYDOWN:
         return
 
-    if event.key not in ARROWS:
+    pressed_key = KEY_TO_ARROW.get(event.key)
+
+    if pressed_key is None:
         return
 
-    if event.key == mix_sequence[mix_index]:
+    if pressed_key == mix_sequence[mix_index]:
 
         mix_index += 1
 
@@ -321,7 +333,7 @@ def update_mix_game(event):
 
         print("Wrong Formula!")
 
-        game_state = "MENU"      
+        game_state = "MENU"  
 
 def update_crafting(event, progress):
 
@@ -448,7 +460,7 @@ def draw_crafting(screen, bg_image, font):
         screen.fill(COLOUR_BG)
 
     msg = get_title_font().render(
-        "Press 1-5 To Craft",
+        "Press 1-4 To Craft",
         True,
         COLOR_TEXT
     )
@@ -495,7 +507,8 @@ def draw_crafting(screen, bg_image, font):
     
     if game_state == "CATCH":
 
-        screen.blit(Beaker_icon, (600, 620))
+        beaker_rect = Beaker_icon.get_rect(center=basket.center)
+        screen.blit(Beaker_icon, basket.topleft)
 
         font = pygame.font.SysFont("Arial",20)
 
@@ -560,23 +573,11 @@ def draw_crafting(screen, bg_image, font):
 
         screen.blit(text,(470,120))
 
-        arrow_font = pygame.font.SysFont("Arial",60)
+        icon = KEY_ICONS[mix_sequence[mix_index]]
 
-        x = 280
+        icon_rect = icon.get_rect(center=(640, 300))
 
-        y = 260
-
-        next_arrow = arrow_font.render(
-
-            ARROW_TEXT[mix_sequence[mix_index]],
-
-            True,
-
-            (255,255,255)
-
-        )
-
-        screen.blit(next_arrow,(600,260))
+        screen.blit(icon, icon_rect)
 
         small = pygame.font.SysFont("Arial",24)
 

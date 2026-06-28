@@ -9,7 +9,7 @@ from setting import run_setting
 import pharmacy
 from shop import draw_shop
 from greenhouse import draw_greenhouse, Plant
-from crafting import draw_crafting, update_crafting, animate_crafting, draw_lab_tutorial, inventory 
+from crafting import draw_crafting, update_crafting, animate_crafting, draw_lab_tutorial, inventory, set_save_callback
 from intro import show_intro
 from taskbar import TaskBar
 from map import draw_map
@@ -234,6 +234,16 @@ def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
+def save_after_craft():
+    save_game(
+        current_day,
+        has_seen_intro,
+        pure_soil_count,
+        intact_canopy_count,
+        oxygen_recycler_count,
+        cookies_count,
+        saved_people
+    )
 progress = load_game()
 current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
@@ -274,6 +284,9 @@ inventory["Glowing Aloe"] = int(
 inventory["Rusty Thorn"] = int(
     progress.get("rusty_thorn", 2)
 )
+
+set_save_callback(save_after_craft)
+
 oxygen_recycler_active = 1 if oxygen_recycler_count > 0 else 0
 intact_canopy_active = 1 if intact_canopy_count > 0 else 0
 
@@ -667,6 +680,7 @@ def draw_greenhouse_tutorial(screen, step, aloe_btn, thorn_btn, harvest_btn):
     screen.blit(skip_text, skip_rect)
 
 while True:
+    pygame.event.pump()
     mouse_pos = pygame.mouse.get_pos()
 
     if greenhouse_fixed:
@@ -1023,6 +1037,11 @@ while True:
               pygame.quit()
               sys.exit()
           continue
+          
+      if current_state == "CRAFTING":
+            update_crafting(event, progress)
+            if event.type == pygame.KEYDOWN:
+              continue 
       
       if event.type == pygame.QUIT:
         save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
