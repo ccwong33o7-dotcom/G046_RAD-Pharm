@@ -21,6 +21,9 @@ pygame.mixer.init()
 pygame.mixer.music.load("music/background_music.ogg")
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
+ending2_sound = pygame.mixer.Sound("day10_soundeffect.mp3")
+ending2_sound.set_volume(0.8)
+ending2_sound_played = False
 
 Width = 1280
 Height= 720
@@ -873,7 +876,11 @@ while True:
              screen.blit(ending1_img,(0,0))
 
          elif ending_step == 1:
-             screen.blit(ending2_img,(0,0))
+            if not ending2_sound_played:
+                ending2_sound.play()
+                ending2_sound_played = True
+
+            screen.blit(ending2_img,(0,0))
 
          elif ending_step == 2:
              screen.blit(ending3_img,(0,0))
