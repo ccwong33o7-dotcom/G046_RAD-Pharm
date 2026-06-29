@@ -8,6 +8,7 @@ from menu import draw_menu
 from setting import run_setting
 import pharmacy
 from shop import draw_shop
+import greenhouse
 from greenhouse import draw_greenhouse, Plant
 from crafting import draw_crafting, update_crafting, animate_crafting, draw_lab_tutorial, inventory, set_save_callback
 from intro import show_intro
@@ -685,6 +686,16 @@ def draw_greenhouse_tutorial(screen, step, aloe_btn, thorn_btn, harvest_btn):
 while True:
     pygame.event.pump()
     mouse_pos = pygame.mouse.get_pos()
+
+    greenhouse.ACID_RAIN_ACTIVE = (
+        current_day in [3, 8]
+        and not greenhouse_fixed
+    )
+
+    if current_state in ["PHARMACY", "MAP", "SHOP", "GREENHOUSE", "CRAFTING"]:
+        if not show_day_transition and not show_acid_rain_popup:
+            for p in plants:
+                p.update()
 
     if greenhouse_fixed:
       if current_day - canopy_fixed_day >= 3:
