@@ -415,7 +415,6 @@ def draw_greenhouse(screen, font, plant_list, bg_image=None, pure_soil_count=0, 
             if img: screen.blit(img, (plot['x'], plot['y']))
     
     for p in plant_list:
-        p.update()
         p.draw(screen)
     
     small_font = pygame.font.SysFont("Arial", 16)
