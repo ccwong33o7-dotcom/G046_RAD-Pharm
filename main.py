@@ -207,6 +207,15 @@ shown_acid_rain_days = progress.get(
 
 progress.setdefault("speed_serum_recipe", False)
 progress.setdefault("blood_stop_recipe", False)
+
+ITEM_PRICES = {
+    "ration_pack": 45,
+    "sedative": 45,
+    "blood_stop": 50,
+    "speed_serum": 55,
+    "rad_ointment": 65,
+    "lung_clear": 60
+}
     
 def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_amt, saved_people_count):
     """Writes active day progression and intro milestones to disk."""
@@ -248,7 +257,6 @@ def save_after_craft():
         cookies_count,
         saved_people
     )
-progress = load_game()
 current_day = progress["current_day"]
 has_seen_intro = progress["has_seen_intro"]
 
@@ -521,6 +529,7 @@ customer_manager.spawn_customers(initial_count, force_ration=force_ration)
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
 
 has_money_on_table = False
+pending_cookie_reward = 0
 current_selected_item = None
 
 pharmacy_buttons = {
@@ -1253,13 +1262,15 @@ while True:
              else:
                  if has_money_on_table and pharmacy_buttons.get("money") and pharmacy_buttons["money"].collidepoint(mouse_pos):
                      clicked_ui = True
-                     cookies_count += 45
+                     reward = pending_cookie_reward
+                     cookies_count += reward
                      saved_people += 1
-                     has_money_on_table = False 
-                     trigger_message("+45 Cookies collected into wallet!")
+                     has_money_on_table = False
+                     pending_cookie_reward = 0
+                     trigger_message(f"+{reward} Cookies collected into wallet!")
                      if tutorial_active and tutorial_step == 2:
                          advance_tutorial()
-                 else:
+                 else:  
                      clicked_customer = None
                      for customer in customer_manager.active_customers:
                          if customer.sell_btn_rect.collidepoint(mouse_pos):
@@ -1267,62 +1278,69 @@ while True:
                              break
 
                      if clicked_customer is not None:
-                         if current_selected_item is None:
-                             msg = "Please select an item from your hotbar first!"
-                             trigger_message(msg)
-                             customer_manager.show_message(msg, is_success=False)
-                         elif current_selected_item != clicked_customer.requested_item:
-                             msg = f"Wrong item! This customer requested {clicked_customer.requested_item.replace('_', ' ').title()}."
-                             trigger_message(msg)
-                             customer_manager.show_message(msg, is_success=False)
+                         if has_money_on_table:
+                            msg = "Please collect the money from the counter first!"
+                            trigger_message(msg)
+                            customer_manager.show_message(msg, is_success=False)
                          else:
-                             item_key = current_selected_item
-                             if item_key in ["ration_pack", "sedative"]:
-                                 if progress.get(item_key, 0) <= 0:
-                                     msg = f"{item_key.replace('_', ' ').title()} out of stock! Go to SHOP."
-                                     trigger_message(msg)
-                                     customer_manager.show_message(msg, is_success=False)
-                                 else:
-                                     progress[item_key] -= 1
-                                     clicked_customer.is_satisfied = True
-                                     has_money_on_table = True
-                                     if tutorial_active and tutorial_step == 1:
-                                         advance_tutorial()
-                                     current_selected_item = None
-                                     save_game(current_day, has_seen_intro, pure_soil_count,
-                                               intact_canopy_count, oxygen_recycler_count,
-                                               cookies_count, saved_people)
-                                     customer_manager.show_message("Trade successful!", True)
-                                     trigger_message("Trade successful!")
-                             elif item_key in ["blood_stop", "speed_serum", "rad_ointment", "lung_clear"]:
-                                 map_key = {
-                                     "blood_stop": "Blood-Stop",
-                                     "speed_serum": "Speed Serum",
-                                     "rad_ointment": "Rad-Ointment",
-                                     "lung_clear": "Lung-Clear"
-                                 }[item_key]
-                                 if inventory.get(map_key, 0) <= 0:
-                                     msg = f"{map_key} out of stock! Go to LAB."
-                                     trigger_message(msg)
-                                     customer_manager.show_message(msg, is_success=False)
-                                 else:
-                                     inventory[map_key] -= 1
-                                     clicked_customer.is_satisfied = True
-                                     has_money_on_table = True
-                                     if tutorial_active and tutorial_step == 1:
-                                         advance_tutorial()
-                                     current_selected_item = None
-                                     save_game(current_day, has_seen_intro, pure_soil_count,
-                                               intact_canopy_count, oxygen_recycler_count,
-                                               cookies_count, saved_people)
-                                     customer_manager.show_message("Trade successful!", True)
-                                     trigger_message("Trade successful!")
+                             if current_selected_item is None:
+                                msg = "Please select an item from your hotbar first!"
+                                trigger_message(msg)
+                                customer_manager.show_message(msg, is_success=False)
+                             elif current_selected_item != clicked_customer.requested_item:
+                                msg = f"Wrong item! This customer requested {clicked_customer.requested_item.replace('_', ' ').title()}."
+                                trigger_message(msg)
+                                customer_manager.show_message(msg, is_success=False)
                              else:
-                                 msg = "Unknown item"
-                                 trigger_message(msg)
-                                 customer_manager.show_message(msg, is_success=False)
+                                item_key = current_selected_item
+                                if item_key in ["ration_pack", "sedative"]:
+                                    if progress.get(item_key, 0) <= 0:
+                                        msg = f"{item_key.replace('_', ' ').title()} out of stock! Go to SHOP."
+                                        trigger_message(msg)
+                                        customer_manager.show_message(msg, is_success=False)
+                                    else:
+                                        progress[item_key] -= 1
+                                        clicked_customer.is_satisfied = True
+                                        has_money_on_table = True
+                                        pending_cookie_reward = ITEM_PRICES.get(item_key, 45)
+                                        if tutorial_active and tutorial_step == 1:
+                                            advance_tutorial()
+                                        current_selected_item = None
+                                        save_game(current_day, has_seen_intro, pure_soil_count,
+                                                intact_canopy_count, oxygen_recycler_count,
+                                                cookies_count, saved_people)
+                                        customer_manager.show_message("Trade successful!", True)
+                                        trigger_message("Trade successful!")
+                                elif item_key in ["blood_stop", "speed_serum", "rad_ointment", "lung_clear"]:
+                                    map_key = {
+                                        "blood_stop": "Blood-Stop",
+                                        "speed_serum": "Speed Serum",
+                                        "rad_ointment": "Rad-Ointment",
+                                        "lung_clear": "Lung-Clear"
+                                    }[item_key]
+                                    if inventory.get(map_key, 0) <= 0:
+                                        msg = f"{map_key} out of stock! Go to LAB."
+                                        trigger_message(msg)
+                                        customer_manager.show_message(msg, is_success=False)
+                                    else:
+                                        inventory[map_key] -= 1
+                                        clicked_customer.is_satisfied = True
+                                        has_money_on_table = True
+                                        pending_cookie_reward = ITEM_PRICES.get(item_key, 45)
+                                        if tutorial_active and tutorial_step == 1:
+                                            advance_tutorial()
+                                        current_selected_item = None
+                                        save_game(current_day, has_seen_intro, pure_soil_count,
+                                                intact_canopy_count, oxygen_recycler_count,
+                                                cookies_count, saved_people)
+                                        customer_manager.show_message("Trade successful!", True)
+                                        trigger_message("Trade successful!")
+                                else:
+                                    msg = "Unknown item"
+                                    trigger_message(msg)
+                                    customer_manager.show_message(msg, is_success=False)
                      else:
-                         pass
+                        pass
 
          elif current_state == "MAP":
             if to_gh_btn.collidepoint(mouse_pos):
