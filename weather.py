@@ -12,8 +12,8 @@ WEATHER_SCHEDULE = {
     4: CLOUDY,
     5: SUNNY,
     6: SUNNY,
-    7: STORMY,
-    8: SUNNY,
+    7: SUNNY,
+    8: STORMY,
     9: CLOUDY,
     10: SUNNY
 }
