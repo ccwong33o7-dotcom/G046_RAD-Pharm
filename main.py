@@ -21,7 +21,7 @@ pygame.mixer.init()
 pygame.mixer.music.load("music/background_music.ogg")
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
-ending2_sound = pygame.mixer.Sound("day10_soundeffect.mp3")
+ending2_sound = pygame.mixer.Sound("music/day10_soundeffect.mp3")
 ending2_sound.set_volume(0.8)
 ending2_sound_played = False
 
