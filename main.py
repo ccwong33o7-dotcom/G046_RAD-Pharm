@@ -133,6 +133,7 @@ try:
     ending2_img = pygame.image.load("image/background/Ending2.png").convert()
     ending3_img = pygame.image.load("image/background/Ending3.png").convert()
     ending4_img = pygame.image.load("image/background/Ending4.png").convert()
+    credit_img = pygame.image.load("image/background/Credit.png").convert()
 
     ending1_img = pygame.transform.scale(
         ending1_img,
@@ -151,6 +152,11 @@ try:
 
     ending4_img = pygame.transform.scale(
         ending4_img,
+        (Width, Height)
+    )
+
+    credit_img = pygame.transform.scale(
+        credit_img,
         (Width, Height)
     )
 
@@ -1011,6 +1017,9 @@ while True:
 
          elif ending_step == 3:
              screen.blit(ending4_img,(0,0))
+         
+         elif ending_step == 4:
+             screen.blit(credit_img, (0, 0))
 
     elif current_state == "SETTING":
        current_state = run_setting(screen, last_state)
@@ -1120,7 +1129,7 @@ while True:
               if event.key == pygame.K_SPACE:
                   ending_step += 1
 
-                  if ending_step > 3:
+                  if ending_step > 4:
                       pygame.quit()
                       sys.exit()
 
