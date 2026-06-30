@@ -162,7 +162,7 @@ def start_catch_game(item):
 
     falling_items.clear()
 
-    catch_timer = 30 * 15  
+    catch_timer = 30 * 25  
 
     caught = {}
 
@@ -301,7 +301,7 @@ def start_mix_game(item):
         for i in range(length)
     ]
 
-    mix_timer = 30 * (length + 2)
+    mix_timer = 30 * (length + 6)
 
 def update_mix_game(event):
 
