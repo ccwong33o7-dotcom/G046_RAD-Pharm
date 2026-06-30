@@ -616,9 +616,24 @@ aloe_btn_rect = pygame.Rect(0, 0, 0, 0)
 thorn_btn_rect = pygame.Rect(0, 0, 0, 0)
 
 customer_manager = pharmacy.CustomerManager()
+
+def fix_locked_customer_requests():
+    allowed_items = ["ration_pack", "sedative", "rad_ointment", "lung_clear"]
+
+    if progress.get("speed_serum_recipe", False):
+        allowed_items.append("speed_serum")
+
+    if progress.get("blood_stop_recipe", False):
+        allowed_items.append("blood_stop")
+
+    for customer in customer_manager.active_customers:
+        if customer.requested_item not in allowed_items:
+            customer.requested_item = random.choice(allowed_items)
+
 initial_count = random.randint(1, 2)
 force_ration = not tutorial_done
 customer_manager.spawn_customers(initial_count, force_ration=force_ration)
+fix_locked_customer_requests()
 print(f"Game Started: Initialized {initial_count} customers for Day {current_day}")
 
 has_money_on_table = False
@@ -839,6 +854,7 @@ while True:
         weather_sys.update_weather(current_day)
         next_day_customers = random.randint(1, 2)
         customer_manager.spawn_customers(next_day_customers, force_ration=False)
+        fix_locked_customer_requests()
         print(f"New Day! Spawned {next_day_customers} customers.")
 
         save_game(
@@ -869,6 +885,7 @@ while True:
         weather_sys.update_weather(current_day) 
         next_day_customers = random.randint(1, 2)
         customer_manager.spawn_customers(next_day_customers, force_ration=False)
+        fix_locked_customer_requests()
         print(f"New Day! Spawned {next_day_customers} customers.")
         save_game(current_day, has_seen_intro, pure_soil_count, intact_canopy_count, oxygen_recycler_count, cookies_count, saved_people)
 
@@ -906,6 +923,7 @@ while True:
         if len(customer_manager.active_customers) == 0 and not has_money_on_table:
             spawn_num =random.randint(1, 2)
             customer_manager.spawn_customers(spawn_num, force_ration=False)
+            fix_locked_customer_requests()
             
         pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager, selected_item=current_selected_item)
         draw_tutorial(screen, pharmacy_buttons)

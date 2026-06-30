@@ -140,6 +140,22 @@ def check_resources(item_name):
                 return False
     return True
 
+def get_missing_ingredients(item_name):
+    recipe = RECIPES[item_name]
+    infinite_resources = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
+    missing = []
+
+    for ingredient, amount_needed in recipe.items():
+        if ingredient in infinite_resources:
+            continue
+
+        have = inventory.get(ingredient, 0)
+
+        if have < amount_needed:
+            missing.append(f"{ingredient} x{amount_needed - have}")
+
+    return missing
+
 def craft_success(item_name):
     recipe = RECIPES[item_name]
     infinites = ["Filtered water", "Bio-Fuel", "Scrap Fiber"]
@@ -365,7 +381,8 @@ def update_crafting(event, progress):
                 if progress.get("speed_serum_recipe", False):
                     selection = "Speed Serum"
                 else:
-                    print("Recipe not unlocked!")
+                    if message_callback:
+                        message_callback("Speed Serum recipe locked! Unlock it in Shop with cookies.")
 
             elif event.key == pygame.K_3:
                 selection = "Lung-Clear"
@@ -374,7 +391,8 @@ def update_crafting(event, progress):
                 if progress.get("blood_stop_recipe", False):
                     selection = "Blood-Stop"
                 else:
-                    print("Recipe not unlocked!")
+                    if message_callback:
+                        message_callback("Blood-Stop recipe locked! Unlock it in Shop with cookies.")
 
             if selection and check_resources(selection):
 
@@ -391,7 +409,10 @@ def update_crafting(event, progress):
                 print(f"Crafting {selection}")
 
             elif selection:
-                print("Missing ingredients!")
+                missing = get_missing_ingredients(selection)
+
+                if message_callback:
+                    message_callback("Missing: " + ", ".join(missing))
 
     elif game_state == "MIX":
 
