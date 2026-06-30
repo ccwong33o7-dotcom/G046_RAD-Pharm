@@ -10,7 +10,7 @@ import pharmacy
 from shop import draw_shop
 import greenhouse
 from greenhouse import draw_greenhouse, Plant
-from crafting import draw_crafting, update_crafting, animate_crafting, draw_lab_tutorial, inventory, set_save_callback
+from crafting import draw_crafting, update_crafting, animate_crafting, draw_lab_tutorial, inventory, set_save_callback,set_message_callback
 from intro import show_intro
 from taskbar import TaskBar
 from map import draw_map
@@ -299,6 +299,7 @@ inventory["Rusty Thorn"] = int(
 
 set_save_callback(save_after_craft)
 
+
 oxygen_recycler_active = 1 if oxygen_recycler_count > 0 else 0
 intact_canopy_active = 1 if intact_canopy_count > 0 else 0
 
@@ -390,6 +391,7 @@ def trigger_message(text):
     global flash_message, flash_message_timer
     flash_message = text
     flash_message_timer = 180
+set_message_callback(trigger_message)
 
 def draw_upgrade_tooltip(screen, mouse_pos, pure_soil_btn, oxygen_btn, canopy_btn):
     tooltip_text = None

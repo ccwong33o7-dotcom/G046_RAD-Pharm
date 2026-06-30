@@ -68,10 +68,15 @@ RECIPES = {
 inventory = {"Filtered water": "Infinite", "Bio-Fuel": "Infinite", "Scrap Fiber": "Infinite", "Glowing Aloe": 2, "Rusty Thorn":2 
              ,"Rad-Ointment": 0 , "Speed Serum": 0, "Lung-Clear": 0, "Blood-Stop": 0}
 save_callback = None
+message_callback = None
 
 def set_save_callback(callback):
     global save_callback
     save_callback = callback
+
+def set_message_callback(callback):
+    global message_callback
+    message_callback = callback
 
 game_state = "MENU"
 pending_item = ""
@@ -171,7 +176,7 @@ def start_catch_game(item):
         caught[ingredient] = 0
 
 WRONG_ITEMS = [
-    "Toxic Waste",
+    "Toxic",
     "Rock",
     "Metal Scrap",
     "Poison Mushroom"
@@ -249,7 +254,8 @@ def update_catch_game():
             if item["good"]:
                 caught[item["name"]] += 1
             else:
-                print("Wrong ingredient!")
+                if message_callback:
+                    message_callback("Craft Failed! Wrong ingredient collected.")
                 game_state = "MENU"
                 falling_items.clear()
                 return
@@ -267,13 +273,16 @@ def update_catch_game():
 
     if success:
         craft_success(pending_item)
-        print("Medicine Crafted!")
+
+        if message_callback:
+            message_callback(f"{pending_item} crafted successfully!")
         game_state = "MENU"
         falling_items.clear()
         return
 
     if catch_timer <= 0:
-        print("Time Up!")
+        if message_callback:
+            message_callback("Craft Failed! Time ran out.")
         game_state = "MENU"
         falling_items.clear()
 
@@ -326,13 +335,15 @@ def update_mix_game(event):
 
             craft_success(pending_item)
 
-            print("Medicine Crafted!")
+            if message_callback:
+                message_callback(f"{pending_item} crafted successfully!")
 
             game_state = "MENU"
 
     else:
 
-        print("Wrong Formula!")
+        if message_callback:
+            message_callback("Craft Failed! Wrong formula entered.")
 
         game_state = "MENU"  
 
@@ -400,7 +411,8 @@ def animate_crafting():
 
         if mix_timer <= 0:
 
-            print("Time Up!")
+            if message_callback:
+                message_callback("Craft Failed! Time ran out.")
 
             game_state = "MENU"
 def draw_lab_tutorial(screen):
