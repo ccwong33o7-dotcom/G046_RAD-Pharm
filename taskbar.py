@@ -27,7 +27,7 @@ class TaskBar:
             (self.map_btn_rect, "Map"),
             (self.weather_btn_rect, "Weather")
         ]
-        self.tooltip_font = pygame.font.SysFont("Arial", 16, bold=True)
+        self.tooltip_font = pygame.font.SysFont("Arial", 18, bold=True)
 
     def load_assets(self):
         base_path = os.path.dirname(os.path.abspath(__file__))

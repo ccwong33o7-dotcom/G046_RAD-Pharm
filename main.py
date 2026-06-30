@@ -697,7 +697,7 @@ def draw_tutorial(screen, pharmacy_buttons):
     else:
         hint_text = "Tutorial Complete! You're ready to help survivors."
         if tutorial_done_timer == 0:
-            trigger_message("Tutorial complete! Buy supplies at SHOP or craft medicine at LAB to save survivors.")
+            trigger_message("Tutorial done! Tap the top right 2nd icon (MAP) to SHOP / LAB")
         tutorial_done_timer += 1
         if tutorial_done_timer > 180:
             tutorial_active = False
