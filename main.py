@@ -602,7 +602,7 @@ def draw_tutorial(screen, pharmacy_buttons):
             
         return
     
-    box_width = 480
+    box_width = 520
     box_height = 60
     box_x = (Width - box_width) // 2
     box_y = Height - 110
