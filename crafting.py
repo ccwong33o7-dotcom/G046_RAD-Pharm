@@ -499,6 +499,14 @@ def draw_lab_tutorial(screen):
     skip_text = small_font.render("Press SPACE to continue / skip", True, (190, 200, 220))
     skip_rect = skip_text.get_rect(center=(1280 // 2, box_y + 68))
     screen.blit(skip_text, skip_rect)
+
+def draw_circle_number(screen, number, center_x, center_y, radius=13, bg_color=(200, 170, 110), text_color=(0,0,0)):
+    pygame.draw.circle(screen, bg_color, (center_x, center_y), radius)
+    pygame.draw.circle(screen, (150, 90, 40), (center_x, center_y), radius, 2)
+    font = pygame.font.SysFont("Arial", radius, bold=True)
+    text = font.render(str(number), True, text_color)
+    screen.blit(text, text.get_rect(center=(center_x, center_y)))
+
 def draw_crafting(screen, bg_image, font):
 
     if bg_image:
@@ -506,13 +514,6 @@ def draw_crafting(screen, bg_image, font):
     else:
         screen.fill(COLOUR_BG)
 
-    msg = get_title_font().render(
-        "Press 1-4 To Craft",
-        True,
-        COLOR_TEXT
-    )
-
-    screen.blit(msg, (500, 55))
     if recipe_btn_img:
         screen.blit(recipe_btn_img, recipe_btn_rect)
     else:
@@ -525,6 +526,20 @@ def draw_crafting(screen, bg_image, font):
     screen.blit(lungclear_icon, (33, 397))
     screen.blit(speedserum_icon, (33, 290))
     screen.blit(radointment_icon, (33, 185))
+
+    icon_data = [
+        (1, radointment_icon, (33, 185)),
+        (2, speedserum_icon, (33, 290)),
+        (3, lungclear_icon, (33, 397)),
+        (4, bloodstop_icon, (33, 510)),
+    ]
+    for num, icon, pos in icon_data:
+        screen.blit(icon, pos)
+        rect = icon.get_rect(topleft=pos)
+        radius = 13
+        center_x = rect.x - radius + 12
+        center_y = rect.y + radius - 5
+        draw_circle_number(screen, num, center_x, center_y, radius=radius)
 
     small_font = pygame.font.SysFont("Arial", 12, bold=True)
 
