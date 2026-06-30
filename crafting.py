@@ -411,7 +411,7 @@ def draw_lab_tutorial(screen):
         "Step 2: Rad-Ointment and Blood-Stop use Catch Game(1 & 4).",
         "Step 3: In Catch Game, use A/D or Left/Right to move the beaker.",
         "Step 4: Catch correct ingredients only. Wrong items will fail the craft.",
-        "Step 5: Speed Serum and Lung-Clear use Mixing Game（2 & 3）.",
+        "Step 5: Speed Serum and Lung-Clear use Mixing Game(2 & 3).",
         "Step 6: In Mixing Game, press W/A/S/D or arrow keys to follow the formula.",
         "Step 7: Blood-Stop and Speed Serum recipes must be unlocked in Shop using cookies."
     ]
