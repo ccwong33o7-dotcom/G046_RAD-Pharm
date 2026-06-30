@@ -36,7 +36,7 @@ def draw_shop(screen, font, bg_img=None,
         screen.blit(btn_canopy, (buy_canopy_btn.x, buy_canopy_btn.y))
     else:
         pygame.draw.rect(screen, (50, 150, 50), buy_canopy_btn)
-        canopy_text = force_small_font.render("150", True, (255, 255, 255))
+        canopy_text = force_small_font.render("200", True, (255, 255, 255))
         screen.blit(canopy_text, (buy_canopy_btn.x + 55, buy_canopy_btn.y + 12))
 
     buy_oxygen_btn = pygame.Rect(718, 387, 96, 52)
