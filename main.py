@@ -87,7 +87,7 @@ try:
     btn_oxygen = pygame.image.load("image/button/65_button.png").convert_alpha()
     btn_oxygen = pygame.transform.smoothscale(btn_oxygen, (96, 52))
     
-    btn_canopy = pygame.image.load("image/button/150_button.png").convert_alpha()
+    btn_canopy = pygame.image.load("image/button/200.png").convert_alpha()
     btn_canopy = pygame.transform.smoothscale(btn_canopy, (96, 52))
     
     btn_30 = pygame.image.load("image/button/30_button.png").convert_alpha()
@@ -160,6 +160,13 @@ except:
     Ending3_img = None
     Ending4_img = None
 
+try:
+    unlock_btn_img = pygame.image.load("image/button/unlock.png").convert_alpha()
+    unlock_btn_img = pygame.transform.smoothscale(unlock_btn_img, (110, 36))
+except Exception as e:
+    unlock_btn_img = None
+    print(f"Warning: Unlock button image not found: {e}")
+
 
 
 pygame.display.set_caption("Game")
@@ -198,6 +205,7 @@ def load_game():
         "greenhouse_fixed": False,
         "canopy_fixed_day": 0,
         "shown_acid_rain_days": [],
+        "unlocked_plot_ids": [],
     }
 progress = load_game()
 shown_acid_rain_days = progress.get(
@@ -243,6 +251,7 @@ def save_game(day_num, seen_intro, pure_soil_count, intact_canopy_count, oxygen_
        "blood_stop_recipe": progress.get("blood_stop_recipe", False),
        "glowing_aloe": inventory.get("Glowing Aloe", 2),
        "rusty_thorn": inventory.get("Rusty Thorn", 2),
+       "unlocked_plot_ids": unlocked_plot_ids,
        }
     with open(SAVE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
@@ -271,6 +280,8 @@ oxygen_recycler_count = progress.get("oxygen_recycler_count", 0)
 oxygen_recycler_count = int(oxygen_recycler_count)
 
 cookies_count = progress.get("cookies", 35)
+PLOT_UNLOCK_PRICE = 15
+unlocked_plot_ids = progress.get("unlocked_plot_ids", [])
 saved_people = progress.get("saved_people", 0)
 tutorial_done = progress.get("tutorial_done", False)
 lab_tutorial_done = progress.get("lab_tutorial_done",False)
@@ -310,32 +321,89 @@ ending_step = 0
 plants = []
 
 plot_positions = [
-    {'x': 990, 'y': 380, 'unlock_day': 1}, 
-    {'x': 710, 'y': 380, 'unlock_day': 1},  
-    {'x': 450, 'y': 380, 'unlock_day': 3},  
-    {'x': 200, 'y': 380, 'unlock_day': 3},  
+    {'id': 'plot_1', 'x': 990, 'y': 380, 'unlock_day': 1}, 
+    {'id': 'plot_2', 'x': 710, 'y': 380, 'unlock_day': 1},  
 
-    {'x': 290, 'y': 230, 'unlock_day': 6},
-    {'x': 490, 'y': 230, 'unlock_day': 6},
-    {'x': 685, 'y': 230, 'unlock_day': 8},
-    {'x': 870, 'y': 230, 'unlock_day': 8}
+    # Day 3 unlock plots
+    {'id': 'plot_3', 'x': 450, 'y': 380, 'unlock_day': 3, 'paid_unlock': True},  
+    {'id': 'plot_4', 'x': 200, 'y': 380, 'unlock_day': 3, 'paid_unlock': True},  
+
+    # Day 6 unlock plots
+    {'id': 'plot_5', 'x': 290, 'y': 230, 'unlock_day': 6, 'paid_unlock': True},
+    {'id': 'plot_6', 'x': 490, 'y': 230, 'unlock_day': 6, 'paid_unlock': True},
+
+    # Day 8 unlock plots
+    {'id': 'plot_7', 'x': 685, 'y': 230, 'unlock_day': 8, 'paid_unlock': True},
+    {'id': 'plot_8', 'x': 870, 'y': 230, 'unlock_day': 8, 'paid_unlock': True}
 ]
 
 locked_plots = [
-    {'type': 'tire', 'x': 440, 'y': 420, 'unlock_day': 3},
-    {'type': 'drum1', 'x': 200, 'y': 380, 'unlock_day': 3},
-    {'type': 'drum2', 'x': 290, 'y': 250, 'unlock_day': 6},
-    {'type': 'drum3', 'x': 500, 'y': 250, 'unlock_day': 6},
-    {'type': 'tire2', 'x': 690, 'y': 290, 'unlock_day': 8},
-    {'type': 'drum4', 'x': 870, 'y': 250, 'unlock_day': 8}
+    {'id': 'plot_3', 'type': 'tire', 'x': 440, 'y': 420, 'unlock_day': 3},
+    {'id': 'plot_4', 'type': 'drum1', 'x': 200, 'y': 380, 'unlock_day': 3},
+
+    {'id': 'plot_5', 'type': 'drum2', 'x': 290, 'y': 250, 'unlock_day': 6},
+    {'id': 'plot_6', 'type': 'drum3', 'x': 500, 'y': 250, 'unlock_day': 6},
+
+    {'id': 'plot_7', 'type': 'tire2', 'x': 690, 'y': 290, 'unlock_day': 8},
+    {'id': 'plot_8', 'type': 'drum4', 'x': 870, 'y': 250, 'unlock_day': 8}
 ]
 
 
+def is_plot_available(plot):
+    if current_day < plot['unlock_day']:
+        return False
+
+    if plot.get('paid_unlock', False):
+        return plot['id'] in unlocked_plot_ids
+
+    return True
+
+
+def get_plot_rect(plot):
+    return pygame.Rect(plot['x'], plot['y'], 120, 160)
+
+
+def get_paid_locked_plots():
+    return [
+        plot for plot in plot_positions
+        if (
+            plot.get('paid_unlock', False)
+            and current_day >= plot['unlock_day']
+            and plot['id'] not in unlocked_plot_ids
+        )
+    ]
+
+
+def draw_paid_locked_plots(screen):
+    price_font = pygame.font.SysFont("Arial", 14, bold=True)
+
+    for plot in get_paid_locked_plots():
+        rect = get_plot_rect(plot)
+
+        if unlock_btn_img:
+            btn_rect = unlock_btn_img.get_rect(
+                center=(rect.centerx, rect.y + 70)
+            )
+            screen.blit(unlock_btn_img, btn_rect)
+        else:
+            btn_rect = pygame.Rect(0, 0, 110, 36)
+            btn_rect.center = (rect.centerx, rect.y + 70)
+            pygame.draw.rect(screen, (80, 55, 30), btn_rect, border_radius=8)
+            pygame.draw.rect(screen, (190, 145, 80), btn_rect, 2, border_radius=8)
+
+            txt = price_font.render("UNLOCK", True, (255, 235, 180))
+            txt_rect = txt.get_rect(center=btn_rect.center)
+            screen.blit(txt, txt_rect)
+
+        # price text
+        price_text = price_font.render("15 Cookies", True, (255, 245, 190))
+        price_rect = price_text.get_rect(center=(rect.centerx, btn_rect.bottom + 16))
+        screen.blit(price_text, price_rect)
 
 def get_free_plot():
     for plot in plot_positions:
 
-        if current_day < plot['unlock_day']:
+        if not is_plot_available(plot):
             continue
 
         x = plot['x']
@@ -366,6 +434,8 @@ flash_message = ""
 flash_message_timer = 0
 
 acid_rain_days = [3, 8]
+ACID_RAIN_EFFECT_DAYS = [3, 4, 5, 8, 9, 10]
+CANOPY_USABLE_DAYS = [3, 4, 5, 8, 9, 10]
 show_acid_rain_popup = False
 greenhouse_fixed = progress.get("greenhouse_fixed", False)
 canopy_fixed_day = progress.get("canopy_fixed_day", 0)
@@ -376,6 +446,27 @@ if current_day in [6, 7]:
 if current_day in [3, 8] and intact_canopy_count > 0:
     greenhouse_fixed = False
     canopy_fixed_day = 0
+
+def is_canopy_repair_day():
+    if not greenhouse_fixed:
+        return False
+
+    if canopy_fixed_day == 0:
+        return False
+
+    if 3 <= canopy_fixed_day <= 5:
+        return canopy_fixed_day <= current_day <= 5
+
+    if 8 <= canopy_fixed_day <= 10:
+        return canopy_fixed_day <= current_day <= 10
+
+    return False
+
+def is_acid_rain_effect_day():
+    return (
+        current_day in ACID_RAIN_EFFECT_DAYS
+        and not is_canopy_repair_day()
+    )
 
 acid_buy_rect = pygame.Rect(0, 0, 0, 0)
 acid_cancel_rect = pygame.Rect(0, 0, 0, 0)
@@ -698,10 +789,7 @@ while True:
     pygame.event.pump()
     mouse_pos = pygame.mouse.get_pos()
 
-    greenhouse.ACID_RAIN_ACTIVE = (
-        current_day in [3, 8]
-        and not greenhouse_fixed
-    )
+    greenhouse.ACID_RAIN_ACTIVE = ()
 
     if current_state in ["PHARMACY", "MAP", "SHOP", "GREENHOUSE", "CRAFTING"]:
         if not show_day_transition and not show_acid_rain_popup:
@@ -709,10 +797,10 @@ while True:
                 p.update()
 
     if greenhouse_fixed:
-      if current_day - canopy_fixed_day >= 3:
-        greenhouse_fixed = False
-        canopy_fixed_day = 0
-        trigger_message("The canopy has broken down!")
+        if not is_canopy_repair_day():
+           greenhouse_fixed = False
+           canopy_fixed_day = 0
+           trigger_message("The canopy has broken down!")
 
     if saved_people >= 25 and current_state != "ENDING":
 
@@ -843,40 +931,36 @@ while True:
 
        active_locked_plots = [
           plot for plot in locked_plots
-          if current_day < plot['unlock_day']
+           if current_day < plot['unlock_day']
        ]
 
-       roof_fixed_today = (
-          (current_day == 3 and greenhouse_fixed and canopy_fixed_day == 3)
-          or (current_day in [4, 5] and canopy_fixed_day == 3)
-          or (current_day == 8 and greenhouse_fixed and canopy_fixed_day == 8)
-          or (current_day in [9, 10] and canopy_fixed_day == 8)
-       )
+       roof_fixed_today = is_canopy_repair_day()
 
        if roof_fixed_today and gh_fixed_bg_img:
           current_gh_bg = gh_fixed_bg_img
        else:
           current_gh_bg = gh_bg_img
 
-       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(screen, font, plants,current_gh_bg, pure_soil_count, oxygen_recycler_count, intact_canopy_count, intact_canopy_count > 0, oxygen_recycler_count > 0, ready_to_craft, locked_plots=active_locked_plots)
+       gh_upgrade_btn, pure_soil_btn, oxygen_btn, harvest_btn, aloe_btn, thorn_btn = draw_greenhouse(
+           screen, font, plants,current_gh_bg, 
+           pure_soil_count, oxygen_recycler_count, 
+           intact_canopy_count, intact_canopy_count > 0, 
+           oxygen_recycler_count > 0, ready_to_craft, 
+           locked_plots=active_locked_plots
+        )
+       
+       draw_paid_locked_plots(screen)
 
-       import greenhouse
-       greenhouse.ACID_RAIN_ACTIVE = (
-           current_day in [3, 8]
-           and not greenhouse_fixed
-       )
 
-       acid_rain_protected_now = (
-           current_day in [3, 8]
-           and greenhouse_fixed
-           and canopy_fixed_day == current_day
-       )
+       greenhouse.ACID_RAIN_ACTIVE = ()
 
-       if current_day in acid_rain_days and not acid_rain_protected_now:
-           acid_overlay = pygame.Surface((Width, Height))
-           acid_overlay.fill((40, 70, 35))
-           acid_overlay.set_alpha(90)
-           screen.blit(acid_overlay, (0, 0))
+       acid_rain_protected_now = is_canopy_repair_day()
+
+       if is_acid_rain_effect_day():
+            acid_overlay = pygame.Surface((Width, Height))
+            acid_overlay.fill((40, 70, 35))
+            acid_overlay.set_alpha(90)
+            screen.blit(acid_overlay, (0, 0))
            
     elif current_state == "CRAFTING":
         screen.fill((0, 0, 0))
@@ -1197,25 +1281,39 @@ while True:
 
                        print("CANOPY BUTTON CLICKED")
 
-                       if intact_canopy_count > 0:
+                       if current_day not in CANOPY_USABLE_DAYS:
+                           trigger_message("Canopy can only be used on Day 3-5 or Day 8-10!")
 
-                         print("CANOPY AVAILABLE")
+                       elif greenhouse_fixed and is_canopy_repair_day():
+                           trigger_message("Greenhouse is already repaired!")
 
-                         intact_canopy_count -= 1
+                       elif intact_canopy_count > 0:
 
-                         greenhouse_fixed = True
-                         canopy_fixed_day = current_day
-                         save_game(
-                           current_day,
-                           has_seen_intro,
-                           pure_soil_count,
-                           intact_canopy_count,
-                           oxygen_recycler_count,
-                           cookies_count,
-                           saved_people
-                         )
+                           print("CANOPY AVAILABLE")
 
-                         trigger_message("Greenhouse repaired!")
+                           intact_canopy_count -= 1
+
+                           greenhouse_fixed = True
+                           canopy_fixed_day = current_day
+
+                           progress["intact_canopy_count"] = intact_canopy_count
+                           progress["greenhouse_fixed"] = greenhouse_fixed
+                           progress["canopy_fixed_day"] = canopy_fixed_day
+
+                           save_game(
+                              current_day,
+                              has_seen_intro,
+                              pure_soil_count,
+                              intact_canopy_count,
+                              oxygen_recycler_count,
+                              cookies_count,
+                              saved_people
+                            )
+                           
+                           trigger_message("Intact Canopy installed! Greenhouse repaired!")
+
+                       else:
+                            trigger_message("No Intact Canopy! Buy one from Shop.")
 
                   elif pure_soil_btn and pure_soil_btn.collidepoint(mouse_pos):
                       pass
@@ -1414,9 +1512,22 @@ while True:
 
              elif shop_buy_canopy_btn and shop_buy_canopy_btn.collidepoint(mouse_pos):
                  print(f"DEBUG: Clicked Canopy Button! Current status: {intact_canopy_count}")
-                 if cookies_count >= 150:
-                    cookies_count -= 150
+                 if cookies_count >= 200:
+                    cookies_count -= 200
                     intact_canopy_count += 1
+                    progress["intact_canopy_count"] = intact_canopy_count
+                    progress["cookies"] = cookies_count
+
+                    save_game(
+                         current_day,
+                         has_seen_intro,
+                         pure_soil_count,
+                         intact_canopy_count,
+                         oxygen_recycler_count,
+                         cookies_count,
+                         saved_people
+                    )
+
                     trigger_message("Intact Canopy purchased!")
                  else:
                     trigger_message("Not enough Cookies for Intact Canopy!")
@@ -1457,6 +1568,39 @@ while True:
                     trigger_message("Not enough Cookies!")
  
          elif current_state == "GREENHOUSE":
+            clicked_paid_plot = False
+
+            for plot in get_paid_locked_plots():
+                  if get_plot_rect(plot).collidepoint(mouse_pos):
+                     clicked_paid_plot = True
+
+                     if cookies_count >= PLOT_UNLOCK_PRICE:
+                        cookies_count -= PLOT_UNLOCK_PRICE
+                        if plot['id'] not in unlocked_plot_ids:
+                            unlocked_plot_ids.append(plot['id'])
+
+                        progress["unlocked_plot_ids"] = unlocked_plot_ids
+                        progress["cookies"] = cookies_count
+
+                        trigger_message("New plot unlocked!")
+
+                        save_game(
+                          current_day,
+                          has_seen_intro,
+                          pure_soil_count,
+                          intact_canopy_count,
+                          oxygen_recycler_count,
+                          cookies_count,
+                          saved_people
+                        )
+                     else:
+                        trigger_message("Need 15 Cookies to unlock this plot!")
+
+                     break
+
+            if clicked_paid_plot:
+                 pass
+
             if aloe_btn.collidepoint(mouse_pos):
                 pos = get_free_plot()
 
