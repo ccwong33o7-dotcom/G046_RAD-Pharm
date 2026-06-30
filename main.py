@@ -1057,7 +1057,7 @@ while True:
         text_rect = text_surf.get_rect(center=(Width // 2, 695))
         screen.blit(text_surf, text_rect)
     
-    if show_acid_rain_popup:
+    if current_state == "GREENHOUSE" and show_acid_rain_popup:
       overlay = pygame.Surface((Width, Height))
       overlay.fill((0, 0, 0))
       overlay.set_alpha(170)
@@ -1126,7 +1126,7 @@ while True:
 
           continue
       
-      if show_acid_rain_popup:
+      if current_state == "GREENHOUSE" and show_acid_rain_popup:
          if event.type == pygame.MOUSEBUTTONDOWN:
             if acid_buy_rect.collidepoint(event.pos):
               show_acid_rain_popup = False
@@ -1484,10 +1484,21 @@ while True:
             if (
                  current_day in acid_rain_days
                  and current_day not in shown_acid_rain_days
-                 and not greenhouse_fixed
+                 and not is_canopy_repair_day()
                ):
                  show_acid_rain_popup = True
                  shown_acid_rain_days.append(current_day)
+
+                 save_game(
+                        current_day,
+                        has_seen_intro,
+                        pure_soil_count,
+                        intact_canopy_count,
+                        oxygen_recycler_count,
+                        cookies_count,
+                        saved_people
+                 )
+
             elif to_shop_btn.collidepoint(mouse_pos):
                current_state = "SHOP"
                print("Entering to Shop...")
