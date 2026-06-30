@@ -915,7 +915,7 @@ while True:
        pygame.event.clear()
 
     if current_state not in ["MENU", "SETTING", "INTRO", "WEATHER_EXPLAIN", "ENDING"]:
-        task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys)
+        task_bar.draw(screen, current_day, cookies_count, saved_people, weather_sys, mouse_pos)
 
     if current_state == "GREENHOUSE" and show_greenhouse_tutorial:
           draw_greenhouse_tutorial(

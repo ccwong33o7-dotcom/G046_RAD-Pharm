@@ -22,6 +22,13 @@ class TaskBar:
         self.money_font = pygame.font.SysFont("Agency FB", 28, bold=True)
         self.small_font = pygame.font.SysFont("Arial", 12)
 
+        self.button_infos = [
+            (self.settings_btn_rect, "Settings"),
+            (self.map_btn_rect, "Map"),
+            (self.weather_btn_rect, "Weather")
+        ]
+        self.tooltip_font = pygame.font.SysFont("Arial", 16, bold=True)
+
     def load_assets(self):
         base_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -91,7 +98,7 @@ class TaskBar:
             self.survivor_icon = None
             print(f"TaskBar: survivor.jpg not found at {survivor_path}")
 
-    def draw(self, screen, current_day, cookies, saved_people=0, weather_sys_param=None):
+    def draw(self, screen, current_day, cookies, saved_people=0, weather_sys_param=None, mouse_pos=None):
         if self.background_img:
             screen.blit(self.background_img, (0, self.y_offset))
         else:
@@ -150,6 +157,27 @@ class TaskBar:
         people_text_x = survivor_x + 28 + 10
         people_text_y = 23 + self.y_offset
         screen.blit(people_surf, (people_text_x, people_text_y))
+
+        if mouse_pos:
+            hovered_rect = None
+            hovered_name = None
+            for rect, name in self.button_infos:
+                if rect.collidepoint(mouse_pos):
+                    hovered_rect = rect
+                    hovered_name = name
+                    break
+
+            if hovered_rect and hovered_name:
+                text_surf = self.tooltip_font.render(hovered_name, True, (255, 255, 255))
+                text_surf.set_alpha(180)
+                text_rect = text_surf.get_rect()
+                tip_x = hovered_rect.centerx - text_rect.width // 2
+                tip_y = hovered_rect.top - text_rect.height + 62
+                if tip_x < 0:
+                    tip_x = 0
+                if tip_x + text_rect.width > self.screen_width:
+                    tip_x = self.screen_width - text_rect.width
+                screen.blit(text_surf, (tip_x, tip_y))
 
     def check_click(self, mouse_pos):
         if self.settings_btn_rect.collidepoint(mouse_pos):
