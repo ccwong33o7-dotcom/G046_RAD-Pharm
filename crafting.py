@@ -89,6 +89,7 @@ mix_sequence = []
 player_sequence = []
 mix_index = 0
 mix_timer = 0
+lab_tutorial_step = 0
 
 ARROWS = [
     pygame.K_w,
@@ -403,55 +404,42 @@ def animate_crafting():
 
             game_state = "MENU"
 def draw_lab_tutorial(screen):
+    global lab_tutorial_step
 
-    global show_lab_tutorial
-    global lab_tutorial_done
-
-    overlay = pygame.Surface((1280,720))
-    overlay.set_alpha(180)
-    overlay.fill((0,0,0))
-    screen.blit(overlay,(0,0))
-
-    title_font = pygame.font.SysFont(
-        "Arial",
-        40,
-        True
-    )
-
-    font = pygame.font.SysFont(
-        "Arial",
-        24
-    )
-
-    title = title_font.render(
-        "LAB INSTRUCTIONS",
-        True,
-        (255,255,255)
-    )
-
-    screen.blit(title, (430,120))
-
-    lines = [
-        "Press 1-4 to select medicine.",
-        "Rad-Ointment and Blood-Stop use Catch Game.",
-        "Speed Serum and Lung-Clear use Mixing Game.",
-        "Catch wrong ingredients and you lose.",
-        "Complete the minigame to craft medicine.",
-        "",
-        "Press SPACE to continue."
+    hints = [
+        "Step 1: Press 1-4 to choose a medicine.",
+        "Step 2: Rad-Ointment and Blood-Stop use Catch Game(1 & 4).",
+        "Step 3: In Catch Game, use A/D or Left/Right to move the beaker.",
+        "Step 4: Catch correct ingredients only. Wrong items will fail the craft.",
+        "Step 5: Speed Serum and Lung-Clear use Mixing Game（2 & 3）.",
+        "Step 6: In Mixing Game, press W/A/S/D or arrow keys to follow the formula.",
+        "Step 7: Blood-Stop and Speed Serum recipes must be unlocked in Shop using cookies."
     ]
 
-    y = 220
+    overlay = pygame.Surface((1280, 720), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 80))
+    screen.blit(overlay, (0, 0))
 
-    for text in lines:
-        txt = font.render(
-            text,
-            True,
-            (255,255,255)
-        )
-        screen.blit(txt, (280, y))
-        y += 50
+    box_width = 760
+    box_height = 95
+    box_x = (1280 - box_width) // 2
+    box_y = 95
 
+    box_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+
+    pygame.draw.rect(screen, (15, 25, 55), box_rect, border_radius=14)
+    pygame.draw.rect(screen, (240, 230, 200), box_rect, 2, border_radius=14)
+
+    tut_font = pygame.font.SysFont("Segoe UI", 18, bold=True)
+    small_font = pygame.font.SysFont("Segoe UI", 13, bold=True)
+
+    text = tut_font.render(hints[lab_tutorial_step], True, (255, 245, 210))
+    text_rect = text.get_rect(center=(1280 // 2, box_y + 35))
+    screen.blit(text, text_rect)
+
+    skip_text = small_font.render("Press SPACE to continue / skip", True, (190, 200, 220))
+    skip_rect = skip_text.get_rect(center=(1280 // 2, box_y + 68))
+    screen.blit(skip_text, skip_rect)
 def draw_crafting(screen, bg_image, font):
 
     if bg_image:
@@ -465,7 +453,7 @@ def draw_crafting(screen, bg_image, font):
         COLOR_TEXT
     )
 
-    screen.blit(msg, (500, 40))
+    screen.blit(msg, (500, 55))
     screen.blit(bloodstop_icon, (33, 510))
     screen.blit(lungclear_icon, (33, 397))
     screen.blit(speedserum_icon, (33, 290))

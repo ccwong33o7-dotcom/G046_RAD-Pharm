@@ -1038,11 +1038,24 @@ while True:
             print(event.key)
 
             if event.key == pygame.K_SPACE:
+                import crafting
 
-                print("SPACE PRESSED")
+                crafting.lab_tutorial_step += 1
 
-                show_lab_tutorial = False
-                lab_tutorial_done = True
+                if crafting.lab_tutorial_step > 6:
+                    crafting.lab_tutorial_step = 0
+                    show_lab_tutorial = False
+                    lab_tutorial_done = True
+
+                    save_game(
+                        current_day,
+                        has_seen_intro,
+                        pure_soil_count,
+                        intact_canopy_count,
+                        oxygen_recycler_count,
+                        cookies_count,
+                        saved_people
+                    )
 
                 save_game(
                     current_day,
