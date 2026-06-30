@@ -55,7 +55,24 @@ except:
     play_btn_img = None
     print("Warning: Play button image not found")
 
+try:
+    recipe_btn_img = pygame.image.load("image/button/Recipe_button.png").convert_alpha()
+    recipe_btn_img = pygame.transform.smoothscale(recipe_btn_img, (130, 70))
+except:
+    recipe_btn_img = None
+    print("Warning: recipe_button.png not found")
+
+try:
+    recipe_popup_img = pygame.image.load("image/icon/Recipe.png").convert_alpha()
+    recipe_popup_img = pygame.transform.smoothscale(recipe_popup_img, (430, 460))
+except:
+    recipe_popup_img = None
+    print("Warning: recipe_popup.png not found")
+
 play_btn_rect = pygame.Rect(550, 435, 180, 80)
+recipe_btn_rect = pygame.Rect(1100, 50, 130, 70)
+show_recipe_popup = False
+recipe_close_rect = pygame.Rect(880, 130, 45, 45)
 
 RECIPES = {
     "Rad-Ointment": {"Filtered water": 1, "Glowing Aloe": 1 , "Scrap Fiber": 1},
@@ -367,6 +384,16 @@ def update_crafting(event, progress):
 
     global game_state
     global pending_item
+    global show_recipe_popup
+
+    if event.type == pygame.MOUSEBUTTONDOWN:
+        if recipe_btn_rect.collidepoint(event.pos):
+            show_recipe_popup = True
+            return
+
+        if show_recipe_popup and recipe_close_rect.collidepoint(event.pos):
+            show_recipe_popup = False
+            return
 
     if game_state == "MENU":
 
@@ -395,13 +422,11 @@ def update_crafting(event, progress):
                         message_callback("Blood-Stop recipe locked! Unlock it in Shop with cookies.")
 
             if selection and check_resources(selection):
-
                 pending_item = selection
 
                 if selection in ["Rad-Ointment", "Blood-Stop"]:
                     game_state = "CATCH"
                     start_catch_game(selection)
-
                 else:
                     game_state = "MIX"
                     start_mix_game(selection)
@@ -487,6 +512,14 @@ def draw_crafting(screen, bg_image, font):
     )
 
     screen.blit(msg, (500, 55))
+    if recipe_btn_img:
+        screen.blit(recipe_btn_img, recipe_btn_rect)
+    else:
+        pygame.draw.rect(screen, (80, 55, 35), recipe_btn_rect, border_radius=10)
+        pygame.draw.rect(screen, (230, 200, 150), recipe_btn_rect, 2, border_radius=10)
+        recipe_text = font.render("RECIPE", True, (255, 255, 255))
+        screen.blit(recipe_text, recipe_text.get_rect(center=recipe_btn_rect.center))
+
     screen.blit(bloodstop_icon, (33, 510))
     screen.blit(lungclear_icon, (33, 397))
     screen.blit(speedserum_icon, (33, 290))
@@ -613,6 +646,25 @@ def draw_crafting(screen, bg_image, font):
         )
 
         screen.blit(progress,(600,340))
+
+    if show_recipe_popup:
+        overlay = pygame.Surface((1280, 720), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 120))
+        screen.blit(overlay, (0, 0))
+
+        popup_rect = pygame.Rect(450, 120, 620, 460)
+
+        if recipe_popup_img:
+            screen.blit(recipe_popup_img, popup_rect)
+        else:
+            pygame.draw.rect(screen, (230, 200, 150), popup_rect, border_radius=15)
+            pygame.draw.rect(screen, (70, 45, 25), popup_rect, 4, border_radius=15)
+
+        pygame.draw.circle(screen, (180, 50, 45), recipe_close_rect.center, 24)
+        pygame.draw.circle(screen, (255, 230, 200), recipe_close_rect.center, 24, 3)
+
+        close_text = font.render("X", True, (255, 255, 255))
+        screen.blit(close_text, close_text.get_rect(center=recipe_close_rect.center))
 
     return play_btn_rect
 
