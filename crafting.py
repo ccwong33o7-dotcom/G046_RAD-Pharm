@@ -466,12 +466,13 @@ def draw_lab_tutorial(screen):
 
     hints = [
         "Step 1: Press 1-4 to choose a medicine.",
-        "Step 2: Rad-Ointment and Blood-Stop use Catch Game(1 & 4).",
-        "Step 3: In Catch Game, use A/D or Left/Right to move the beaker.",
-        "Step 4: Catch correct ingredients only. Wrong items will fail the craft.",
-        "Step 5: Speed Serum and Lung-Clear use Mixing Game(2 & 3).",
-        "Step 6: In Mixing Game, press W/A/S/D or arrow keys to follow the formula.",
-        "Step 7: Blood-Stop and Speed Serum recipes must be unlocked in Shop using cookies."
+        "Step 2: Click the Recipe button to view all crafting recipes.",
+        "Step 3: Rad-Ointment and Blood-Stop use the Catch Game (1 & 4).",
+        "Step 4: Use A/D or Left/Right to move the beaker and catch only the correct ingredients.",
+        "Step 5: Speed Serum and Lung-Clear use the Mixing Game (2 & 3).",
+        "Step 6: Press W/A/S/D or Arrow Keys to match the formula shown.",
+        "Step 7: Blood-Stop and Speed Serum recipes must be unlocked in the Shop using cookies.",
+        "Step 8: Press SPACE to continue through the tutorial."
     ]
 
     overlay = pygame.Surface((1280, 720), pygame.SRCALPHA)

@@ -1146,7 +1146,7 @@ while True:
 
                 crafting.lab_tutorial_step += 1
 
-                if crafting.lab_tutorial_step > 6:
+                if crafting.lab_tutorial_step > 7:
                     crafting.lab_tutorial_step = 0
                     show_lab_tutorial = False
                     lab_tutorial_done = True
