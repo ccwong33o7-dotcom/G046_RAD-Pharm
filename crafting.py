@@ -25,7 +25,7 @@ speedserum_icon = pygame.image.load("image/icon/speedserum_button.png").convert_
 speedserum_icon = pygame.transform.smoothscale(speedserum_icon, (70, 70))
 radointment_icon = pygame.image.load("image/icon/rad-ointment_button.png").convert_alpha()
 radointment_icon = pygame.transform.smoothscale(radointment_icon, (70, 70))
-Beaker_icon = pygame.image.load("image/icon/Beaker_icon.jpeg").convert_alpha()
+Beaker_icon = pygame.image.load("image/icon/Beaker_icon.png").convert_alpha()
 Beaker_icon = pygame.transform.smoothscale(Beaker_icon, (70, 70))
 A_icon = pygame.image.load("image/icon/A.png").convert_alpha()
 A_icon = pygame.transform.smoothscale(A_icon, (70, 70))
@@ -610,23 +610,44 @@ def draw_crafting(screen, bg_image, font):
 
         for item in falling_items:
 
-            color = (0,200,0) if item["good"] else (220,50,50)
+            item_font = pygame.font.SysFont("Arial", 15, bold=True)
 
-            icon = ITEM_ICONS.get(item["name"])
+            for item in falling_items:
+                color = (0, 200, 0) if item["good"] else (255, 40, 40)
+                icon = ITEM_ICONS.get(item["name"])
 
-            if icon is not None:
-                screen.blit(icon, item["rect"])
+                box_rect = pygame.Rect(
+                    item["rect"].x - 8,
+                    item["rect"].y - 8,
+                    145,
+                    68
+                )
 
-            label = font.render(
-                item["name"],
-                True,
-                color
-            )
+                # wrong items: brighter red box + warning label
+                if not item["good"]:
+                    pygame.draw.rect(screen, (90, 10, 10), box_rect, border_radius=10)
+                    pygame.draw.rect(screen, (255, 40, 40), box_rect, 4, border_radius=10)
 
-            screen.blit(
-                label,
-                (item["rect"].x, item["rect"].y)
-        )
+                    warning = item_font.render("DANGER", True, (255, 230, 120))
+                    warning_rect = warning.get_rect(center=(box_rect.centerx, box_rect.y + 18))
+                    screen.blit(warning, warning_rect)
+
+                    label = item_font.render(item["name"], True, (255, 255, 255))
+                    label_rect = label.get_rect(center=(box_rect.centerx, box_rect.y + 43))
+                    screen.blit(label, label_rect)
+
+                # correct items: green box + smaller icon/text
+                else:
+                    pygame.draw.rect(screen, (15, 45, 25), box_rect, border_radius=10)
+                    pygame.draw.rect(screen, (0, 200, 0), box_rect, 3, border_radius=10)
+
+                    if icon is not None:
+                        small_icon = pygame.transform.smoothscale(icon, (42, 42))
+                        screen.blit(small_icon, (box_rect.x + 8, box_rect.y + 13))
+
+                    label = item_font.render(item["name"], True, (255, 255, 255))
+                    screen.blit(label, (box_rect.x + 55, box_rect.y + 24))
+
     if game_state == "MIX":
 
         title = pygame.font.SysFont("Arial",32,True)
