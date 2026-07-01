@@ -97,6 +97,7 @@ def set_message_callback(callback):
 
 game_state = "MENU"
 pending_item = ""
+pending_game = None
 
 catch_started = False
 falling_items = []
@@ -250,7 +251,7 @@ def spawn_falling_item():
             35
         ),
 
-        "speed": random.randint(4,7)
+        "speed": random.randint(3,5)
 
     })
 
@@ -385,6 +386,7 @@ def update_crafting(event, progress):
     global game_state
     global pending_item
     global show_recipe_popup
+    global pending_game
 
     if event.type == pygame.MOUSEBUTTONDOWN:
         if recipe_btn_rect.collidepoint(event.pos):
@@ -425,11 +427,11 @@ def update_crafting(event, progress):
                 pending_item = selection
 
                 if selection in ["Rad-Ointment", "Blood-Stop"]:
-                    game_state = "CATCH"
-                    start_catch_game(selection)
+                    pending_game = "CATCH"
                 else:
-                    game_state = "MIX"
-                    start_mix_game(selection)
+                    pending_game = "MIX"
+
+                game_state = "READY"
 
                 print(f"Crafting {selection}")
 
@@ -439,13 +441,62 @@ def update_crafting(event, progress):
                 if message_callback:
                     message_callback("Missing: " + ", ".join(missing))
 
+    elif game_state == "READY":
+
+        if event.type == pygame.KEYDOWN:
+
+            if event.key in (pygame.K_RETURN, pygame.K_SPACE):
+
+                if pending_game == "CATCH":
+                    game_state = "CATCH"
+                    start_catch_game(pending_item)
+
+                else:
+                    game_state = "MIX"
+                    start_mix_game(pending_item)
+
+            elif event.key == pygame.K_ESCAPE:
+                game_state = "MENU"
+
     elif game_state == "MIX":
+
+    
 
         update_mix_game(event)
 def animate_crafting():
 
     global mix_timer
     global game_state
+
+    if game_state == "READY":
+
+        overlay = pygame.Surface((1280, 720), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 170))
+        screen.blit(overlay, (0, 0))
+
+        box = pygame.Rect(360, 180, 560, 280)
+
+        pygame.draw.rect(screen, (32, 40, 70), box, border_radius=15)
+        pygame.draw.rect(screen, (245, 220, 170), box, 3, border_radius=15)
+
+        title_font = pygame.font.SysFont("Arial", 32, bold=True)
+        text_font = pygame.font.SysFont("Arial", 22, bold=True)
+
+        title = title_font.render(pending_item, True, (255,255,255))
+        screen.blit(title, title.get_rect(center=(640,240)))
+
+        line1 = text_font.render("Press ENTER or SPACE", True, (255,245,180))
+        screen.blit(line1, line1.get_rect(center=(640,310)))
+
+        line2 = text_font.render("to Start Crafting", True, (255,245,180))
+        screen.blit(line2, line2.get_rect(center=(640,345)))
+
+        esc = pygame.font.SysFont("Arial",16).render(
+            "Press ESC to cancel",
+            True,
+            (200,200,200)
+        )
+        screen.blit(esc, esc.get_rect(center=(640,400)))
 
     if game_state == "CATCH":
 
