@@ -1,8 +1,21 @@
 import pygame
 import random
+import logging
+import sys
+import os
 from crafting import inventory
 
 ICON_SIZE = (95, 95)
+
+logging.basicConfig(filename='customer_debug.log', level=logging.DEBUG,
+                    format='%(asctime)s - %(message)s')
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 def load_and_scale(path, size, name_for_error):
     try:
@@ -12,20 +25,20 @@ def load_and_scale(path, size, name_for_error):
         print(f"ERROR loading {name_for_error}: {e}")
         return None
 
-cookie_icon_img = load_and_scale("image/button/CookiesforPharmacy.png", (100, 100), "CookiesforPharmacy.png")
-ration_pack_icon_img = load_and_scale("image/button/rationpack_button.png", ICON_SIZE, "rationpack_button.png")
-sedative_icon_img = load_and_scale("image/button/sedative_button.png", ICON_SIZE, "sedative_button.png")
-bloodstop_icon_img = load_and_scale("image/button/bloodstop_button.png", ICON_SIZE, "bloodstop_button.png")
-speedserum_icon_img = load_and_scale("image/button/speedserum_button.png", ICON_SIZE, "speedserum_button.png")
-radointment_icon_img = load_and_scale("image/button/rad-ointment_button.png", ICON_SIZE, "rad-ointment_button.png")
-lungclear_icon_img = load_and_scale("image/button/lung-clear_button.png", ICON_SIZE, "lung-clear_button.png")
+cookie_icon_img = load_and_scale(resource_path("image/button/CookiesforPharmacy.png"), (100, 100), "CookiesforPharmacy.png")
+ration_pack_icon_img = load_and_scale(resource_path("image/button/rationpack_button.png"), ICON_SIZE, "rationpack_button.png")
+sedative_icon_img = load_and_scale(resource_path("image/button/sedative_button.png"), ICON_SIZE, "sedative_button.png")
+bloodstop_icon_img = load_and_scale(resource_path("image/button/bloodstop_button.png"), ICON_SIZE, "bloodstop_button.png")
+speedserum_icon_img = load_and_scale(resource_path("image/button/speedserum_button.png"), ICON_SIZE, "speedserum_button.png")
+radointment_icon_img = load_and_scale(resource_path("image/button/rad-ointment_button.png"), ICON_SIZE, "rad-ointment_button.png")
+lungclear_icon_img = load_and_scale(resource_path("image/button/lung-clear_button.png"), ICON_SIZE, "lung-clear_button.png")
 
 class Customer:
     _btn_font = None
 
     def __init__(self, img_path):
         try:
-            self.image = pygame.image.load(img_path).convert_alpha()
+            self.image = pygame.image.load(resource_path(img_path)).convert_alpha()
             target_h = 340
             w, h = self.image.get_size()
             target_w = int(w * (target_h / h))
@@ -36,7 +49,7 @@ class Customer:
             self.image.fill((200, 0, 0, 150))
 
         try:
-            self.bubble_image = pygame.image.load("image/Customer/CI_bubblerequest.png").convert_alpha()
+            self.bubble_image = pygame.image.load(resource_path("image/Customer/CI_bubblerequest.png")).convert_alpha()
             bubble_h = 215
             bw, bh = self.bubble_image.get_size()
             bubble_w = int(bw * (bubble_h / bh))
@@ -58,14 +71,16 @@ class Customer:
         self.is_satisfied = False
         self._warned_out_of_stock = False
 
+        logging.debug(f"Created customer with requested_item = {self.requested_item}")
+
     def _load_item_icon(self, item):
         icon_paths = {
-            "ration_pack": "image/Customer/CI_rationpack.png",
-            "sedative": "image/Customer/CI_sedative.png",
-            "blood_stop": "image/Customer/CI_bloodstop.png",
-            "speed_serum": "image/Customer/CI_speedserum.png",
-            "rad_ointment": "image/Customer/CI_radointment.png",
-            "lung_clear": "image/Customer/CI_lungclear.png"
+            "ration_pack": resource_path("image/Customer/CI_rationpack.png"),
+            "sedative": resource_path("image/Customer/CI_sedative.png"),
+            "blood_stop": resource_path("image/Customer/CI_bloodstop.png"),
+            "speed_serum": resource_path("image/Customer/CI_speedserum.png"),
+            "rad_ointment": resource_path("image/Customer/CI_radointment.png"),
+            "lung_clear": resource_path("image/Customer/CI_lungclear.png")
         }
         try:
             icon_img = pygame.image.load(icon_paths[item]).convert_alpha()
@@ -82,6 +97,7 @@ class Customer:
     def set_requested_item(self, item):
         self.requested_item = item
         self.item_icon = self._load_item_icon(item)
+        logging.debug(f"Customer {id(self)} requested item changed to {item}")
 
     def update(self):
         if self.current_x > self.target_x:
@@ -164,10 +180,10 @@ class CustomerManager:
 
     def __init__(self):
         self.image_paths = [
-            "image/Customer/buyer1.png",
-            "image/Customer/buyer2.png",
-            "image/Customer/buyer3.png",
-            "image/Customer/buyer4.png"
+            resource_path("image/Customer/buyer1.png"),
+            resource_path("image/Customer/buyer2.png"),
+            resource_path("image/Customer/buyer3.png"),
+            resource_path("image/Customer/buyer4.png")
         ]
         self.active_customers = []
 
@@ -248,54 +264,28 @@ class CustomerManager:
                     self.show_message(msg, False)
                     return False, msg
 
-            if current_selected_item in ["ration_pack", "sedative"]:
+                if current_selected_item in ["ration_pack", "sedative"]:
+                    target_dict = progress_dict
+                    dict_key = current_selected_item
+                else:
+                    key_map = {
+                        "blood_stop": "Blood-Stop",
+                        "speed_serum": "Speed Serum",
+                        "rad_ointment": "Rad-Ointment",
+                        "lung_clear": "Lung-Clear"
+                    }
+                    target_dict = inventory  
+                    dict_key = key_map[current_selected_item]
 
-                if progress_dict.get(current_selected_item, 0) <= 0:
-                    self.show_message("Out of stock! Go to SHOP.", False)
+                if target_dict.get(dict_key, 0) <= 0:
+                    item_name = dict_key.replace('_', ' ').title()
+                    self.show_message(f"{item_name} is out of stock!", False)
                     return False, "Out of stock!"
 
-                progress_dict[current_selected_item] -= 1
-
-            elif current_selected_item == "blood_stop":
-
-                if inventory.get("Blood-Stop", 0) <= 0:
-                    self.show_message("Out of stock! Go to LAB.", False)
-                    return False, "Out of stock!"
-
-                inventory["Blood-Stop"] -= 1
-
-            elif current_selected_item == "speed_serum":
-
-                if inventory.get("Speed Serum", 0) <= 0:
-                    self.show_message("Out of stock! Go to LAB.", False)
-                    return False, "Out of stock!"
-
-                inventory["Speed Serum"] -= 1
-
-            elif current_selected_item == "rad_ointment":
-
-                if inventory.get("Rad-Ointment", 0) <= 0:
-                    self.show_message("Out of stock! Go to LAB.", False)
-                    return False, "Out of stock!"
-
-                inventory["Rad-Ointment"] -= 1
-
-            elif current_selected_item == "lung_clear":
-
-                if inventory.get("Lung-Clear", 0) <= 0:
-                    self.show_message("Out of stock! Go to LAB.", False)
-                    return False, "Out of stock!"
-
-                inventory["Lung-Clear"] -= 1
-
-            else:
-
-                self.show_message("Unknown item", False)
-                return False, "Unknown item"
-
-            customer.is_satisfied = True
-            self.show_message("Trade successful!", True)
-            return True, "Trade successful!"
+                target_dict[dict_key] -= 1
+                customer.is_satisfied = True
+                self.show_message("Trade successful!", True)
+                return True, "Trade successful!"
             
         return False, "No click on sell button"
 
