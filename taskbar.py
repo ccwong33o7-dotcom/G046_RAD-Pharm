@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 
 class TaskBar:
     def __init__(self, screen_width):
@@ -30,7 +31,10 @@ class TaskBar:
         self.tooltip_font = pygame.font.SysFont("Arial", 18, bold=True)
 
     def load_assets(self):
-        base_path = os.path.dirname(os.path.abspath(__file__))
+        if getattr(sys, "frozen", False):
+            base_path = os.path.dirname(sys.executable)
+        else:
+            base_path = os.path.dirname(os.path.abspath(__file__))
 
         bg_path = os.path.join(base_path, "image", "background", "taskbarbg.png")  
         if os.path.exists(bg_path):
@@ -123,10 +127,16 @@ class TaskBar:
             dynamic_icon = pygame.transform.smoothscale(dynamic_icon, (42, 42))
             screen.blit(dynamic_icon, (self.weather_btn_rect.x, self.weather_btn_rect.y))
 
+        elif self.weather_icon:
+            screen.blit(self.weather_icon, (self.weather_btn_rect.x, self.weather_btn_rect.y))
+
+        else:
+            pygame.draw.circle(screen, (120, 90, 40), self.weather_btn_rect.center, 20)
+
         day_text = f"DAY {current_day}"
         day_surf = self.font.render(day_text, True, (220, 204, 207))
         day_x = (self.screen_width // 2) - (day_surf.get_width() // 2)
-        day_y = 20 + self.y_offset
+        day_y = 14 + self.y_offset
         screen.blit(day_surf, (day_x, day_y))
 
         money_text = f"{cookies}"
@@ -142,7 +152,7 @@ class TaskBar:
             screen.blit(self.cookie_icon, (base_x, cookie_y))
 
         text_x = base_x + 34 + 10
-        text_y = 23 + self.y_offset
+        text_y = 17 + self.y_offset
 
         screen.blit(money_surf, (text_x, text_y))
 
@@ -155,7 +165,7 @@ class TaskBar:
         people_text = f"{saved_people} / 25"
         people_surf = self.money_font.render(people_text, True, (230, 230, 230))
         people_text_x = survivor_x + 28 + 10
-        people_text_y = 23 + self.y_offset
+        people_text_y = 17 + self.y_offset
         screen.blit(people_surf, (people_text_x, people_text_y))
 
         if mouse_pos:
