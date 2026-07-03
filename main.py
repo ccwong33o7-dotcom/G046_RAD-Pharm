@@ -634,7 +634,8 @@ def fix_locked_customer_requests():
 
     for customer in customer_manager.active_customers:
         if customer.requested_item not in allowed_items:
-            customer.requested_item = random.choice(allowed_items)
+            new_item = random.choice(allowed_items)
+            customer.set_requested_item(new_item)
 
 initial_count = random.randint(1, 2)
 force_ration = not tutorial_done
