@@ -807,6 +807,7 @@ def draw_greenhouse_tutorial(screen, step, aloe_btn, thorn_btn, harvest_btn):
     screen.blit(skip_text, skip_rect)
 
 while True:
+    dt = clock.tick(60) / 1000.0
     pygame.event.pump()
     mouse_pos = pygame.mouse.get_pos()
 
@@ -931,7 +932,7 @@ while True:
             customer_manager.spawn_customers(spawn_num, force_ration=False)
             fix_locked_customer_requests()
             
-        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager, selected_item=current_selected_item)
+        pharmacy_buttons = pharmacy.draw_pharmacy(screen, pharmacy_bg_img, pharmacy_counter_img, has_money_on_table, progress, customer_manager, selected_item=current_selected_item, dt=dt)
         draw_tutorial(screen, pharmacy_buttons)
 
     elif current_state == "MAP":

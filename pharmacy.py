@@ -17,6 +17,12 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+FONT_PATH = resource_path("Arimo-VariableFont_wght.ttf")
+try:
+    FONT = pygame.font.Font(FONT_PATH, 13) 
+except:
+    FONT = None
+
 def load_and_scale(path, size, name_for_error):
     try:
         image = pygame.image.load(path).convert_alpha()
@@ -61,7 +67,7 @@ class Customer:
 
         self.current_x = 1280
         self.target_x = 1280
-        self.speed = 8
+        self.speed = 15
         self.sell_btn_rect = pygame.Rect(0, 0, 0, 0)
 
         self.possible_requests = ["ration_pack", "sedative", "blood_stop", "speed_serum", "rad_ointment", "lung_clear"]
@@ -99,9 +105,9 @@ class Customer:
         self.item_icon = self._load_item_icon(item)
         logging.debug(f"Customer {id(self)} requested item changed to {item}")
 
-    def update(self):
+    def update(self, dt):
         if self.current_x > self.target_x:
-            self.current_x -= self.speed
+            self.current_x -= self.speed * dt * 60
             if self.current_x < self.target_x:
                 self.current_x = self.target_x
 
@@ -130,7 +136,7 @@ class Customer:
 
             pygame.draw.rect(screen, btn_color, self.sell_btn_rect, border_radius=4)
             if Customer._btn_font is None:
-                Customer._btn_font = pygame.font.SysFont("Arial", 13, bold=True)
+                Customer._btn_font = pygame.font.Font(FONT_PATH, 13)
             text_surf = Customer._btn_font.render("SELL", True, (255, 255, 255))
             screen.blit(text_surf, (btn_x + (btn_w - text_surf.get_width()) // 2,
                                     btn_y + (btn_h - text_surf.get_height()) // 2))
@@ -212,19 +218,19 @@ class CustomerManager:
             customer.current_x = screen_w + (i * 80)
             self.active_customers.append(customer)
 
-    def update_all(self):
+    def update_all(self, dt):
         self.active_customers = [c for c in self.active_customers if not c.is_satisfied]
         for customer in self.active_customers:
-            customer.update()
+            customer.update(dt)
 
     def show_message(self, text, is_success=False):
         self.feedback_text = text
         self.feedback_timer = 120
         self.feedback_color = (50, 255, 50) if is_success else (255, 50, 50)
 
-    def draw_all(self, screen, selected_item=None, inventory_dict=None):
+    def draw_all(self, screen, selected_item=None, inventory_dict=None, dt=0.016):
         y_pos = 177
-        self.update_all()
+        self.update_all(dt)
         for customer in self.active_customers:
             customer.draw(screen, y_pos, selected_item, inventory_dict)
 
@@ -296,12 +302,13 @@ def change_customer_count(count):
         _global_manager_ref.spawn_customers(count)
 
 def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
-                  progress_dict=None, external_manager=None, selected_item=None):
+                  progress_dict=None, external_manager=None, selected_item=None, dt=0.016):
     global _global_manager_ref
     if external_manager:
         _global_manager_ref = external_manager
         external_manager.money_pending = money_waiting_to_collect
 
+    merged_inventory = {}
     if bg_img:
         screen.blit(bg_img, (0, 0))
     else:
@@ -317,7 +324,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
 
 
     if external_manager:
-        external_manager.draw_all(screen, selected_item, merged_inventory)
+        external_manager.draw_all(screen, selected_item, merged_inventory, dt=dt)
 
     if counter_img:
         target_width = 1280
@@ -344,7 +351,7 @@ def draw_pharmacy(screen, bg_img, counter_img, money_waiting_to_collect,
         else:
             pygame.draw.circle(screen, (240, 200, 20), cookie_rect.center, 40)
 
-    label_font = pygame.font.SysFont("Arial", 16, bold=True)
+    label_font = pygame.font.Font(FONT_PATH, 16)
     ration_val = progress_dict.get("ration_pack", 0) if progress_dict else 0
     sedative_val = progress_dict.get("sedative", 0) if progress_dict else 0
     blood_val = inventory.get("Blood-Stop", 0)

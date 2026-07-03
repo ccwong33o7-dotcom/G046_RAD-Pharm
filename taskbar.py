@@ -2,6 +2,13 @@ import pygame
 import os
 import sys
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 class TaskBar:
     def __init__(self, screen_width):
         self.screen_width = screen_width
@@ -15,20 +22,26 @@ class TaskBar:
         self.y_offset = 0
         self.load_assets()
 
+        try:
+            font_path = resource_path("Alathesia_Demo.otf")
+            self.font = pygame.font.Font(font_path, 27)
+            self.money_font = pygame.font.Font(font_path, 25)  
+        except Exception as e:
+            self.font = pygame.font.SysFont("Agency FB", 32, bold=True)
+            self.money_font = pygame.font.SysFont("Agency FB", 28, bold=True)
+
+        self.small_font = pygame.font.SysFont("Arial", 12)
+        self.tooltip_font = pygame.font.SysFont("Arial", 18, bold=True)
+
         self.settings_btn_rect = pygame.Rect(50, 10 + self.y_offset, 42, 42)
         self.map_btn_rect = pygame.Rect(115, 10 + self.y_offset, 42, 42)
         self.weather_btn_rect = pygame.Rect(175, 10 + self.y_offset, 42, 42)
-
-        self.font = pygame.font.SysFont("Agency FB", 32, bold=True) 
-        self.money_font = pygame.font.SysFont("Agency FB", 28, bold=True)
-        self.small_font = pygame.font.SysFont("Arial", 12)
 
         self.button_infos = [
             (self.settings_btn_rect, "Settings"),
             (self.map_btn_rect, "Map"),
             (self.weather_btn_rect, "Weather")
         ]
-        self.tooltip_font = pygame.font.SysFont("Arial", 18, bold=True)
 
     def load_assets(self):
         if getattr(sys, "frozen", False):
@@ -136,7 +149,7 @@ class TaskBar:
         day_text = f"DAY {current_day}"
         day_surf = self.font.render(day_text, True, (220, 204, 207))
         day_x = (self.screen_width // 2) - (day_surf.get_width() // 2)
-        day_y = 14 + self.y_offset
+        day_y = 17 + self.y_offset
         screen.blit(day_surf, (day_x, day_y))
 
         money_text = f"{cookies}"
@@ -152,7 +165,7 @@ class TaskBar:
             screen.blit(self.cookie_icon, (base_x, cookie_y))
 
         text_x = base_x + 34 + 10
-        text_y = 17 + self.y_offset
+        text_y = 20 + self.y_offset
 
         screen.blit(money_surf, (text_x, text_y))
 
@@ -165,7 +178,7 @@ class TaskBar:
         people_text = f"{saved_people} / 25"
         people_surf = self.money_font.render(people_text, True, (230, 230, 230))
         people_text_x = survivor_x + 28 + 10
-        people_text_y = 17 + self.y_offset
+        people_text_y = 20 + self.y_offset
         screen.blit(people_surf, (people_text_x, people_text_y))
 
         if mouse_pos:
