@@ -443,6 +443,15 @@ def update_crafting(event, progress):
 
     elif game_state == "READY":
 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if play_btn_rect.collidepoint(event.pos):
+                if pending_game == "CATCH":
+                    game_state = "CATCH"
+                    start_catch_game(pending_item)
+                else:
+                    game_state = "MIX"
+                    start_mix_game(pending_item)
+
         if event.type == pygame.KEYDOWN:
 
             if event.key in (pygame.K_RETURN, pygame.K_SPACE):
